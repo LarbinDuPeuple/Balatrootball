@@ -1,10 +1,12 @@
 // Écran titre et booster de départ.
 import Phaser from 'phaser';
-import { newGame, booster, addMove, makeOffer } from '../game/logic.js';
+import { newGame, booster, addMove, makeOffer, STARTER, starterPack } from '../game/logic.js';
 import { drawField, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
 import { W, C, big, txt, Button, backdrop, crt, modal, panel, onUpdate } from '../ui/theme';
 import { moveTile, Tile } from '../ui/tiles';
+import { CardView, CARD_W, CARD_H, cardTip } from '../ui/Card';
+import { tip, wasLongPress, hideTip } from '../ui/Tooltip';
 
 export class TitleScene extends Phaser.Scene {
   constructor() { super('title'); }
@@ -22,13 +24,73 @@ export class TitleScene extends Phaser.Scene {
     this.add.image(W / 2, 367, 'titlePitch').setScale(2);
     let t = 0;
     onUpdate(this, () => { t++; drawField(tex.getContext(), '#c8102e', null, { x: 120 + Math.sin(t / 30) * 40, y: 68 + Math.cos(t / 23) * 20 }, t); tex.refresh(); });
-    new Button(this, W / 2, 570, 300, 60, 'Nouvelle saison', C.gold, () => this.openBooster(), 22);
+    new Button(this, W / 2, 570, 300, 60, 'Nouvelle saison', C.gold, () => this.startSeason(), 22);
     txt(this, W / 2, 640, 'Bats le mur du gardien avec tes mouvements. Combine club, nationalité, génération et styles.', 15, C.muted).setOrigin(0.5);
     crt(this);
   }
 
-  openBooster() {
+  /** Nouvelle saison : un booster de joueurs par ligne, puis le booster de mouvements. */
+  startSeason() {
     S.G = newGame();
+    S.G.squad = [];
+    this.openDraft(0);
+  }
+
+  openDraft(step: number) {
+    const lines = Object.keys(STARTER) as string[];
+    if (step >= lines.length) { this.openBooster(); return; }
+    const pos = lines[step], [n, keep] = (STARTER as any)[pos];
+    const label: Record<string, string> = { GAR: 'Gardiens', DEF: 'Défenseurs', MIL: 'Milieux', ATT: 'Attaquants' };
+    const pack: string[] = starterPack(pos);
+    const chosen: string[] = [];
+    const { layer, close } = modal(this, 1160, 600);
+    layer.add(txt(this, W / 2, 84, `BOOSTER DE DÉPART · ${step + 1}/${lines.length}`, 16, C.muted).setOrigin(0.5));
+    layer.add(big(this, W / 2, 120, label[pos], 22).setOrigin(0.5));
+    const hint = txt(this, W / 2, 162, `Garde ${keep} joueurs sur ${n}. Reste appuyé sur une carte pour son détail.`, 18, C.cream2).setOrigin(0.5);
+    layer.add(hint);
+    const packG = this.add.container(W / 2, 360);
+    const pg = this.add.graphics();
+    pg.fillStyle(C.edge, 1).fillRect(-83, -113, 166, 226); pg.fillStyle(C.sky, 1).fillRect(-80, -110, 160, 220);
+    pg.fillStyle(C.gold, 1).fillRect(-80, -20, 160, 40);
+    packG.add([pg, big(this, 0, 0, label[pos].toUpperCase(), 10, C.ink).setOrigin(0.5)]);
+    layer.add(packG);
+    const go = new Button(this, W / 2, 610, 340, 52, '', C.gold, () => {
+      S.G.squad.push(...chosen);
+      hideTip(this); close();
+      this.time.delayedCall(160, () => this.openDraft(step + 1));
+    });
+    const sync = () => go.setEnabled(chosen.length === keep).setLabel(chosen.length === keep ? (step === lines.length - 1 ? 'Valider l\'effectif' : 'Suivant') : `Choisis ${keep} joueurs (${chosen.length}/${keep})`);
+    sync(); go.setVisible(false); layer.add(go);
+    const gap = 168, x0 = W / 2 - (n - 1) * gap / 2, cy = 380;
+    this.tweens.add({
+      targets: packG, angle: { from: -4, to: 4 }, duration: 70, yoyo: true, repeat: 6, onComplete: () => {
+        this.cameras.main.flash(200, 255, 240, 200);
+        packG.destroy();
+        pack.forEach((id, i) => {
+          const ring = this.add.graphics();
+          const v = new CardView(this, x0 + i * gap, cy, id);
+          v.sway = false; v.setScale(0, 1.12);
+          layer.add([ring, v]);
+          this.tweens.add({ targets: v, scaleX: 1.12, duration: 220, delay: i * 120, ease: 'Back.out' });
+          v.setInteractive({ useHandCursor: true });
+          tip(v, () => cardTip(id));
+          v.on('pointerup', () => {
+            if (wasLongPress(v)) return;
+            const j = chosen.indexOf(id);
+            if (j >= 0) chosen.splice(j, 1); else if (chosen.length < keep) chosen.push(id); else return;
+            const on = chosen.includes(id);
+            this.tweens.add({ targets: v, y: on ? cy - 22 : cy, duration: 120 });
+            ring.clear();
+            if (on) ring.fillStyle(C.gold, 1).fillRect(v.x - CARD_W * 0.56 - 6, cy - 22 - CARD_H * 0.56 - 6, CARD_W * 1.12 + 12, CARD_H * 1.12 + 12);
+            sync();
+          });
+        });
+        go.setVisible(true);
+      },
+    });
+  }
+
+  openBooster() {
     const pack = booster();
     const chosen: string[] = [];
     const { layer, close } = modal(this, 860, 520);

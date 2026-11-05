@@ -47,6 +47,7 @@ export function drawPortrait(ctx: Ctx, p: any) {
   if (c === 'boucle') { px(ctx, 5, 2, 10, 3, hc); px(ctx, 5, 5, 2, 4, hc); px(ctx, 13, 5, 2, 4, hc); [6, 9, 12].forEach(x => px(ctx, x, 1, 2, 1, hc)); }
   if (c === 'afro') px(ctx, 6, 3, 8, 1, hc);
   if (c === 'degarni') { px(ctx, 6, 5, 1, 3, hc); px(ctx, 13, 5, 1, 3, hc); px(ctx, 5, 6, 1, 2, hc); px(ctx, 14, 6, 1, 2, hc); px(ctx, 9, 3, 2, 1, sh); }
+  if (c === 'crete') { px(ctx, 9, 0, 2, 4, hc); px(ctx, 8, 1, 4, 2, hc); }
   if (c === 'chauve') px(ctx, 8, 4, 2, 1, 'rgba(255,255,255,.4)');
   if (c === 'casquette') { px(ctx, 6, 2, 8, 3, '#2a2a2a'); px(ctx, 5, 4, 10, 1, '#2a2a2a'); px(ctx, 4, 5, 8, 1, '#111'); }
   if (lk.face === 'moustache') px(ctx, 8, 11, 4, 1, hc);

@@ -18,7 +18,15 @@ async function run(vw, vh, tag) {
   const s = box.width / 1280;
   const click = async (x, y, wait = 300) => { await pg.mouse.click(box.x + x * s, box.y + y * s); await pg.waitForTimeout(wait); };
   await pg.screenshot({ path: `${out}/${tag}-1-title.png` });
-  await click(640, 570, 3800);
+  await click(640, 570, 3000);
+  // booster de départ : 4 paquets (GAR 4→2, puis 6→4)
+  for (const [n, keep] of [[4, 2], [6, 4], [6, 4], [6, 4]]) {
+    const x0 = 640 - (n - 1) * 84;
+    for (let i = 0; i < keep; i++) await click(x0 + i * 168, 400, 150);
+    await pg.screenshot({ path: `${out}/${tag}-1b-draft-${n}.png` });
+    await click(640, 610, 2800);
+  }
+  await pg.waitForTimeout(800);
   await click(340, 360, 200); await click(540, 360, 200);
   await pg.screenshot({ path: `${out}/${tag}-2-booster.png` });
   await click(640, 570, 3500);

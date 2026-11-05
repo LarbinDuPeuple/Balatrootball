@@ -25,6 +25,9 @@ const NATIONS = {
   'Égypte': { t: 'h', c: ['#c8102e', '#f4f4f4', '#111111'] },
   'Sénégal': { t: 'v', c: ['#1d8a43', '#f2d22e', '#c8102e'] },
   'Maroc': { t: 'h', c: ['#c1272d'] },
+  'Mexique': { t: 'v', c: ['#1d7a3a', '#f4f4f4', '#c8102e'] },
+  'Nigéria': { t: 'v', c: ['#1d8a43', '#f4f4f4', '#1d8a43'] },
+  'Mali': { t: 'v', c: ['#1d8a43', '#f2d22e', '#c8102e'] },
 };
 
 // maillot, liseré
@@ -41,6 +44,10 @@ const CLUBS = {
   'Montpellier': ['#f47b20', '#1b2a4a'], 'Newcastle': ['#111111', '#f4f4f4'],
   'Dortmund': ['#fde100', '#111111'], 'Atlético Madrid': ['#cb3524', '#f4f4f4'],
   'Olympique': ['#5a8fd0', '#f4f4f4'],
+  'Nantes': ['#f2d22e', '#1d8a43'], 'Lyon': ['#f4f4f4', '#1b4f9c'], 'Bordeaux': ['#1b2a4a', '#f4f4f4'],
+  'Lille': ['#c8102e', '#1b2a4a'], 'Auxerre': ['#f4f4f4', '#2b6cb0'], 'Sochaux': ['#f2c14e', '#1b4f9c'],
+  'Porto': ['#1b4f9c', '#f4f4f4'], 'Ajaccio': ['#c8102e', '#f4f4f4'], 'Atlético Nacional': ['#1d8a43', '#f4f4f4'],
+  'Pumas': ['#1b2a4a', '#d4af37'],
 };
 
 // look : [peau 0-4, cheveux 0-6, coupe, pilosité]
@@ -124,6 +131,71 @@ const YOUTH = [
   ['B. Hansen', 'ATT', 63, 'Norvège', 0, ['Physique']], ['E. Moreau', 'ATT', 62, 'France', 0, ['Vitesse']],
 ];
 
+// Joueurs « moyens » du booster de départ : vrais joueurs cultes, pas des cracks.
+const MIDS = [
+  // GARDIENS
+  ['Mickaël Landreau', 'GAR', 70, 'Nantes', 'France', 2000, ['Spécialiste'], L(0, 2, 'court')],
+  ['Grégory Coupet', 'GAR', 71, 'Lyon', 'France', 2000, ['Leader'], L(0, 0, 'chauve')],
+  ['Ulrich Ramé', 'GAR', 66, 'Bordeaux', 'France', 2000, [], L(0, 2, 'court')],
+  ['Pepe Reina', 'GAR', 70, 'Liverpool', 'Espagne', 2010, ['Technique'], L(1, 0, 'court', 'barbe')],
+  ['David James', 'GAR', 66, 'Liverpool', 'Angleterre', 2000, ['Physique'], L(4, 0, 'court')],
+  ['Jerzy Dudek', 'GAR', 68, 'Liverpool', 'Pologne', 2000, ['Spécialiste'], L(0, 2, 'court', 'moustache')],
+  ['René Higuita', 'GAR', 68, 'Atlético Nacional', 'Colombie', 1990, ['Technique'], L(2, 0, 'afro', 'moustache')],
+  ['Jorge Campos', 'GAR', 66, 'Pumas', 'Mexique', 1990, ['Vitesse'], L(2, 0, 'long')],
+  ['Guillermo Ochoa', 'GAR', 68, 'Ajaccio', 'Mexique', 2010, ['Spécialiste'], L(2, 0, 'afro')],
+  // DÉFENSEURS
+  ['Jamie Carragher', 'DEF', 72, 'Liverpool', 'Angleterre', 2000, ['Leader'], L(0, 2, 'court')],
+  ['Marco Materazzi', 'DEF', 72, 'Inter Milan', 'Italie', 2000, ['Physique', 'Pressing'], L(1, 0, 'court', 'barbe')],
+  ['Philippe Mexès', 'DEF', 70, 'AS Roma', 'France', 2000, ['Physique'], L(1, 0, 'long', 'barbe')],
+  ['Daniel Van Buyten', 'DEF', 70, 'Bayern Munich', 'Belgique', 2010, ['Physique'], L(0, 3, 'court')],
+  ['Bruno Alves', 'DEF', 70, 'Porto', 'Portugal', 2010, ['Physique'], L(1, 0, 'court', 'barbe')],
+  ['Gaël Clichy', 'DEF', 70, 'Arsenal', 'France', 2010, ['Vitesse'], L(3, 0, 'court')],
+  ['Bacary Sagna', 'DEF', 70, 'Arsenal', 'France', 2010, ['Pressing'], L(4, 0, 'afro')],
+  ['Jérémy Mathieu', 'DEF', 68, 'FC Barcelone', 'France', 2010, ['Physique'], L(0, 0, 'court')],
+  ['Taye Taiwo', 'DEF', 68, 'Marseille', 'Nigéria', 2000, ['Vitesse'], L(4, 0, 'court')],
+  ['Mathieu Debuchy', 'DEF', 68, 'Newcastle', 'France', 2010, ['Vitesse'], L(0, 2, 'court')],
+  ['Rod Fanni', 'DEF', 66, 'Marseille', 'France', 2010, ['Vitesse'], L(4, 0, 'court')],
+  ['Jean-Alain Boumsong', 'DEF', 66, 'Juventus', 'France', 2000, ['Physique'], L(4, 0, 'chauve')],
+  ['Benoît Trémoulinas', 'DEF', 66, 'Bordeaux', 'France', 2010, [], L(0, 2, 'court')],
+  ['Sébastien Squillaci', 'DEF', 66, 'Arsenal', 'France', 2010, [], L(0, 0, 'court')],
+  ['Pascal Cygan', 'DEF', 64, 'Arsenal', 'France', 2000, ['Physique'], L(0, 0, 'degarni')],
+  ['Djimi Traoré', 'DEF', 63, 'Liverpool', 'Mali', 2000, [], L(4, 0, 'court')],
+  ['Titus Bramble', 'DEF', 62, 'Newcastle', 'Angleterre', 2000, ['Physique'], L(4, 0, 'chauve')],
+  // MILIEUX
+  ['Yoann Gourcuff', 'MIL', 72, 'Bordeaux', 'France', 2010, ['Technique'], L(0, 2, 'court')],
+  ['Florent Malouda', 'MIL', 72, 'Chelsea', 'France', 2010, ['Vitesse'], L(4, 0, 'chauve')],
+  ['Mathieu Valbuena', 'MIL', 71, 'Marseille', 'France', 2010, ['Spécialiste'], L(1, 0, 'court')],
+  ['Johan Micoud', 'MIL', 71, 'Bordeaux', 'France', 2000, ['Technique'], L(0, 2, 'degarni')],
+  ['Ludovic Giuly', 'MIL', 71, 'FC Barcelone', 'France', 2000, ['Vitesse'], L(0, 2, 'long')],
+  ['Lassana Diarra', 'MIL', 71, 'Real Madrid', 'France', 2010, ['Pressing'], L(4, 0, 'court')],
+  ['Jérémy Toulalan', 'MIL', 70, 'Lyon', 'France', 2010, ['Pressing'], L(0, 0, 'court')],
+  ['Christian Karembeu', 'MIL', 70, 'Real Madrid', 'France', 1990, ['Pressing'], L(3, 0, 'long')],
+  ['Jérôme Rothen', 'MIL', 68, 'PSG', 'France', 2000, ['Spécialiste'], L(0, 2, 'court')],
+  ['Alou Diarra', 'MIL', 68, 'Bordeaux', 'France', 2010, ['Physique'], L(4, 0, 'chauve')],
+  ['Mohamed Sissoko', 'MIL', 67, 'Liverpool', 'Mali', 2000, ['Physique'], L(4, 0, 'court')],
+  ['Joey Barton', 'MIL', 66, 'Newcastle', 'Angleterre', 2010, ['Pressing', 'Physique'], L(0, 2, 'court', 'barbe')],
+  ['Kevin Nolan', 'MIL', 66, 'Newcastle', 'Angleterre', 2010, ['Physique'], L(0, 2, 'court')],
+  ['Rio Mavuba', 'MIL', 66, 'Lille', 'France', 2010, ['Pressing'], L(4, 0, 'court')],
+  ['Abou Diaby', 'MIL', 66, 'Arsenal', 'France', 2010, ['Technique'], L(4, 0, 'court')],
+  // ATTAQUANTS
+  ['Djibril Cissé', 'ATT', 72, 'Liverpool', 'France', 2000, ['Vitesse'], L(4, 3, 'crete', 'barbe')],
+  ['Nwankwo Kanu', 'ATT', 71, 'Arsenal', 'Nigéria', 1990, ['Technique'], L(4, 0, 'chauve')],
+  ['Mamadou Niang', 'ATT', 70, 'Marseille', 'Sénégal', 2010, ['Vitesse'], L(4, 0, 'court')],
+  ['Christophe Dugarry', 'ATT', 70, 'Bordeaux', 'France', 1990, ['Technique'], L(0, 2, 'court')],
+  ['Louis Saha', 'ATT', 70, 'Manchester United', 'France', 2000, ['Physique'], L(4, 0, 'chauve')],
+  ['Bafétimbi Gomis', 'ATT', 70, 'Lyon', 'France', 2010, ['Physique'], L(4, 0, 'court', 'barbe')],
+  ['André-Pierre Gignac', 'ATT', 70, 'Marseille', 'France', 2010, ['Physique'], L(1, 0, 'court', 'barbe')],
+  ['Sidney Govou', 'ATT', 69, 'Lyon', 'France', 2000, ['Vitesse'], L(4, 0, 'court')],
+  ['Kevin Gameiro', 'ATT', 69, 'Atlético Madrid', 'France', 2010, ['Vitesse'], L(1, 0, 'court')],
+  ['Peter Crouch', 'ATT', 68, 'Liverpool', 'Angleterre', 2000, ['Physique'], L(0, 2, 'court')],
+  ['Andy Carroll', 'ATT', 68, 'Newcastle', 'Angleterre', 2010, ['Physique'], L(0, 2, 'queue', 'barbe')],
+  ['Péguy Luyindula', 'ATT', 66, 'PSG', 'France', 2000, ['Technique'], L(4, 0, 'court')],
+  ['Emile Heskey', 'ATT', 66, 'Liverpool', 'Angleterre', 2000, ['Physique'], L(4, 0, 'chauve')],
+  ['Jimmy Briand', 'ATT', 66, 'Lyon', 'France', 2010, ['Vitesse'], L(4, 0, 'court')],
+  ['Stéphane Guivarc\'h', 'ATT', 64, 'Auxerre', 'France', 1990, ['Physique'], L(0, 2, 'court')],
+  ['Pierre-Alain Frau', 'ATT', 64, 'Sochaux', 'France', 2000, [], L(0, 2, 'court')],
+];
+
 function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-'); }
 function price(r) { return Math.max(1, Math.round(((r - 55) ** 2) / 60 * 2) / 2); }
 function salary(r) { return Math.max(0.2, Math.round(price(r) * 0.035 * 10) / 10); }
@@ -142,6 +214,17 @@ YOUTH.forEach(([name, pos, r, nat, , styles], i) => {
     price: price(r), salary: salary(r),
   };
 });
+
+MIDS.forEach(([name, pos, r, club, nat, dec, styles, look]) => {
+  const id = slug(name);
+  // prix et salaire de jeune : le booster de départ ne doit pas être une machine à cash
+  PLAYERS[id] = { id, name, pos, r, club, nat, dec, styles, star: false, mid: true, look, price: price(r - 8), salary: 0.1 };
+});
+
+// Booster de départ : un paquet par ligne, on garde une partie des joueurs.
+const STARTER = { GAR: [4, 2], DEF: [6, 4], MIL: [6, 4], ATT: [6, 4] };
+function starterPack(pos) { return shuffle(Object.values(PLAYERS).filter(p => p.mid && p.pos === pos).map(p => p.id)).slice(0, STARTER[pos][0]); }
+function autoStarter() { return Object.keys(STARTER).flatMap(pos => starterPack(pos).sort((a, b) => PLAYERS[b].r - PLAYERS[a].r).slice(0, STARTER[pos][1])); }
 
 // tier : base (départ), commun (booster), rare, epique
 const MOVES = {
@@ -199,12 +282,12 @@ const OPP_CLUBS = Object.keys(CLUBS).filter(c => c !== 'Olympique');
 
 const SEASON = [
   { comp: 'Championnat', label: 'Journée 1', wall: 400, opp: 1, prime: 6 },
-  { comp: 'Championnat', label: 'Journée 2', wall: 650, opp: 1, prime: 7 },
-  { comp: 'Championnat', label: 'Grande affiche', wall: 1100, opp: 2, prime: 10, boss: true },
-  { comp: 'Coupe nationale', label: 'Huitième', wall: 1300, opp: 2, prime: 10 },
-  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1700, opp: 2, prime: 12 },
-  { comp: 'Coupe nationale', label: 'Finale', wall: 2600, opp: 2, prime: 15, boss: true },
-  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 3500, opp: 2, prime: 16 },
+  { comp: 'Championnat', label: 'Journée 2', wall: 700, opp: 1, prime: 7 },
+  { comp: 'Championnat', label: 'Grande affiche', wall: 1300, opp: 2, prime: 10, boss: true },
+  { comp: 'Coupe nationale', label: 'Huitième', wall: 1500, opp: 2, prime: 10 },
+  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1900, opp: 2, prime: 12 },
+  { comp: 'Coupe nationale', label: 'Finale', wall: 2800, opp: 2, prime: 15, boss: true },
+  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 3600, opp: 2, prime: 16 },
   { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 4000, opp: 3, prime: 18 },
   { comp: 'Coupe d\'Europe', label: 'Finale', wall: 4300, opp: 3, prime: 25, boss: true },
 ];
@@ -218,7 +301,7 @@ function pick(a) { return a[Math.floor(rng() * a.length)]; }
 // ===== Partie =====
 function newGame() {
   const G = {
-    budget: 12, squad: Object.values(PLAYERS).filter(p => p.youth).map(p => p.id),
+    budget: 12, squad: autoStarter(),
     goals: {}, staff: [], items: [], levels: {}, moves: ['frappe', 'passe', 'unedeux'], stage: 0, rerolls: 0, offer: null, history: [],
   };
   Object.keys(MOVES).forEach(k => G.levels[k] = 0);
@@ -425,7 +508,7 @@ function removeMove(G, k) { const i = G.moves.indexOf(k); if (i < 0) return fals
 
 function makeOffer(G) {
   const cap = 84 + G.stage * 2;
-  const pool = Object.values(PLAYERS).filter(p => !p.youth && !G.squad.includes(p.id) && p.r <= cap);
+  const pool = Object.values(PLAYERS).filter(p => !p.youth && !p.mid && !G.squad.includes(p.id) && p.r <= cap);
   const players = shuffle(pool.slice()).slice(0, 4).map(p => p.id);
   const staff = shuffle(Object.keys(STAFF).filter(k => !G.staff.includes(k))).slice(0, 2);
   const items = shuffle(Object.keys(ITEMS)).slice(0, 2);
@@ -445,7 +528,7 @@ function wageTotal(G) { return Math.round(G.squad.reduce((a, id) => a + PLAYERS[
 function wallNow(m, G) { return Math.round(m.wall * (m.rule === 'derby' ? 1.2 : 1) * Math.pow(0.9, m.pressing) * (hasStaff(G, 'video') ? 0.9 : 1)); }
 
 export {
-  LINES, NATIONS, CLUBS, PLAYERS, MOVES, MOVE_SLOTS, TIER_PRICE, STAFF, ITEMS, RULES, SEASON,
+  LINES, NATIONS, CLUBS, PLAYERS, MOVES, STARTER, starterPack, MOVE_SLOTS, TIER_PRICE, STAFF, ITEMS, RULES, SEASON,
   setRng, shuffle, newGame, newMatch, evaluate, playAction, changeCards, settle, makeOffer, playable, useItem,
   sellValue, rerollCost, price, booster, addMove, removeMove, movePrice, hasStaff, fatigueLimit, wageTotal, wallNow,
 };
