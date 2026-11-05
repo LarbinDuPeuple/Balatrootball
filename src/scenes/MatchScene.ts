@@ -13,8 +13,8 @@ import { moveBadge, staffBadge, itemBadge, moveTip, staffTip, itemTip } from '..
 
 const SB_X = 16, SB_W = 280;          // barre latérale
 const RX = 312;                       // début de la zone droite
-const HAND_CX = 760, HAND_Y = 548;    // centre de la main
-const DECK_X = 1228, DECK_Y = 652;
+const HAND_CX = 770, HAND_Y = 546;    // centre de la main
+const DECK_X = 1238, DECK_Y = 678;
 
 export class MatchScene extends Phaser.Scene {
   views: CardView[] = [];
@@ -151,8 +151,8 @@ export class MatchScene extends Phaser.Scene {
     this.ui.btnChange = new Button(this, 640, 684, 230, 46, 'Changement', C.red, () => this.change());
     this.ui.btnPlay = new Button(this, 936, 684, 260, 46, 'Jouer l\'action', C.sky, () => this.play());
     const g = this.add.graphics();
-    for (let i = 3; i >= 0; i--) { g.fillStyle(C.edge, 1).fillRect(DECK_X - 32 + i * 2, DECK_Y - 44 - i * 2, 64, 88); g.fillStyle(C.red, 1).fillRect(DECK_X - 29 + i * 2, DECK_Y - 41 - i * 2, 58, 82); }
-    g.fillStyle(C.gold, 1).fillRect(DECK_X - 29, DECK_Y - 8, 58, 14);
+    for (let i = 3; i >= 0; i--) { g.fillStyle(C.edge, 1).fillRect(DECK_X - 22 + i * 2, DECK_Y - 30 - i * 2, 44, 60); g.fillStyle(C.red, 1).fillRect(DECK_X - 20 + i * 2, DECK_Y - 28 - i * 2, 40, 56); }
+    g.fillStyle(C.gold, 1).fillRect(DECK_X - 20, DECK_Y - 8, 40, 14);
     this.ui.deck = txt(this, 1264, 416, '', 12, C.muted).setOrigin(1, 0);
     this.ui.deckN = big(this, DECK_X, DECK_Y - 1, '', 10, C.ink).setOrigin(0.5);
     this.ui.out = txt(this, RX, 416, '', 12, C.muted).setWordWrapWidth(640);
@@ -182,10 +182,10 @@ export class MatchScene extends Phaser.Scene {
       keep.push(v);
     });
     this.views = M.hand.map((id: string) => keep.find(v => v.id === id)!);
-    const n = this.views.length, gap = Math.min(112, 860 / Math.max(n, 1));
+    const n = this.views.length, gap = Math.min(119, 900 / Math.max(n, 1));
     this.views.forEach((v, i) => {
       const k = i - (n - 1) / 2;
-      v.setHome(HAND_CX + k * gap, HAND_Y + Math.abs(k) * Math.abs(k) * 2.2, k * 0.025);
+      v.setHome(HAND_CX + k * gap, HAND_Y + Math.abs(k) * Math.abs(k) * 1.3, k * 0.02);
       v.setDepth(10 + i);
       v.setFatigue(M.fatigue[v.id] || 0, fatigueLimit(S.G));
     });

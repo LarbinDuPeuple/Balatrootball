@@ -29,11 +29,11 @@ export class CardView extends Phaser.GameObjects.Container {
     g.fillStyle(clubC, 1).fillRect(x0 + 6, y0 + 6, w - 12, 16);
     g.fillStyle(C.edge, 1).fillRect(x0 + 8, y0 + 24, w - 16, w - 16);
     this.glow = scene.add.graphics();
-    const head = txt(scene, x0 + 9, y0 + 7, p.club.toUpperCase(), 11, C.cream).setFixedSize(w - 38, 14);
-    const flag = scene.add.image(x0 + w - 17, y0 + 14, flagKey(scene, p.nat)).setScale(1.5);
+    const head = txt(scene, x0 + 30, y0 + 7, p.club.toUpperCase(), 11, C.cream).setFixedSize(w - 38, 14);
+    const flag = scene.add.image(x0 + 18, y0 + 14, flagKey(scene, p.nat)).setScale(1.5);
     const pic = scene.add.image(0, y0 + 25 + (w - 18) / 2, portraitKey(scene, id)).setDisplaySize(w - 18, w - 18);
     const note = scene.add.graphics();
-    const nx = x0 + w - 22, ny = y0 + 24 + w - 20;
+    const nx = x0 + 22, ny = y0 + 24 + w - 20;
     note.fillStyle(C.edge, 1).fillCircle(nx, ny, 17);
     note.fillStyle(rar === 'or' || rar === 'legende' ? C.gold : C.green, 1).fillCircle(nx, ny, 14);
     const noteT = big(scene, nx + 1, ny + 1, String(p.r), 11, C.ink).setOrigin(0.5);
@@ -42,8 +42,8 @@ export class CardView extends Phaser.GameObjects.Container {
     this.pips = scene.add.graphics();
     this.add([g, this.glow, head, flag, pic, note, noteT, nm, ...badges, this.pips]);
     if (p.star) {
-      const sb = scene.add.graphics(); sb.fillStyle(C.edge, 1).fillRect(x0 + 7, y0 + 26, 38, 15); sb.fillStyle(C.red, 1).fillRect(x0 + 8, y0 + 27, 36, 13);
-      this.add([sb, big(scene, x0 + 26, y0 + 34, 'STAR', 7, C.cream).setOrigin(0.5)]);
+      const sb = scene.add.graphics(); sb.fillStyle(C.edge, 1).fillRect(x0 + 9, y0 + 26, 38, 15); sb.fillStyle(C.red, 1).fillRect(x0 + 10, y0 + 27, 36, 13);
+      this.add([sb, big(scene, x0 + 28, y0 + 34, 'STAR', 7, C.cream).setOrigin(0.5)]);
     }
     if (rar === 'legende' || rar === 'or') this.shine(rar === 'legende');
     this.setSize(w, h);
@@ -66,7 +66,8 @@ export class CardView extends Phaser.GameObjects.Container {
   }
   setFatigue(used: number, limit: number) {
     const g = this.pips; g.clear();
-    for (let i = 0; i < limit; i++) { const x = CARD_W / 2 - 14 - i * 11, y = CARD_H / 2 - 16; g.fillStyle(C.edge, 1).fillRect(x - 1, y - 1, 9, 9); g.fillStyle(i < used ? C.red : C.green, 1).fillRect(x, y, 7, 7); }
+    const start = -CARD_W / 2 + 12 + this.p.styles.length * 20 + 6;
+    for (let i = 0; i < limit; i++) { const x = start + i * 11, y = CARD_H / 2 - 22; g.fillStyle(C.edge, 1).fillRect(x - 1, y - 1, 9, 9); g.fillStyle(i < used ? C.red : C.green, 1).fillRect(x, y, 7, 7); }
   }
   setHome(x: number, y: number, rot = 0) { this.homeX = x; this.homeY = y; this.setData('rot', rot); }
   tick(t: number) {
