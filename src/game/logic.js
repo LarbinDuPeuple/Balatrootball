@@ -198,15 +198,15 @@ const RULES = {
 const OPP_CLUBS = Object.keys(CLUBS).filter(c => c !== 'Olympique');
 
 const SEASON = [
-  { comp: 'Championnat', label: 'Journée 1', wall: 350, opp: 1, prime: 6 },
-  { comp: 'Championnat', label: 'Journée 2', wall: 500, opp: 1, prime: 7 },
-  { comp: 'Championnat', label: 'Grande affiche', wall: 700, opp: 2, prime: 10, boss: true },
-  { comp: 'Coupe nationale', label: 'Huitième', wall: 900, opp: 2, prime: 10 },
-  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1200, opp: 2, prime: 12 },
-  { comp: 'Coupe nationale', label: 'Finale', wall: 1800, opp: 2, prime: 15, boss: true },
-  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 2400, opp: 2, prime: 16 },
-  { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 3000, opp: 3, prime: 18 },
-  { comp: 'Coupe d\'Europe', label: 'Finale', wall: 3700, opp: 3, prime: 25, boss: true },
+  { comp: 'Championnat', label: 'Journée 1', wall: 400, opp: 1, prime: 6 },
+  { comp: 'Championnat', label: 'Journée 2', wall: 650, opp: 1, prime: 7 },
+  { comp: 'Championnat', label: 'Grande affiche', wall: 1100, opp: 2, prime: 10, boss: true },
+  { comp: 'Coupe nationale', label: 'Huitième', wall: 1300, opp: 2, prime: 10 },
+  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1700, opp: 2, prime: 12 },
+  { comp: 'Coupe nationale', label: 'Finale', wall: 2600, opp: 2, prime: 15, boss: true },
+  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 3500, opp: 2, prime: 16 },
+  { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 4000, opp: 3, prime: 18 },
+  { comp: 'Coupe d\'Europe', label: 'Finale', wall: 4300, opp: 3, prime: 25, boss: true },
 ];
 
 // ===== Aléatoire =====
@@ -233,7 +233,7 @@ function newMatch(G) {
   const ossature = Object.entries(natCount).find(([, c]) => c >= 5);
   let poss = 6 + (hasStaff(G, 'mental') ? 1 : 0) + (ossature ? 1 : 0);
   const m = {
-    stage: G.stage, opp: pick(OPP_CLUBS), wall: s.wall, oppGoals: s.opp, goals: 0,
+    stage: G.stage, opp: pick(OPP_CLUBS), wall: s.wall, wear: 0, oppGoals: s.opp, goals: 0,
     poss, possStart: poss, changes: 2 + (hasStaff(G, 'kine') ? 1 : 0),
     deck: shuffle(G.squad.slice()), hand: [], discard: [], out: [], fatigue: {},
     rule: s.boss ? pick(Object.keys(RULES)) : null, pressing: 0, nextWall: 1, nextPrec: 1,
@@ -332,8 +332,10 @@ function evaluate(ids, m, G) {
     if (!best || danger > best.danger) best = { move: k, base, prec, danger, lv };
   });
   const wall = Math.round(m.wall * wallMult);
-  const goals = best.danger >= 2 * wall ? 2 : best.danger >= wall ? 1 : 0;
-  return { ...best, sum, wall, goals, syn, fatigueFree, techBonus, pressingAdd, ordered: ps.map(p => p.id) };
+  // Le mur s'use : chaque tir arrêté retire son danger au prochain but ; le doublé demande en plus un mur entier.
+  const need = Math.max(1, wall - (m.wear || 0));
+  const goals = best.danger >= need + wall ? 2 : best.danger >= need ? 1 : 0;
+  return { ...best, sum, wall, need, goals, syn, fatigueFree, techBonus, pressingAdd, ordered: ps.map(p => p.id) };
 }
 
 function playable(m, G, id) {
@@ -352,6 +354,7 @@ function playAction(ids, m, G) {
     G.goals[scorer] = (G.goals[scorer] || 0) + goals;
   }
   m.goals += goals;
+  if (ev.goals > 0) m.wear = 0; else if (ev.move) m.wear = (m.wear || 0) + ev.danger;
   if (ev.pressingAdd) m.pressing++;
   if (ev.techBonus) { m.changes++; m.techUsed = true; }
   m.nextWall = 1; m.nextPrec = 1;

@@ -204,7 +204,9 @@ export class MatchScene extends Phaser.Scene {
   refresh() {
     const G = S.G, M = S.M, u = this.ui;
     const wall = wallNow(M, G);
-    u.wall.setText(String(wall)); u.wall2.setText(`Doublé à ${wall * 2} · adversaire : ${M.oppGoals} but${M.oppGoals > 1 ? 's' : ''}`);
+    const need = Math.max(1, wall - (M.wear || 0));
+    u.wall.setText(String(need));
+    u.wall2.setText(`${M.wear ? `Usé de ${M.wear} sur ${wall}` : `Mur entier`} · doublé à ${need + wall}`);
     u.gUs.setText(String(M.goals)); u.gOpp.setText(String(M.oppGoals));
     u.need.setText(`il te faut ${M.oppGoals + 1} buts`);
     const pg = u.poss as Phaser.GameObjects.Graphics; pg.clear();
@@ -230,7 +232,7 @@ export class MatchScene extends Phaser.Scene {
     }
     u.move.setText(ev.move ? (MOVES as any)[ev.move].name.toUpperCase() + (ev.lv ? ` niv.${ev.lv + 1}` : '') : 'AUCUN MOUVEMENT');
     u.chips.setText(String(ev.sum + ev.base)); u.mult.setText(dec(ev.prec)); u.danger.setText(String(ev.danger));
-    u.verdict.setText(!ev.move ? 'Aucun de tes mouvements ne correspond' : ev.goals === 2 ? 'DOUBLÉ !' : ev.goals ? 'BUT !' : `Arrêté, il faut ${ev.wall}`)
+    u.verdict.setText(!ev.move ? 'Aucun de tes mouvements ne correspond' : ev.goals === 2 ? 'DOUBLÉ !' : ev.goals ? 'BUT !' : `Arrêté, il faut ${ev.need}`)
       .setColor(hex(ev.goals ? C.green : C.muted));
     this.lastSyn = ev.syn;
     u.syn.setText(ev.syn.length ? `${ev.syn.length} bonus (détail)` : '');
@@ -276,7 +278,7 @@ export class MatchScene extends Phaser.Scene {
     layer.add(big(this, W / 2, top + 36, s.boss ? 'MATCH SPÉCIAL' : 'COUP D\'ENVOI', 22).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 76, `Olympique contre ${M.opp}`, 20).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 108, `${M.opp} annonce ${M.oppGoals} but${M.oppGoals > 1 ? 's' : ''}. Marques-en ${M.oppGoals + 1} en ${M.poss} possessions.`, 16, C.cream2).setOrigin(0.5));
-    layer.add(txt(this, W / 2, top + 134, `Mur du gardien : ${wallNow(M, G)} de danger par but.${M.ossature ? `  Ossature ${M.ossature} : +1 possession.` : ''}`, 16, C.cream2).setOrigin(0.5));
+    layer.add(txt(this, W / 2, top + 134, `Mur du gardien : ${wallNow(M, G)}. Chaque tir arrêté l'use jusqu'au but.${M.ossature ? `  Ossature ${M.ossature} : +1 possession.` : ''}`, 16, C.cream2).setOrigin(0.5));
     if (M.rule) {
       const r = (RULES as any)[M.rule];
       layer.add(panel(this, W / 2 - 260, top + 160, 520, 60, C.red, C.gold));
