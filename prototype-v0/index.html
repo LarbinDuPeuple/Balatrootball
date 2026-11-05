@@ -1,0 +1,1124 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><title>Mercato</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Press+Start+2P&display=swap">
+<style>
+/* Mise en page : un stade de nuit, panneaux sombres autour du terrain, main de cartes vignettes en bas */
+:root {
+  --night: #151826; --panel: #20263a; --panel-2: #2b3350; --edge: #0a0c14;
+  --cream: #f3e7c9; --cream-2: #e2d3ad; --ink: #1d1a22; --muted: #9aa3c0;
+  --gold: #f4c34f; --red: #e8573a; --green: #6fcf4f; --sky: #7fc3ea;
+  --bronze: #b97a46; --silver: #b9c3cf; --goldcard: #e9b93a;
+  --f-ui: "Pixelify Sans", "Courier New", monospace;
+  --f-big: "Press Start 2P", "Pixelify Sans", "Courier New", monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--night); color: var(--cream); font-family: var(--f-ui); font-size: 16px; line-height: 1.3;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px; box-sizing: border-box; }
+* { box-sizing: border-box; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+button { font-family: var(--f-ui); font-size: 16px; font-weight: 700; color: var(--ink); background: var(--gold); border: 3px solid var(--edge);
+  box-shadow: 0 4px 0 var(--edge); padding: 8px 14px; cursor: pointer; text-transform: uppercase; letter-spacing: .04em; }
+button:hover:not(:disabled) { filter: brightness(1.08); }
+button:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--edge); }
+button:disabled { background: var(--panel-2); color: var(--muted); cursor: not-allowed; }
+button.alt { background: var(--sky); }
+button.ghost { background: var(--panel-2); color: var(--cream); }
+button:focus-visible, .card:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+.screen { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.panel { background: var(--panel); border: 3px solid var(--edge); box-shadow: inset 0 0 0 2px var(--panel-2); padding: 10px 12px; }
+.label { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+h1, h2, h3 { margin: 0; font-weight: 700; text-wrap: balance; }
+h2 { font-family: var(--f-big); font-size: 15px; color: var(--gold); letter-spacing: .02em; line-height: 1.5; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Titre */
+#title { align-items: center; text-align: center; padding-top: 4vh; gap: 20px; }
+.logo { font-family: var(--f-big); font-size: clamp(30px, 8vw, 64px); color: var(--gold); text-shadow: 4px 4px 0 var(--red), 8px 8px 0 var(--edge); letter-spacing: .04em; }
+.tagline { font-size: 20px; color: var(--sky); }
+#title-canvas { width: min(560px, 100%); border: 3px solid var(--edge); }
+.howto { max-width: 640px; text-align: left; }
+.howto ol { margin: 6px 0 0; padding-left: 22px; display: grid; gap: 6px; }
+
+/* Match */
+.scorebar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.sb-team { font-family: var(--f-big); font-size: clamp(11px, 2vw, 16px); text-transform: uppercase; line-height: 1.4; }
+.sb-team.opp { text-align: right; }
+.sb-score { font-family: var(--f-big); font-size: clamp(22px, 4vw, 34px); color: var(--gold); white-space: nowrap; }
+.sb-score .need { display: block; font-family: var(--f-ui); font-size: 13px; color: var(--muted); text-align: center; letter-spacing: .06em; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.meta .chip { display: inline-flex; gap: 6px; align-items: baseline; }
+.meta .val { font-family: var(--f-big); font-size: 13px; color: var(--cream); }
+.pips { display: inline-flex; gap: 3px; }
+.pip { width: 10px; height: 10px; background: var(--gold); border: 2px solid var(--edge); }
+.pip.off { background: var(--panel-2); }
+.rule-chip { background: var(--red); color: var(--cream); padding: 3px 8px; border: 2px solid var(--edge); font-weight: 700; }
+.arena { display: grid; grid-template-columns: 200px minmax(0, 1fr) 250px; gap: 12px; align-items: stretch; }
+.side, .calc { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.slot-list { display: grid; gap: 6px; }
+.slot { background: var(--panel-2); border: 2px solid var(--edge); padding: 6px 8px; font-size: 14px; }
+.slot b { display: block; color: var(--gold); font-size: 14px; }
+.slot.empty { color: var(--muted); border-style: dashed; }
+.item-btn { width: 100%; text-align: left; font-size: 13px; padding: 6px 8px; text-transform: none; letter-spacing: 0; background: var(--sky); }
+.item-btn small { display: block; font-weight: 400; }
+.pitchwrap { position: relative; border: 3px solid var(--edge); background: #2f7a32; min-width: 0; align-self: start; }
+#pitch { width: 100%; height: auto; aspect-ratio: 240 / 136; }
+.burst { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.burst span { font-family: var(--f-big); font-size: clamp(28px, 7vw, 64px); color: var(--gold); text-shadow: 4px 4px 0 var(--red), 7px 7px 0 var(--edge); animation: pop .9s steps(6) both; }
+.burst span.miss { color: var(--cream); text-shadow: 3px 3px 0 var(--edge); font-size: clamp(16px, 3.5vw, 30px); }
+@keyframes pop { 0% { transform: scale(.2); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+.calc .panel { display: flex; flex-direction: column; gap: 6px; }
+.c-move { font-family: var(--f-big); font-size: 12px; color: var(--sky); line-height: 1.5; min-height: 36px; }
+.c-formula { font-size: 15px; color: var(--cream-2); }
+.c-danger { font-family: var(--f-big); font-size: 30px; color: var(--red); text-shadow: 3px 3px 0 var(--edge); }
+.c-verdict { font-weight: 700; font-size: 15px; }
+.c-verdict.goal { color: var(--green); }
+.c-verdict.none { color: var(--muted); }
+.syn { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13px; }
+.syn li { background: var(--panel-2); border-left: 4px solid var(--gold); padding: 3px 6px; }
+.syn li.bad { border-left-color: var(--red); }
+details { font-size: 13px; }
+.mv { display: flex; justify-content: space-between; gap: 6px; padding: 4px 6px; border-left: 4px solid var(--panel-2); background: var(--panel-2); font-size: 13px; }
+.mv.on { border-left-color: var(--green); background: #2f4a3a; }
+.mv .lv { color: var(--gold); }
+.mv .hint { font-size: 12px; }
+.mv .num { white-space: nowrap; color: var(--cream-2); }
+.booster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; text-align: left; }
+.pickable { cursor: pointer; }
+.pickable .tile { height: 100%; }
+.pickable.on .tile { box-shadow: 0 0 0 3px var(--gold); transform: translateY(-3px); }
+.tile.move { border-left: 8px solid var(--silver); }
+.tile.t-commun { border-left-color: var(--green); } .tile.t-rare { border-left-color: var(--sky); } .tile.t-epique { border-left-color: #c58cf0; }
+.own-moves { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.own-moves .tile { font-size: 14px; }
+button.danger { background: var(--red); color: var(--cream); }
+details summary { cursor: pointer; color: var(--gold); font-weight: 700; }
+.moves { display: grid; gap: 4px; margin-top: 2px; }
+.handbar { display: flex; flex-direction: column; gap: 10px; }
+.hand { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; padding-top: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.actions .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.deckinfo { color: var(--muted); font-size: 14px; }
+
+/* Carte joueur */
+.card { position: relative; background: var(--cream); color: var(--ink); border: 3px solid var(--edge); box-shadow: inset 0 0 0 3px var(--frame, var(--bronze)), 0 4px 0 var(--edge);
+  padding: 6px; display: flex; flex-direction: column; gap: 3px; cursor: pointer; user-select: none; transition: transform .08s steps(2); min-width: 0; }
+.card.r-argent { --frame: var(--silver); } .card.r-or { --frame: var(--goldcard); }
+.card.r-legende { --frame: #c58cf0; background: linear-gradient(135deg, #f7e9ff, #e6fbff 40%, #fff6d8 70%, #ffe3f2); }
+.card.sel { transform: translateY(-12px); box-shadow: inset 0 0 0 3px var(--frame, var(--bronze)), 0 0 0 3px var(--gold), 0 6px 0 var(--edge); }
+.card .top { display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--cream); background: var(--clubc, #456); padding: 2px 4px; min-width: 0; }
+.card .top span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .top canvas { width: 18px; height: 12px; flex: none; border: 1px solid var(--edge); }
+.card .pic { position: relative; }
+.card .pic canvas { width: 100%; height: auto; aspect-ratio: 1; border: 2px solid var(--edge); }
+.card .note { position: absolute; right: -4px; bottom: -6px; width: 34px; height: 34px; display: grid; place-items: center; font-family: var(--f-big); font-size: 11px;
+  background: var(--green); border: 3px solid var(--edge); border-radius: 50%; color: var(--ink); }
+.card.r-or .note, .card.r-legende .note { background: var(--gold); }
+.card .nm { font-weight: 700; font-size: 13px; line-height: 1.15; text-transform: uppercase; overflow-wrap: anywhere; margin-top: 4px; }
+.card .st { font-size: 11px; text-transform: uppercase; color: #4a4458; line-height: 1.2; min-height: 26px; }
+.card .ft { display: flex; justify-content: space-between; align-items: center; font-size: 11px; border-top: 2px dashed var(--cream-2); padding-top: 2px; }
+.card .fat { display: inline-flex; gap: 2px; }
+.card .fat i { width: 7px; height: 7px; background: var(--green); border: 1px solid var(--edge); }
+.card .fat i.used { background: var(--red); }
+.card .star { position: absolute; left: 8px; top: 30px; font-family: var(--f-big); font-size: 9px; background: var(--red); color: var(--cream); padding: 2px 3px; border: 2px solid var(--edge); }
+
+/* Mercato */
+.merc-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; }
+.money { font-family: var(--f-big); font-size: 13px; line-height: 1.8; }
+.money .warn { color: var(--red); }
+.shop { display: grid; grid-template-columns: repeat(4, minmax(0, 190px)); gap: 16px; justify-content: center; }
+.offer { display: flex; flex-direction: column; gap: 8px; }
+.offer .price { font-family: var(--f-big); font-size: 12px; text-align: center; color: var(--green); background: var(--edge); padding: 6px; border: 2px solid var(--green); }
+.shop-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.shop-col { display: flex; flex-direction: column; gap: 8px; }
+.tile { background: var(--cream); color: var(--ink); border: 3px solid var(--edge); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.tile b { text-transform: uppercase; }
+.tile .kind { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #6b6478; }
+.tile .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tile button { font-size: 13px; padding: 5px 10px; }
+.tile.staff { border-left: 8px solid var(--green); } .tile.item { border-left: 8px solid var(--sky); } .tile.train { border-left: 8px solid var(--gold); }
+.squad { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.squad .cell { display: flex; flex-direction: column; gap: 6px; }
+.squad .cell button { font-size: 12px; padding: 5px 6px; background: var(--red); color: var(--cream); }
+.squad .card { cursor: default; }
+.next-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.hint { color: var(--muted); font-size: 14px; }
+
+/* Modale */
+.modal { position: fixed; inset: 0; background: rgba(5, 6, 12, .78); display: grid; place-items: center; z-index: 20;
+  padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); }
+.modal .box { background: var(--panel); border: 4px solid var(--edge); box-shadow: inset 0 0 0 3px var(--gold); padding: 20px; max-width: 560px; max-height: 100%; overflow-y: auto; width: 100%; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.modal .big { font-family: var(--f-big); font-size: 22px; color: var(--gold); line-height: 1.4; }
+.modal table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.modal td { padding: 3px 0; border-bottom: 1px dashed var(--panel-2); text-align: left; }
+.modal td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.modal .rule { background: var(--red); padding: 8px; border: 2px solid var(--edge); }
+
+@media (max-width: 980px) {
+  .arena { grid-template-columns: minmax(0, 1fr) 230px; }
+  .side { grid-column: 1 / -1; order: 3; display: grid; grid-template-columns: 1fr 1fr; }
+  .shop { grid-template-columns: repeat(2, minmax(0, 190px)); }
+}
+@media (max-width: 680px) {
+  .arena { grid-template-columns: minmax(0, 1fr); }
+  .side { grid-template-columns: 1fr; }
+  .hand { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .shop-row { grid-template-columns: 1fr; }
+  .c-danger { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .burst span { animation: none; } .card { transition: none; } }
+</style>
+
+<section id="title" class="screen">
+  <div class="logo">MERCATO</div>
+  <div class="tagline">Recrute des légendes. Enchaîne les combos. Gagne la saison.</div>
+  <canvas id="title-canvas" width="240" height="136"></canvas>
+  <button id="btn-new">Nouvelle saison</button>
+  <div class="panel howto">
+    <h2>Comment jouer</h2>
+    <ol>
+      <li>L'adversaire annonce son score. Marque un but de plus pour gagner.</li>
+      <li>Choisis 1 à 5 joueurs et joue l'action. Elle ne marque que si elle correspond à un de tes mouvements (6 emplacements). Tu en débloques de nouveaux au booster de départ puis au mercato.</li>
+      <li>Danger = (somme des notes + base) × précision. Danger au-dessus du mur : but. Deux fois le mur : doublé.</li>
+      <li>Même club, même nationalité, même génération et trios de styles boostent l'action.</li>
+      <li>Un joueur est fatigué après 2 actions. Entre les matchs, achète joueurs, staff et consignes au mercato. Attention à la masse salariale.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="match" class="screen" hidden>
+  <div class="panel scorebar">
+    <div class="sb-team">Olympique</div>
+    <div class="sb-score num"><span id="g-us">0</span> - <span id="g-opp">0</span><span class="need" id="g-need"></span></div>
+    <div class="sb-team opp" id="opp-name"></div>
+  </div>
+  <div class="panel meta">
+    <span class="chip"><span class="label" id="m-comp"></span></span>
+    <span class="chip"><span class="label">Possessions</span><span class="pips" id="m-poss"></span></span>
+    <span class="chip"><span class="label">Changements</span><span class="val num" id="m-chg"></span></span>
+    <span class="chip"><span class="label">Mur du gardien</span><span class="val num" id="m-wall"></span></span>
+    <span class="rule-chip" id="m-rule" hidden></span>
+  </div>
+  <div class="arena">
+    <aside class="side">
+      <div class="panel"><div class="label">Staff · permanent</div><div class="slot-list" id="m-staff"></div></div>
+      <div class="panel"><div class="label">Consignes · usage unique</div><div class="hint" style="font-size:12px">Clique pour l'utiliser pendant ce match.</div><div class="slot-list" id="m-items"></div></div>
+    </aside>
+    <div class="pitchwrap"><canvas id="pitch" width="240" height="136"></canvas><div class="burst" id="burst"></div></div>
+    <aside class="calc">
+      <div class="panel">
+        <div class="label">Action en cours</div>
+        <div class="c-move" id="c-move">Choisis des joueurs</div>
+        <div class="c-formula num" id="c-formula">(notes + base) × précision</div>
+        <div class="c-danger num" id="c-danger">0</div>
+        <div class="c-verdict none" id="c-verdict"></div>
+        <ul class="syn" id="c-syn"></ul>
+      </div>
+      <div class="panel">
+        <div class="label" id="c-moves-label">Tes mouvements</div><div class="moves" id="c-moves"></div>
+      </div>
+    </aside>
+  </div>
+  <div class="handbar">
+    <div class="hand" id="hand"></div>
+    <div class="actions">
+      <span class="deckinfo" id="deckinfo"></span>
+      <div class="btns">
+        <button id="btn-change" class="ghost">Changement</button>
+        <button id="btn-play">Jouer l'action</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mercato" class="screen" hidden>
+  <div class="panel merc-head">
+    <h2>Mercato entre deux matchs</h2>
+    <div class="money num" id="merc-money"></div>
+    <button id="btn-reroll" class="alt">Relancer</button>
+  </div>
+  <div class="panel">
+    <div class="label">Joueurs à vendre</div>
+    <div class="shop" id="shop-players"></div>
+  </div>
+  <div class="panel">
+    <div class="label">Mouvements à vendre</div>
+    <div class="shop-row" id="shop-moves"></div>
+    <div class="label" id="own-moves-label" style="margin-top:12px">Tes mouvements</div>
+    <div class="own-moves" id="own-moves"></div>
+  </div>
+  <div class="shop-row">
+    <div class="panel shop-col"><div class="label">Staff permanent (4 places)</div><div class="hint">Agit à chaque match tant qu'il est au club.</div><div id="shop-staff" class="shop-col"></div></div>
+    <div class="panel shop-col"><div class="label">Consignes à usage unique (3 max)</div><div class="hint">À utiliser pendant un match, puis elles disparaissent.</div><div id="shop-items" class="shop-col"></div></div>
+    <div class="panel shop-col"><div class="label">Séances d'entraînement</div><div id="shop-train" class="shop-col"></div></div>
+  </div>
+  <div class="panel">
+    <div class="label" id="squad-label">Ton effectif</div>
+    <div class="squad" id="squad"></div>
+  </div>
+  <div class="panel next-bar">
+    <span class="hint" id="next-info"></span>
+    <button id="btn-next">Prochain match</button>
+  </div>
+</section>
+
+<div class="modal" id="modal" hidden><div class="box" id="modal-box"></div></div>
+<script>
+// ===== Données et règles (aucun accès au DOM) =====
+const LINES = { GAR: 0, DEF: 1, MIL: 2, ATT: 3 };
+
+const NATIONS = {
+  'France': { t: 'v', c: ['#2b4fa8', '#f4f4f4', '#d8232a'] },
+  'Italie': { t: 'v', c: ['#1d8a43', '#f4f4f4', '#d8232a'] },
+  'Allemagne': { t: 'h', c: ['#111111', '#d8232a', '#f2c14e'] },
+  'Espagne': { t: 'h', c: ['#c8102e', '#f2c14e', '#f2c14e', '#c8102e'] },
+  'Brésil': { t: 'd', c: ['#1d8a43', '#f2d22e', '#2b4fa8'] },
+  'Argentine': { t: 'h', c: ['#7cc0ea', '#f4f4f4', '#7cc0ea'] },
+  'Pays-Bas': { t: 'h', c: ['#c8102e', '#f4f4f4', '#2b4fa8'] },
+  'Angleterre': { t: 'x', c: ['#f4f4f4', '#c8102e'] },
+  'Portugal': { t: 'v', c: ['#1d7a3a', '#c8102e', '#c8102e'] },
+  'URSS': { t: 'h', c: ['#c8102e'] },
+  'Croatie': { t: 'h', c: ['#c8102e', '#f4f4f4', '#2b4fa8'] },
+  'Belgique': { t: 'v', c: ['#111111', '#f2d22e', '#d8232a'] },
+  'Colombie': { t: 'h', c: ['#f2d22e', '#f2d22e', '#2b4fa8', '#c8102e'] },
+  'Danemark': { t: 'x', c: ['#c8102e', '#f4f4f4'] },
+  'Suède': { t: 'x', c: ['#2b6cb0', '#f2d22e'] },
+  'Norvège': { t: 'x', c: ['#c8102e', '#f4f4f4'] },
+  'Cameroun': { t: 'v', c: ['#1d7a3a', '#c8102e', '#f2d22e'] },
+  "Côte d'Ivoire": { t: 'v', c: ['#f08a24', '#f4f4f4', '#1d8a43'] },
+  'Libéria': { t: 'h', c: ['#c8102e', '#f4f4f4', '#c8102e', '#f4f4f4'] },
+  'Pologne': { t: 'h', c: ['#f4f4f4', '#d8232a'] },
+  'Égypte': { t: 'h', c: ['#c8102e', '#f4f4f4', '#111111'] },
+  'Sénégal': { t: 'v', c: ['#1d8a43', '#f2d22e', '#c8102e'] },
+  'Maroc': { t: 'h', c: ['#c1272d'] },
+};
+
+// maillot, liseré
+const CLUBS = {
+  'Juventus': ['#f4f4f4', '#111111'], 'AC Milan': ['#c8102e', '#111111'],
+  'Real Madrid': ['#f4f4f4', '#d4af37'], 'FC Barcelone': ['#a50044', '#004d98'],
+  'Bayern Munich': ['#dc052d', '#f4f4f4'], 'Manchester United': ['#da291c', '#111111'],
+  'Liverpool': ['#c8102e', '#f6eb61'], 'Chelsea': ['#034694', '#f4f4f4'],
+  'Arsenal': ['#ef0107', '#f4f4f4'], 'Inter Milan': ['#0068a8', '#111111'],
+  'Naples': ['#12a0d7', '#f4f4f4'], 'Santos': ['#f4f4f4', '#111111'],
+  'Ajax': ['#f4f4f4', '#d2122e'], 'PSG': ['#1b2a4a', '#da291c'],
+  'Manchester City': ['#6cabdd', '#f4f4f4'], 'Marseille': ['#f4f4f4', '#2faee0'],
+  'AS Roma': ['#8e1f2f', '#f0bc42'], 'Dynamo Moscou': ['#1b4f9c', '#f4f4f4'],
+  'Montpellier': ['#f47b20', '#1b2a4a'], 'Newcastle': ['#111111', '#f4f4f4'],
+  'Dortmund': ['#fde100', '#111111'], 'Atlético Madrid': ['#cb3524', '#f4f4f4'],
+  'Olympique': ['#5a8fd0', '#f4f4f4'],
+};
+
+// look : [peau 0-4, cheveux 0-6, coupe, pilosité]
+// coupes : court, long, chauve, boucle, afro, queue, casquette, crete, degarni
+// pilosité : rien, moustache, barbe, bouc
+const L = (skin, hair, cut, face) => ({ skin, hair, cut, face: face || 'rien' });
+
+const STARS = [
+  // GARDIENS
+  ['Lev Yachine', 'GAR', 89, 'Dynamo Moscou', 'URSS', 1960, ['Leader', 'Spécialiste'], 0, L(1, 0, 'casquette')],
+  ['Gianluigi Buffon', 'GAR', 91, 'Juventus', 'Italie', 2000, ['Leader'], 0, L(1, 1, 'court', 'barbe')],
+  ['Manuel Neuer', 'GAR', 90, 'Bayern Munich', 'Allemagne', 2010, ['Technique'], 0, L(0, 3, 'court')],
+  ['Iker Casillas', 'GAR', 88, 'Real Madrid', 'Espagne', 2000, ['Leader'], 0, L(1, 0, 'court')],
+  ['Fabien Barthez', 'GAR', 84, 'Manchester United', 'France', 1990, ['Technique'], 0, L(0, 0, 'chauve')],
+  ['Peter Schmeichel', 'GAR', 87, 'Manchester United', 'Danemark', 1990, ['Leader', 'Physique'], 0, L(0, 3, 'court')],
+  // DÉFENSEURS
+  ['Franz Beckenbauer', 'DEF', 93, 'Bayern Munich', 'Allemagne', 1970, ['Leader', 'Technique'], 1, L(0, 2, 'court')],
+  ['Paolo Maldini', 'DEF', 92, 'AC Milan', 'Italie', 1990, ['Leader', 'Vitesse'], 1, L(1, 1, 'long')],
+  ['Franco Baresi', 'DEF', 89, 'AC Milan', 'Italie', 1980, ['Leader', 'Pressing'], 0, L(1, 1, 'degarni')],
+  ['Cafu', 'DEF', 87, 'AS Roma', 'Brésil', 2000, ['Vitesse', 'Pressing'], 0, L(3, 0, 'chauve')],
+  ['Roberto Carlos', 'DEF', 87, 'Real Madrid', 'Brésil', 2000, ['Vitesse', 'Spécialiste'], 0, L(3, 0, 'chauve')],
+  ['Sergio Ramos', 'DEF', 88, 'Real Madrid', 'Espagne', 2010, ['Leader', 'Physique'], 0, L(1, 1, 'long', 'barbe')],
+  ['Lilian Thuram', 'DEF', 86, 'Juventus', 'France', 1990, ['Physique', 'Vitesse'], 0, L(4, 0, 'court')],
+  ['Marcel Desailly', 'DEF', 86, 'Chelsea', 'France', 1990, ['Physique', 'Leader'], 0, L(4, 0, 'chauve')],
+  ['Virgil van Dijk', 'DEF', 89, 'Liverpool', 'Pays-Bas', 2020, ['Physique', 'Leader'], 0, L(3, 0, 'court', 'barbe')],
+  ['Carles Puyol', 'DEF', 87, 'FC Barcelone', 'Espagne', 2000, ['Pressing', 'Leader'], 0, L(1, 1, 'boucle')],
+  ['Alessandro Nesta', 'DEF', 87, 'AC Milan', 'Italie', 2000, ['Technique'], 0, L(1, 0, 'long')],
+  ['Philipp Lahm', 'DEF', 86, 'Bayern Munich', 'Allemagne', 2010, ['Technique', 'Pressing'], 0, L(0, 2, 'court')],
+  ['Kalidou Koulibaly', 'DEF', 85, 'Naples', 'Sénégal', 2010, ['Physique'], 0, L(4, 0, 'court', 'barbe')],
+  // MILIEUX
+  ['Zinédine Zidane', 'MIL', 94, 'Real Madrid', 'France', 2000, ['Technique', 'Leader'], 1, L(1, 1, 'degarni')],
+  ['Michel Platini', 'MIL', 91, 'Juventus', 'France', 1980, ['Technique', 'Spécialiste'], 1, L(1, 2, 'boucle')],
+  ['Xavi', 'MIL', 90, 'FC Barcelone', 'Espagne', 2010, ['Technique'], 0, L(1, 0, 'court', 'barbe')],
+  ['Andrés Iniesta', 'MIL', 91, 'FC Barcelone', 'Espagne', 2010, ['Technique', 'Vitesse'], 0, L(0, 2, 'chauve')],
+  ['Andrea Pirlo', 'MIL', 89, 'Juventus', 'Italie', 2010, ['Technique', 'Spécialiste'], 0, L(1, 1, 'long', 'barbe')],
+  ['Steven Gerrard', 'MIL', 88, 'Liverpool', 'Angleterre', 2000, ['Leader', 'Physique'], 0, L(0, 2, 'court')],
+  ['Frank Lampard', 'MIL', 87, 'Chelsea', 'Angleterre', 2000, ['Spécialiste', 'Physique'], 0, L(0, 2, 'court')],
+  ['Luka Modrić', 'MIL', 90, 'Real Madrid', 'Croatie', 2010, ['Technique', 'Pressing'], 0, L(0, 3, 'long')],
+  ['Patrick Vieira', 'MIL', 87, 'Arsenal', 'France', 2000, ['Physique', 'Pressing'], 0, L(4, 0, 'court')],
+  ["N'Golo Kanté", 'MIL', 86, 'Chelsea', 'France', 2010, ['Pressing', 'Vitesse'], 0, L(4, 0, 'court')],
+  ['Carlos Valderrama', 'MIL', 85, 'Montpellier', 'Colombie', 1990, ['Technique'], 0, L(2, 3, 'afro', 'moustache')],
+  ['Gennaro Gattuso', 'MIL', 84, 'AC Milan', 'Italie', 2000, ['Pressing', 'Physique'], 0, L(1, 0, 'court', 'barbe')],
+  ['Kevin De Bruyne', 'MIL', 90, 'Manchester City', 'Belgique', 2020, ['Technique', 'Spécialiste'], 0, L(0, 4, 'court')],
+  ['Lothar Matthäus', 'MIL', 89, 'Bayern Munich', 'Allemagne', 1990, ['Leader', 'Physique'], 0, L(0, 2, 'long')],
+  ['Clarence Seedorf', 'MIL', 86, 'AC Milan', 'Pays-Bas', 2000, ['Physique', 'Technique'], 0, L(4, 0, 'court')],
+  // ATTAQUANTS
+  ['Pelé', 'ATT', 96, 'Santos', 'Brésil', 1960, ['Technique', 'Vitesse'], 1, L(4, 0, 'court')],
+  ['Diego Maradona', 'ATT', 96, 'Naples', 'Argentine', 1980, ['Technique', 'Spécialiste'], 1, L(2, 0, 'boucle')],
+  ['Johan Cruyff', 'ATT', 94, 'Ajax', 'Pays-Bas', 1970, ['Technique', 'Vitesse'], 1, L(0, 2, 'long')],
+  ['Ronaldo', 'ATT', 94, 'Inter Milan', 'Brésil', 1990, ['Vitesse', 'Technique'], 1, L(3, 0, 'chauve')],
+  ['Lionel Messi', 'ATT', 96, 'FC Barcelone', 'Argentine', 2010, ['Technique', 'Vitesse'], 1, L(1, 2, 'court', 'barbe')],
+  ['Cristiano Ronaldo', 'ATT', 95, 'Real Madrid', 'Portugal', 2010, ['Physique', 'Vitesse'], 1, L(1, 0, 'court')],
+  ['Thierry Henry', 'ATT', 91, 'Arsenal', 'France', 2000, ['Vitesse', 'Technique'], 0, L(4, 0, 'chauve')],
+  ['Marco van Basten', 'ATT', 91, 'AC Milan', 'Pays-Bas', 1980, ['Technique', 'Physique'], 0, L(0, 3, 'court')],
+  ['Roberto Baggio', 'ATT', 90, 'Juventus', 'Italie', 1990, ['Technique', 'Spécialiste'], 0, L(1, 0, 'queue', 'bouc')],
+  ['Ronaldinho', 'ATT', 92, 'FC Barcelone', 'Brésil', 2000, ['Technique'], 1, L(3, 0, 'long')],
+  ['Kylian Mbappé', 'ATT', 92, 'PSG', 'France', 2020, ['Vitesse'], 1, L(4, 0, 'court')],
+  ['Erling Haaland', 'ATT', 91, 'Manchester City', 'Norvège', 2020, ['Physique'], 0, L(0, 3, 'queue')],
+  ['Karim Benzema', 'ATT', 90, 'Real Madrid', 'France', 2020, ['Technique'], 0, L(2, 0, 'court', 'barbe')],
+  ['Zlatan Ibrahimović', 'ATT', 89, 'AC Milan', 'Suède', 2010, ['Physique', 'Technique'], 1, L(2, 0, 'queue', 'barbe')],
+  ['Jean-Pierre Papin', 'ATT', 87, 'Marseille', 'France', 1990, ['Spécialiste', 'Physique'], 0, L(0, 2, 'court')],
+  ['Didier Drogba', 'ATT', 88, 'Chelsea', "Côte d'Ivoire", 2000, ['Physique', 'Leader'], 0, L(4, 0, 'court')],
+  ["Samuel Eto'o", 'ATT', 88, 'FC Barcelone', 'Cameroun', 2000, ['Vitesse'], 0, L(4, 0, 'court')],
+  ['George Weah', 'ATT', 88, 'AC Milan', 'Libéria', 1990, ['Vitesse', 'Physique'], 0, L(4, 0, 'court')],
+  ['Eric Cantona', 'ATT', 88, 'Manchester United', 'France', 1990, ['Leader', 'Technique'], 1, L(0, 1, 'court')],
+  ['Robert Lewandowski', 'ATT', 90, 'Bayern Munich', 'Pologne', 2020, ['Physique', 'Spécialiste'], 0, L(0, 2, 'court')],
+  ['Alan Shearer', 'ATT', 87, 'Newcastle', 'Angleterre', 1990, ['Physique'], 0, L(0, 2, 'court')],
+  ['Mohamed Salah', 'ATT', 89, 'Liverpool', 'Égypte', 2020, ['Vitesse'], 0, L(2, 0, 'afro', 'barbe')],
+  ['Antoine Griezmann', 'ATT', 88, 'Atlético Madrid', 'France', 2010, ['Technique', 'Pressing'], 0, L(0, 3, 'court')],
+  ['Achraf Hakimi', 'DEF', 86, 'PSG', 'Maroc', 2020, ['Vitesse'], 0, L(2, 0, 'court')],
+].filter(p => p[2] > 0);
+
+// Effectif de départ : jeunes du centre de formation (noms fictifs)
+const YOUTH = [
+  ['K. Lemoine', 'GAR', 64, 'France', 1, ['Technique']], ['T. Brandt', 'GAR', 60, 'Allemagne', 1, []],
+  ['Y. Diallo', 'DEF', 66, 'Sénégal', 0, ['Physique']], ['M. Rossi', 'DEF', 63, 'Italie', 0, ['Vitesse']],
+  ['L. Perrin', 'DEF', 65, 'France', 0, ['Pressing']], ['J. Costa', 'DEF', 61, 'Portugal', 0, ['Vitesse']],
+  ['A. Dupont', 'MIL', 67, 'France', 0, ['Technique']], ['S. Ortega', 'MIL', 64, 'Espagne', 0, ['Technique']],
+  ['P. Novak', 'MIL', 62, 'Croatie', 0, ['Physique']], ['R. Benali', 'MIL', 65, 'Maroc', 0, ['Technique', 'Pressing']],
+  ['N. Mendy', 'ATT', 68, 'France', 0, ['Vitesse']], ['D. Silva', 'ATT', 64, 'Brésil', 0, ['Technique']],
+  ['B. Hansen', 'ATT', 63, 'Norvège', 0, ['Physique']], ['E. Moreau', 'ATT', 62, 'France', 0, ['Vitesse']],
+];
+
+function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-'); }
+function price(r) { return Math.max(1, Math.round(((r - 55) ** 2) / 60 * 2) / 2); }
+function salary(r) { return Math.max(0.2, Math.round(price(r) * 0.035 * 10) / 10); }
+
+const PLAYERS = {};
+STARS.forEach(([name, pos, r, club, nat, dec, styles, star, look]) => {
+  const id = slug(name);
+  PLAYERS[id] = { id, name, pos, r, club, nat, dec, styles, star: !!star, look, price: price(r), salary: salary(r) };
+});
+YOUTH.forEach(([name, pos, r, nat, , styles], i) => {
+  const id = 'jeune-' + slug(name);
+  const seed = i * 7 + 3;
+  PLAYERS[id] = {
+    id, name, pos, r, club: 'Olympique', nat, dec: 2020, styles, star: false, youth: true,
+    look: L(seed % 5, (seed * 3) % 6, ['court', 'long', 'boucle', 'court', 'degarni', 'afro'][seed % 6], ['rien', 'rien', 'moustache', 'barbe'][seed % 4]),
+    price: price(r), salary: salary(r),
+  };
+});
+
+// tier : base (départ), commun (booster), rare, epique
+const MOVES = {
+  frappe: { name: 'Frappe isolée', base: 10, prec: 1, tier: 'base', desc: '1 joueur seul', test: c => c.n === 1 },
+  passe: { name: 'Passe courte', base: 15, prec: 1.2, tier: 'base', desc: '2 joueurs ou plus', test: c => c.n >= 2 },
+  unedeux: { name: 'Une-deux', base: 25, prec: 1.5, tier: 'base', desc: '2 joueurs du même poste', test: c => c.n === 2 && c.ps[0].pos === c.ps[1].pos },
+  cpa: { name: 'Coup de pied arrêté', base: 60, prec: 2, tier: 'commun', desc: '1 Spécialiste seul', test: c => c.n === 1 && c.has(c.ps[0], 'Spécialiste') },
+  centre: { name: 'Centre-tête', base: 30, prec: 2, tier: 'commun', desc: '2 joueurs, dont un ATT Physique', test: c => c.n === 2 && c.ps.some(p => p.pos === 'ATT' && c.has(p, 'Physique')) },
+  triangle: { name: 'Triangle', base: 35, prec: 2.2, tier: 'commun', desc: '3 joueurs de 3 postes différents', test: c => c.n === 3 && new Set(c.ps.map(p => p.pos)).size === 3 },
+  relance: { name: 'Relance propre', base: 30, prec: 2, tier: 'commun', desc: '2 joueurs ou plus, que des GAR et DEF', test: c => c.n >= 2 && !c.line.MIL && !c.line.ATT },
+  recup: { name: 'Récupération haute', base: 40, prec: 2.2, tier: 'commun', desc: '2 joueurs Pressing ou plus', test: c => (c.style.Pressing || 0) >= 2 },
+  long: { name: 'Jeu long', base: 35, prec: 2, tier: 'commun', desc: 'GAR ou DEF + ATT Physique, sans MIL', test: c => (c.line.GAR || c.line.DEF) && !c.line.MIL && c.ps.some(p => p.pos === 'ATT' && c.has(p, 'Physique')) },
+  contre: { name: 'Contre éclair', base: 45, prec: 2.5, tier: 'rare', desc: 'DEF + 2 ATT, dont 2 Vitesse', test: c => c.line.DEF >= 1 && c.line.ATT >= 2 && (c.style.Vitesse || 0) >= 2 },
+  solo: { name: 'Exploit individuel', base: 50, prec: 2.5, tier: 'rare', desc: '1 Star seule', test: c => c.n === 1 && c.ps[0].star },
+  tiki: { name: 'Tiki-taka', base: 55, prec: 3, tier: 'rare', desc: '3 MIL Technique ou plus', test: c => { const m = c.ps.filter(p => p.pos === 'MIL'); return m.length >= 3 && m.every(p => c.has(p, 'Technique')); } },
+  montee: { name: 'Montée complète', base: 70, prec: 3.5, tier: 'epique', desc: 'GAR, DEF, MIL et ATT', test: c => c.line.GAR && c.line.DEF && c.line.MIL && c.line.ATT },
+  totale: { name: 'Attaque totale', base: 60, prec: 3.2, tier: 'epique', desc: '5 joueurs dont 3 ATT', test: c => c.n === 5 && c.line.ATT >= 3 },
+};
+const MOVE_SLOTS = 6;
+const TIER_PRICE = { commun: 5, rare: 9, epique: 14 };
+function movePrice(k, lv) { return TIER_PRICE[MOVES[k].tier] + 4 * lv; }
+
+
+const STAFF = {
+  prepa: { name: 'Préparateur physique', desc: 'Fatigue : 3 actions par match au lieu de 2', cost: 8 },
+  adjoint: { name: 'Adjoint défensif', desc: '+0,5 précision si un DEF est dans l\'action', cost: 6 },
+  coachatt: { name: 'Coach des attaquants', desc: '+20 base par ATT dans l\'action', cost: 7 },
+  comm: { name: 'Directeur commercial', desc: '+3 M€ à chaque victoire', cost: 6 },
+  psy: { name: 'Psychologue', desc: 'Annule la règle Ego', cost: 5 },
+  gk: { name: 'Entraîneur des gardiens', desc: '+1 précision si un GAR est dans l\'action', cost: 7 },
+  kine: { name: 'Kiné', desc: '+1 changement par match', cost: 6 },
+  video: { name: 'Analyste vidéo', desc: 'Le mur adverse baisse de 10 %', cost: 10 },
+  mental: { name: 'Préparateur mental', desc: '+1 possession par match', cost: 12 },
+  scout: { name: 'Recruteur malin', desc: 'Relancer le mercato coûte 1 M€ de moins', cost: 4 },
+};
+
+const ITEMS = {
+  pressing: { name: 'Pressing haut', desc: 'Mur -20 % pour la prochaine action', cost: 3 },
+  blocbas: { name: 'Bloc bas', desc: 'L\'adversaire marque 1 but de moins, tu perds 2 possessions', cost: 4 },
+  coaching: { name: 'Coaching gagnant', desc: '+1 possession', cost: 4 },
+  tactique: { name: 'Changement tactique', desc: '+1 changement', cost: 2 },
+  remontada: { name: 'Remontada', desc: 'Précision x2 pour la prochaine action', cost: 5 },
+  recup: { name: 'Récupération', desc: 'Tous les joueurs fatigués reviennent', cost: 3 },
+};
+
+const RULES = {
+  catenaccio: { name: 'Catenaccio', desc: 'Les attaquants ne comptent que la moitié de leur note' },
+  gelee: { name: 'Pelouse gelée', desc: 'Le style Technique ne compte pas' },
+  arbitre: { name: 'Arbitre tatillon', desc: 'Une action à 5 joueurs : le mieux noté est exclu du match' },
+  derby: { name: 'Derby bouillant', desc: 'Synergies de club doublées, mais mur +20 %' },
+  grace: { name: 'Gardien en état de grâce', desc: 'Ton premier but est annulé' },
+};
+
+const OPP_CLUBS = Object.keys(CLUBS).filter(c => c !== 'Olympique');
+
+const SEASON = [
+  { comp: 'Championnat', label: 'Journée 1', wall: 350, opp: 1, prime: 6 },
+  { comp: 'Championnat', label: 'Journée 2', wall: 500, opp: 1, prime: 7 },
+  { comp: 'Championnat', label: 'Grande affiche', wall: 700, opp: 2, prime: 10, boss: true },
+  { comp: 'Coupe nationale', label: 'Huitième', wall: 900, opp: 2, prime: 10 },
+  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1200, opp: 2, prime: 12 },
+  { comp: 'Coupe nationale', label: 'Finale', wall: 1800, opp: 2, prime: 15, boss: true },
+  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 2400, opp: 2, prime: 16 },
+  { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 3000, opp: 3, prime: 18 },
+  { comp: 'Coupe d\'Europe', label: 'Finale', wall: 3700, opp: 3, prime: 25, boss: true },
+];
+
+// ===== Aléatoire =====
+let rng = Math.random;
+function setRng(f) { rng = f; }
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function pick(a) { return a[Math.floor(rng() * a.length)]; }
+
+// ===== Partie =====
+function newGame() {
+  const G = {
+    budget: 12, squad: Object.values(PLAYERS).filter(p => p.youth).map(p => p.id),
+    goals: {}, staff: [], items: [], levels: {}, moves: ['frappe', 'passe', 'unedeux'], stage: 0, rerolls: 0, offer: null, history: [],
+  };
+  Object.keys(MOVES).forEach(k => G.levels[k] = 0);
+  return G;
+}
+function hasStaff(G, k) { return G.staff.includes(k); }
+
+function newMatch(G) {
+  const s = SEASON[G.stage];
+  const natCount = {};
+  G.squad.forEach(id => { const n = PLAYERS[id].nat; natCount[n] = (natCount[n] || 0) + 1; });
+  const ossature = Object.entries(natCount).find(([, c]) => c >= 5);
+  let poss = 6 + (hasStaff(G, 'mental') ? 1 : 0) + (ossature ? 1 : 0);
+  const m = {
+    stage: G.stage, opp: pick(OPP_CLUBS), wall: s.wall, oppGoals: s.opp, goals: 0,
+    poss, possStart: poss, changes: 2 + (hasStaff(G, 'kine') ? 1 : 0),
+    deck: shuffle(G.squad.slice()), hand: [], discard: [], out: [], fatigue: {},
+    rule: s.boss ? pick(Object.keys(RULES)) : null, pressing: 0, nextWall: 1, nextPrec: 1,
+    techUsed: false, graceUsed: false, played: 0, over: null, ossature: ossature ? ossature[0] : null, log: [],
+  };
+  draw(m);
+  return m;
+}
+
+function fatigueLimit(G) { return hasStaff(G, 'prepa') ? 3 : 2; }
+
+function draw(m) {
+  while (m.hand.length < 8) {
+    if (!m.deck.length) { if (!m.discard.length) break; m.deck = shuffle(m.discard); m.discard = []; }
+    m.hand.push(m.deck.pop());
+  }
+  sortHand(m);
+}
+function sortHand(m) { m.hand.sort((a, b) => LINES[PLAYERS[a].pos] - LINES[PLAYERS[b].pos] || PLAYERS[b].r - PLAYERS[a].r); }
+
+function stylesOf(p, m) {
+  return m && m.rule === 'gelee' ? p.styles.filter(s => s !== 'Technique') : p.styles;
+}
+
+function evaluate(ids, m, G) {
+  if (!ids.length) return null;
+  const ps = ids.map(id => PLAYERS[id]).sort((a, b) => LINES[a.pos] - LINES[b.pos]);
+  const syn = [];
+  const n = ps.length;
+  // notes
+  const decCount = {};
+  ps.forEach(p => decCount[p.dec] = (decCount[p.dec] || 0) + 1);
+  let sum = 0;
+  ps.forEach(p => {
+    let r = p.r;
+    if (m.rule === 'catenaccio' && p.pos === 'ATT') r = Math.floor(r / 2);
+    if (decCount[p.dec] >= 2 && !p.youth) r += 5;
+    sum += r;
+  });
+  const gen = Object.entries(decCount).filter(([d, c]) => c >= 2 && ps.some(p => p.dec == d && !p.youth));
+  gen.forEach(([d, c]) => syn.push(`Génération ${d}s : +5 note x${c}`));
+
+  const line = { GAR: 0, DEF: 0, MIL: 0, ATT: 0 };
+  ps.forEach(p => line[p.pos]++);
+  const st = p => stylesOf(p, m);
+  const styleCount = {};
+  ps.forEach(p => st(p).forEach(s => styleCount[s] = (styleCount[s] || 0) + 1));
+
+  // mouvements possibles
+  const ctx = { n, ps, line, style: styleCount, has: (p, x) => st(p).includes(x) };
+  const cands = G.moves.filter(k => MOVES[k].test(ctx));
+  // synergies communes
+  let addBase = 0, addPrec = 0, multPrec = 1, wallMult = 1;
+  const fatigueFree = new Set();
+  const clubCount = {};
+  ps.forEach(p => { if (p.club) clubCount[p.club] = (clubCount[p.club] || 0) + 1; });
+  const derby = m.rule === 'derby' ? 2 : 1;
+  Object.entries(clubCount).forEach(([c, k]) => {
+    if (c === 'Olympique') return; // les jeunes du centre ne créent pas d'automatismes
+    if (k === 2) { addPrec += 0.5 * derby; syn.push(`Automatismes ${c} : +${0.5 * derby} préc.`); }
+    if (k >= 3) { addPrec += 1.5 * derby; ps.filter(p => p.club === c).forEach(p => fatigueFree.add(p.id)); syn.push(`Bloc ${c} : +${1.5 * derby} préc., sans fatigue`); }
+  });
+  const natCount = {};
+  ps.forEach(p => natCount[p.nat] = (natCount[p.nat] || 0) + 1);
+  Object.entries(natCount).forEach(([nat, k]) => {
+    if (k >= 2) { addBase += 15 * k; syn.push(`Sélection ${nat} : +${15 * k} base`); }
+  });
+  let techBonus = false, pressingAdd = false;
+  if ((styleCount.Vitesse || 0) >= 3) { const v = m.played === 0 ? 2 : 1; addPrec += v; syn.push(`Trio Vitesse : +${v} préc.`); }
+  if ((styleCount.Physique || 0) >= 3) { wallMult *= 0.85; syn.push('Trio Physique : mur -15 %'); }
+  if ((styleCount.Pressing || 0) >= 3) { pressingAdd = true; syn.push('Trio Pressing : mur -10 % jusqu\'à la fin'); }
+  if ((styleCount.Technique || 0) >= 3 && !m.techUsed) { techBonus = true; syn.push('Trio Technique : +1 changement'); }
+  const stars = ps.filter(p => p.star).length;
+  const leader = ps.some(p => st(p).includes('Leader'));
+  if (stars >= 2) {
+    if (leader || hasStaff(G, 'psy')) syn.push('Ego calmé par un Leader');
+    else { multPrec *= 0.7; syn.push('Ego : 2 stars sans Leader, préc. x0,7'); }
+  }
+  // staff
+  if (hasStaff(G, 'adjoint') && line.DEF) { addPrec += 0.5; syn.push('Adjoint défensif : +0,5 préc.'); }
+  if (hasStaff(G, 'coachatt') && line.ATT) { addBase += 20 * line.ATT; syn.push(`Coach des attaquants : +${20 * line.ATT} base`); }
+  if (hasStaff(G, 'gk') && line.GAR) { addPrec += 1; syn.push('Entraîneur des gardiens : +1 préc.'); }
+  if (hasStaff(G, 'video')) wallMult *= 0.9;
+  if (m.nextPrec !== 1) { multPrec *= m.nextPrec; syn.push('Remontada : préc. x2'); }
+  if (m.nextWall !== 1) { wallMult *= m.nextWall; syn.push('Pressing haut : mur -20 %'); }
+  if (m.rule === 'derby') wallMult *= 1.2;
+  wallMult *= Math.pow(0.9, m.pressing);
+
+  let best = null;
+  if (!cands.length) best = { move: null, base: 0, prec: 0, danger: 0, lv: 0 };
+  cands.forEach(k => {
+    const mv = MOVES[k], lv = G.levels[k] || 0;
+    const base = mv.base + 10 * lv + addBase;
+    const prec = Math.round((mv.prec + 0.5 * lv + addPrec) * multPrec * 100) / 100;
+    const danger = Math.round((sum + base) * prec);
+    if (!best || danger > best.danger) best = { move: k, base, prec, danger, lv };
+  });
+  const wall = Math.round(m.wall * wallMult);
+  const goals = best.danger >= 2 * wall ? 2 : best.danger >= wall ? 1 : 0;
+  return { ...best, sum, wall, goals, syn, fatigueFree, techBonus, pressingAdd, ordered: ps.map(p => p.id) };
+}
+
+function playable(m, G, id) {
+  return (m.fatigue[id] || 0) < fatigueLimit(G);
+}
+
+function playAction(ids, m, G) {
+  const ev = evaluate(ids, m, G);
+  const res = { ...ev, cancelled: false, sentOff: null, scorer: null };
+  let goals = ev.goals;
+  if (goals > 0 && m.rule === 'grace' && !m.graceUsed) { m.graceUsed = true; goals -= 1; res.cancelled = true; }
+  res.scored = goals;
+  if (goals > 0) {
+    const scorer = ev.ordered[ev.ordered.length - 1];
+    res.scorer = scorer;
+    G.goals[scorer] = (G.goals[scorer] || 0) + goals;
+  }
+  m.goals += goals;
+  if (ev.pressingAdd) m.pressing++;
+  if (ev.techBonus) { m.changes++; m.techUsed = true; }
+  m.nextWall = 1; m.nextPrec = 1;
+  let sentOff = null;
+  if (m.rule === 'arbitre' && ids.length === 5) {
+    sentOff = ids.slice().sort((a, b) => PLAYERS[b].r - PLAYERS[a].r)[0];
+    res.sentOff = sentOff;
+  }
+  ids.forEach(id => {
+    m.hand.splice(m.hand.indexOf(id), 1);
+    if (!ev.fatigueFree.has(id)) m.fatigue[id] = (m.fatigue[id] || 0) + 1;
+    if (id === sentOff) m.fatigue[id] = 99;
+    if (m.fatigue[id] >= fatigueLimit(G)) m.out.push(id); else m.discard.push(id);
+  });
+  m.poss--; m.played++;
+  draw(m);
+  m.log.push(res);
+  checkEnd(m);
+  return res;
+}
+
+function changeCards(ids, m) {
+  if (m.changes <= 0 || !ids.length || ids.length > 4) return false;
+  ids.forEach(id => { m.hand.splice(m.hand.indexOf(id), 1); m.discard.push(id); });
+  m.changes--;
+  draw(m);
+  return true;
+}
+
+function checkEnd(m) {
+  if (m.goals > m.oppGoals) m.over = 'win';
+  else if (m.poss <= 0 || !m.hand.length) m.over = 'loss';
+}
+
+function useItem(k, m, G) {
+  const i = G.items.indexOf(k);
+  if (i < 0) return false;
+  if (k === 'pressing') m.nextWall = 0.8;
+  if (k === 'blocbas') { if (m.poss <= 2) return false; m.oppGoals = Math.max(0, m.oppGoals - 1); m.poss -= 2; }
+  if (k === 'coaching') m.poss++;
+  if (k === 'tactique') m.changes++;
+  if (k === 'remontada') m.nextPrec = 2;
+  if (k === 'recup') { m.out.forEach(id => { m.fatigue[id] = 0; m.discard.push(id); }); m.out = []; Object.keys(m.fatigue).forEach(id => m.fatigue[id] = 0); draw(m); }
+  G.items.splice(i, 1);
+  checkEnd(m);
+  return true;
+}
+
+function settle(m, G) {
+  const s = SEASON[m.stage];
+  const wage = Math.round(G.squad.reduce((a, id) => a + PLAYERS[id].salary, 0) * 10) / 10;
+  const r = { wage, prime: 0, diff: 0, ticket: 0, comm: 0 };
+  if (m.over === 'win') {
+    r.prime = s.prime; r.diff = 2 * (m.goals - m.oppGoals); r.ticket = m.poss; r.comm = hasStaff(G, 'comm') ? 3 : 0;
+  }
+  r.total = Math.round((r.prime + r.diff + r.ticket + r.comm - wage) * 10) / 10;
+  G.budget = Math.round((G.budget + r.total) * 10) / 10;
+  return r;
+}
+
+function sellValue(G, id) { return Math.round((PLAYERS[id].price * 0.5 + (G.goals[id] || 0)) * 2) / 2; }
+
+function rerollCost(G) { return Math.max(0, 2 + G.rerolls - (hasStaff(G, 'scout') ? 1 : 0)); }
+
+function booster() { return shuffle(Object.keys(MOVES).filter(k => MOVES[k].tier === 'commun')).slice(0, 4); }
+function addMove(G, k, lv) { if (G.moves.length >= MOVE_SLOTS || G.moves.includes(k)) return false; G.moves.push(k); G.levels[k] = Math.max(G.levels[k] || 0, lv || 0); return true; }
+function removeMove(G, k) { const i = G.moves.indexOf(k); if (i < 0) return false; G.moves.splice(i, 1); G.levels[k] = 0; return true; }
+
+function makeOffer(G) {
+  const cap = 84 + G.stage * 2;
+  const pool = Object.values(PLAYERS).filter(p => !p.youth && !G.squad.includes(p.id) && p.r <= cap);
+  const players = shuffle(pool.slice()).slice(0, 4).map(p => p.id);
+  const staff = shuffle(Object.keys(STAFF).filter(k => !G.staff.includes(k))).slice(0, 2);
+  const items = shuffle(Object.keys(ITEMS)).slice(0, 2);
+  const train = shuffle(G.moves.slice()).slice(0, 2);
+  const tiers = G.stage < 3 ? ['commun', 'commun', 'rare'] : G.stage < 6 ? ['commun', 'rare', 'rare', 'epique'] : ['rare', 'epique'];
+  const pool2 = Object.keys(MOVES).filter(k => MOVES[k].tier !== 'base' && !G.moves.includes(k));
+  const moves = [];
+  for (let i = 0; i < 6 && moves.length < 2; i++) {
+    const t = pick(tiers); const opts = pool2.filter(k => (MOVES[k].tier === t || i > 3) && !moves.some(m => m.k === k));
+    if (opts.length) { const lv = rng() < 0.25 + G.stage * 0.05 ? 1 + Math.floor(rng() * 2) : 0; moves.push({ k: pick(opts), lv }); }
+  }
+  G.offer = { players, staff, items, train, moves };
+}
+
+</script><script>
+// ===== Interface =====
+const $ = s => document.querySelector(s);
+const SKIN = ['#f2c9a0', '#e0aa7e', '#c68a5a', '#9c6a43', '#6b4426'];
+const SKIN_SH = ['#d9a982', '#c48d62', '#a86f43', '#7f5333', '#53331b'];
+const HAIR = ['#1a1410', '#3b2516', '#6b4426', '#e3c063', '#b5512a', '#9a9a9a', '#f0e0a0'];
+const TIER_NAME = { base: 'Base', commun: 'Commun', rare: 'Rare', epique: 'Épique' };
+const POS_BG = { GAR: '#f0d36a', DEF: '#8ec5e8', MIL: '#9fd38a', ATT: '#f0a08a' };
+
+let G = null, M = null, sel = [], busy = false;
+
+function rarity(r) { return r >= 92 ? 'legende' : r >= 88 ? 'or' : r >= 80 ? 'argent' : 'bronze'; }
+function shortName(p) {
+  const parts = p.name.split(' ');
+  return parts.length === 1 ? p.name : parts.slice(1).join(' ');
+}
+function fmt(n) { return (Math.round(n * 10) / 10).toString().replace('.', ',') + ' M€'; }
+
+// --- pixel helpers
+function px(ctx, x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+
+function drawFlag(cv, nat) {
+  const f = NATIONS[nat] || { t: 'h', c: ['#888'] };
+  const ctx = cv.getContext('2d'); const W = 12, H = 8;
+  cv.width = W; cv.height = H;
+  if (f.t === 'v') { const w = W / f.c.length; f.c.forEach((c, i) => px(ctx, Math.round(i * w), 0, Math.ceil(w), H, c)); }
+  else if (f.t === 'h') { const h = H / f.c.length; f.c.forEach((c, i) => px(ctx, 0, Math.round(i * h), W, Math.ceil(h), c)); }
+  else if (f.t === 'x') { px(ctx, 0, 0, W, H, f.c[0]); px(ctx, 4, 0, 2, H, f.c[1]); px(ctx, 0, 3, W, 2, f.c[1]); }
+  else if (f.t === 'd') { px(ctx, 0, 0, W, H, f.c[0]); px(ctx, 3, 2, 6, 4, f.c[1]); px(ctx, 2, 3, 8, 2, f.c[1]); px(ctx, 5, 3, 2, 2, f.c[2]); }
+}
+
+function drawPortrait(cv, p) {
+  const ctx = cv.getContext('2d');
+  cv.width = 20; cv.height = 20;
+  const lk = p.look, sk = SKIN[lk.skin], sh = SKIN_SH[lk.skin], hc = HAIR[lk.hair];
+  const [shirt, trim] = CLUBS[p.club] || ['#5a8fd0', '#fff'];
+  px(ctx, 0, 0, 20, 20, POS_BG[p.pos]);
+  // fond : petits pixels de tribune
+  for (let i = 0; i < 14; i++) px(ctx, (i * 7) % 20, (i * 5) % 9, 1, 1, 'rgba(0,0,0,.08)');
+  // corps
+  px(ctx, 2, 16, 16, 4, shirt); px(ctx, 3, 15, 14, 1, shirt);
+  px(ctx, 8, 15, 4, 1, trim); px(ctx, 9, 16, 2, 1, trim);
+  if (p.pos === 'GAR') { px(ctx, 2, 16, 16, 4, '#2f9e5a'); px(ctx, 3, 15, 14, 1, '#2f9e5a'); }
+  // cou
+  px(ctx, 8, 13, 4, 2, sh);
+  // afro / grosses coupes derrière la tête
+  if (lk.cut === 'afro') { px(ctx, 3, 1, 14, 9, hc); px(ctx, 2, 3, 16, 7, hc); px(ctx, 3, 10, 2, 3, hc); px(ctx, 15, 10, 2, 3, hc); }
+  if (lk.cut === 'long') { px(ctx, 5, 4, 10, 10, hc); }
+  if (lk.cut === 'queue') { px(ctx, 14, 5, 3, 3, hc); px(ctx, 15, 8, 2, 3, hc); }
+  // tête
+  px(ctx, 6, 4, 8, 10, sk); px(ctx, 7, 3, 6, 1, sk); px(ctx, 7, 14, 6, 0, sk);
+  px(ctx, 6, 4, 1, 1, POS_BG[p.pos]); px(ctx, 13, 4, 1, 1, POS_BG[p.pos]);
+  px(ctx, 5, 8, 1, 2, sk); px(ctx, 14, 8, 1, 2, sk);
+  px(ctx, 13, 5, 1, 8, sh); px(ctx, 7, 13, 6, 1, sh);
+  // yeux, sourcils, nez, bouche
+  px(ctx, 8, 8, 1, 1, '#111'); px(ctx, 11, 8, 1, 1, '#111');
+  px(ctx, 7, 7, 2, 1, lk.hair === 3 || lk.hair === 6 ? '#a78a4a' : hc); px(ctx, 11, 7, 2, 1, lk.hair === 3 || lk.hair === 6 ? '#a78a4a' : hc);
+  px(ctx, 10, 9, 1, 2, sh);
+  px(ctx, 9, 12, 3, 1, '#8a3b2c');
+  // cheveux
+  const c = lk.cut;
+  if (c === 'court' || c === 'queue') { px(ctx, 6, 3, 8, 2, hc); px(ctx, 7, 2, 6, 1, hc); px(ctx, 6, 5, 1, 2, hc); px(ctx, 13, 5, 1, 2, hc); }
+  if (c === 'long') { px(ctx, 6, 3, 8, 2, hc); px(ctx, 7, 2, 6, 1, hc); px(ctx, 5, 5, 2, 8, hc); px(ctx, 13, 5, 2, 8, hc); }
+  if (c === 'boucle') { px(ctx, 5, 2, 10, 3, hc); px(ctx, 5, 5, 2, 4, hc); px(ctx, 13, 5, 2, 4, hc); [6, 9, 12].forEach(x => px(ctx, x, 1, 2, 1, hc)); }
+  if (c === 'afro') { px(ctx, 6, 3, 8, 1, hc); }
+  if (c === 'degarni') { px(ctx, 6, 5, 1, 3, hc); px(ctx, 13, 5, 1, 3, hc); px(ctx, 5, 6, 1, 2, hc); px(ctx, 14, 6, 1, 2, hc); px(ctx, 9, 3, 2, 1, sh); }
+  if (c === 'chauve') { px(ctx, 8, 4, 2, 1, '#fff6'); }
+  if (c === 'casquette') { px(ctx, 6, 2, 8, 3, '#2a2a2a'); px(ctx, 5, 4, 10, 1, '#2a2a2a'); px(ctx, 4, 5, 8, 1, '#111'); }
+  if (c === 'crete') { px(ctx, 9, 1, 2, 4, hc); }
+  // pilosité
+  if (lk.face === 'moustache') px(ctx, 8, 11, 4, 1, hc);
+  if (lk.face === 'barbe') { px(ctx, 6, 10, 1, 3, hc); px(ctx, 13, 10, 1, 3, hc); px(ctx, 7, 12, 6, 2, hc); px(ctx, 8, 11, 4, 1, hc); px(ctx, 9, 12, 3, 1, '#8a3b2c'); }
+  if (lk.face === 'bouc') px(ctx, 9, 13, 2, 1, hc);
+}
+
+function cardEl(id, opts = {}) {
+  const p = PLAYERS[id];
+  const el = document.createElement('div');
+  el.className = 'card r-' + rarity(p.r);
+  el.style.setProperty('--clubc', (CLUBS[p.club] || ['#456'])[0] === '#f4f4f4' ? '#3d3a48' : (CLUBS[p.club] || ['#456'])[0]);
+  el.innerHTML = `<div class="top"><span>${p.club}</span><canvas></canvas></div>
+    <div class="pic"><canvas></canvas><div class="note">${p.r}</div></div>
+    ${p.star ? '<div class="star">STAR</div>' : ''}
+    <div class="nm">${p.pos} - ${shortName(p)}</div>
+    <div class="st">${p.styles.join(' · ') || '&nbsp;'}</div>
+    <div class="ft"><span>${fmt(p.salary)}/m</span><span class="fat"></span></div>`;
+  const cvs = el.querySelectorAll('canvas');
+  drawFlag(cvs[0], p.nat); drawPortrait(cvs[1], p);
+  cvs[0].title = p.nat;
+  if (opts.fatigue !== undefined) {
+    const f = el.querySelector('.fat');
+    for (let i = 0; i < opts.limit; i++) { const d = document.createElement('i'); if (i < opts.fatigue) d.className = 'used'; f.appendChild(d); }
+  }
+  return el;
+}
+
+// ===== Terrain =====
+const pitch = { cv: null, ctx: null, t: 0, anim: null, crowd: [] };
+function initPitch(cv) {
+  const ctx = cv.getContext('2d');
+  const crowd = [];
+  for (let i = 0; i < 520; i++) crowd.push([Math.floor(rng() * 240), Math.random() < .5 ? Math.floor(Math.random() * 12) : 124 + Math.floor(Math.random() * 12), ['#e8573a', '#f4c34f', '#7fc3ea', '#f3e7c9', '#9aa3c0', '#5a8fd0'][i % 6]]);
+  return { cv, ctx, crowd };
+}
+const HOME = [[12, 68], [40, 40], [40, 96], [70, 54], [70, 84], [100, 68], [120, 44], [120, 92]];
+function drawField(P, oppColor, actors, ball, t) {
+  const ctx = P.ctx;
+  px(ctx, 0, 0, 240, 136, '#1b1f2e');
+  P.crowd.forEach(([x, y, c], i) => { if ((i + Math.floor(t / 12)) % 9) px(ctx, x, y, 1, 1, c); });
+  for (let i = 0; i < 12; i++) px(ctx, i * 20, 14, 20, 108, i % 2 ? '#3f8f3a' : '#4a9c43');
+  ctx.strokeStyle = '#e8f2e0'; ctx.lineWidth = 1;
+  ctx.strokeRect(4.5, 16.5, 231, 103); ctx.beginPath(); ctx.moveTo(120.5, 16.5); ctx.lineTo(120.5, 119.5); ctx.stroke();
+  ctx.beginPath(); ctx.arc(120.5, 68, 14, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeRect(4.5, 44.5, 24, 47); ctx.strokeRect(211.5, 44.5, 24, 47);
+  ctx.strokeRect(4.5, 56.5, 8, 23); ctx.strokeRect(227.5, 56.5, 8, 23);
+  px(ctx, 0, 58, 4, 20, '#dfe7ef'); px(ctx, 236, 58, 4, 20, '#dfe7ef');
+  for (let y = 59; y < 77; y += 2) px(ctx, 237, y, 2, 1, '#9aa3c0');
+  // adversaires
+  HOME.forEach(([x, y], i) => sprite(ctx, 240 - x, y + Math.round(Math.sin(t / 20 + i) * 1), oppColor, '#111', 1, t + i * 5, i === 0 ? '#2f9e5a' : null));
+  // nos joueurs
+  if (actors) actors.forEach(a => sprite(ctx, Math.round(a.x), Math.round(a.y), a.shirt, a.hair, a.skin, t + a.x, a.gk));
+  else HOME.forEach(([x, y], i) => sprite(ctx, x, y + Math.round(Math.cos(t / 20 + i) * 1), '#5a8fd0', HAIR[i % 5], SKIN[i % 5], t + i * 3, i === 0 ? '#2f9e5a' : null));
+  if (ball) { px(ctx, Math.round(ball.x) - 1, Math.round(ball.y) - 1, 3, 3, '#111'); px(ctx, Math.round(ball.x) - 1, Math.round(ball.y) - 1, 2, 2, '#fff'); }
+}
+function sprite(ctx, x, y, shirt, hair, skin, t, gk) {
+  const s = typeof skin === 'number' ? SKIN[skin] : skin;
+  const step = Math.floor(t / 8) % 2;
+  px(ctx, x - 2, y - 8, 4, 1, hair);
+  px(ctx, x - 2, y - 7, 4, 3, s);
+  px(ctx, x - 3, y - 4, 6, 3, gk || shirt);
+  px(ctx, x - 2, y - 1, 4, 1, '#f3f3f3');
+  px(ctx, x - 2 + step, y, 1, 2, s); px(ctx, x + 1 - step, y, 1, 2, s);
+}
+
+function lineX(pos) { return { GAR: 14, DEF: 50, MIL: 105, ATT: 170 }[pos]; }
+
+function animateAction(ordered, res, done) {
+  const actors = ordered.map((id, i) => {
+    const p = PLAYERS[id];
+    return { x: lineX(p.pos) + i * 6, y: 30 + ((i * 37 + p.r) % 76), shirt: (CLUBS[p.club] || ['#5a8fd0'])[0], hair: HAIR[p.look.hair], skin: p.look.skin, gk: p.pos === 'GAR' ? '#2f9e5a' : null };
+  });
+  const path = actors.map(a => ({ x: a.x + 3, y: a.y - 1 }));
+  const target = res.goals > 0 ? { x: 238, y: 60 + Math.floor(Math.random() * 16) } : { x: 226, y: 68 };
+  path.push(target);
+  let seg = 0, k = 0, t0 = performance.now();
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const segDur = reduce ? 1 : 260;
+  function frame(now) {
+    const t = (now - t0) / 16;
+    k = Math.min(1, (now - t0) / segDur);
+    const a = path[seg], b = path[seg + 1] || a;
+    const ball = { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
+    // les joueurs avancent un peu pendant l'action
+    actors.forEach(ac => ac.x += 0.25);
+    drawField(pitch, M.oppColor, actors, ball, t);
+    if (k >= 1) { seg++; t0 = now; }
+    if (seg >= path.length - 1) { drawField(pitch, M.oppColor, actors, target, t); done(); return; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function idleLoop() {
+  let t = 0;
+  function f() {
+    t++;
+    if (!busy && !$('#match').hidden) drawField(pitch, M ? M.oppColor : '#c8102e', null, { x: 120, y: 68 }, t);
+    if (!$('#title').hidden) drawField(titlePitch, '#c8102e', null, { x: 120 + Math.sin(t / 30) * 40, y: 68 + Math.cos(t / 23) * 20 }, t);
+    requestAnimationFrame(f);
+  }
+  requestAnimationFrame(f);
+}
+
+// ===== Écrans =====
+function show(id) { ['#title', '#match', '#mercato'].forEach(s => $(s).hidden = s !== id); window.scrollTo(0, 0); }
+function modal(html, buttons) {
+  $('#modal-box').innerHTML = html;
+  const row = document.createElement('div'); row.style.cssText = 'display:flex;gap:10px;justify-content:center;flex-wrap:wrap';
+  buttons.forEach(([label, fn, cls]) => { const b = document.createElement('button'); b.textContent = label; if (cls) b.className = cls; b.onclick = () => { $('#modal').hidden = true; fn(); }; row.appendChild(b); });
+  $('#modal-box').appendChild(row);
+  $('#modal').hidden = false;
+  row.querySelector('button').focus();
+}
+
+function startGame() { G = newGame(); openBooster(); }
+
+function moveTile(k, lv, extra) {
+  const mv = MOVES[k];
+  return `<div class="tile move t-${mv.tier}"><span class="kind">${TIER_NAME[mv.tier]}${lv ? ' · niv. ' + (lv + 1) : ''}</span><b>${mv.name}</b><span>${mv.desc}</span>
+    <span class="num">${mv.base + 10 * lv} base × ${String(mv.prec + 0.5 * lv).replace('.', ',')}</span>${extra || ''}</div>`;
+}
+
+function openBooster() {
+  const pack = booster(); const chosen = [];
+  const render = () => {
+    $('#modal-box').innerHTML = `<div class="big">Booster de départ</div>
+      <div>Tu commences avec Frappe isolée, Passe courte et Une-deux. Choisis <b>2 mouvements</b> de plus.</div>
+      <div class="booster">${pack.map(k => `<div class="pickable${chosen.includes(k) ? ' on' : ''}" data-k="${k}" tabindex="0" role="button">${moveTile(k, 0)}</div>`).join('')}</div>`;
+    const b = document.createElement('button'); b.textContent = `Commencer la saison (${chosen.length}/2)`; b.disabled = chosen.length !== 2;
+    b.onclick = () => { chosen.forEach(k => addMove(G, k, 0)); $('#modal').hidden = true; makeOffer(G); startMatch(); };
+    $('#modal-box').appendChild(b);
+    $('#modal-box').querySelectorAll('.pickable').forEach(el => {
+      const t = () => { const k = el.dataset.k; const i = chosen.indexOf(k); if (i >= 0) chosen.splice(i, 1); else if (chosen.length < 2) chosen.push(k); render(); };
+      el.onclick = t; el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t(); } };
+    });
+  };
+  show('#title'); render(); $('#modal').hidden = false;
+}
+
+function startMatch() {
+  M = newMatch(G); sel = [];
+  M.oppColor = CLUBS[M.opp][0] === '#f4f4f4' ? '#e9e9e9' : CLUBS[M.opp][0];
+  const s = SEASON[G.stage];
+  show('#match'); renderMatch();
+  const rule = M.rule ? `<div class="rule"><b>Règle : ${RULES[M.rule].name}</b><br>${RULES[M.rule].desc}</div>` : '';
+  modal(`<div class="label">${s.comp} · ${s.label} · match ${G.stage + 1}/9</div>
+    <div class="big">${s.boss ? 'Match spécial' : 'Coup d\'envoi'}</div>
+    <div>Olympique contre <b>${M.opp}</b></div>
+    <div>${M.opp} annonce <b>${M.oppGoals} but${M.oppGoals > 1 ? 's' : ''}</b>. Il t'en faut <b>${M.oppGoals + 1}</b> en ${M.poss} possessions.</div>
+    <div>Mur du gardien : <b>${M.wall}</b> de danger par but.</div>
+    ${M.ossature ? `<div>Ossature ${M.ossature} : +1 possession.</div>` : ''}${rule}`, [['Jouer', () => {}]]);
+}
+
+function renderMatch() {
+  const s = SEASON[G.stage];
+  $('#g-us').textContent = M.goals; $('#g-opp').textContent = M.oppGoals;
+  $('#g-need').textContent = `il faut ${M.oppGoals + 1}`;
+  $('#opp-name').textContent = M.opp;
+  $('#m-comp').textContent = `${s.comp} · ${s.label}`;
+  $('#m-poss').innerHTML = Array.from({ length: Math.max(M.possStart, M.poss) }, (_, i) => `<i class="pip${i < M.poss ? '' : ' off'}"></i>`).join('');
+  $('#m-chg').textContent = M.changes;
+  $('#m-wall').textContent = Math.round(M.wall * (M.rule === 'derby' ? 1.2 : 1) * Math.pow(0.9, M.pressing) * (G.staff.includes('video') ? 0.9 : 1));
+  const rc = $('#m-rule'); rc.hidden = !M.rule; if (M.rule) { rc.textContent = RULES[M.rule].name; rc.title = RULES[M.rule].desc; }
+  // staff & consignes
+  $('#m-staff').innerHTML = [0, 1, 2, 3].map(i => G.staff[i] ? `<div class="slot"><b>${STAFF[G.staff[i]].name}</b>${STAFF[G.staff[i]].desc}</div>` : '<div class="slot empty">Place libre</div>').join('');
+  const it = $('#m-items'); it.innerHTML = '';
+  if (!G.items.length) it.innerHTML = '<div class="slot empty">Aucune consigne. Achète-en au mercato.</div>';
+  G.items.forEach(k => {
+    const b = document.createElement('button'); b.className = 'item-btn'; b.innerHTML = `${ITEMS[k].name}<small>${ITEMS[k].desc}</small>`;
+    b.onclick = () => { if (busy) return; if (useItem(k, M, G)) { renderMatch(); if (M.over) endMatch(); } };
+    it.appendChild(b);
+  });
+  // main
+  const h = $('#hand'); h.innerHTML = '';
+  M.hand.forEach(id => {
+    const el = cardEl(id, { fatigue: M.fatigue[id] || 0, limit: hasStaff(G, 'prepa') ? 3 : 2 });
+    el.tabIndex = 0; el.setAttribute('role', 'button');
+    if (sel.includes(id)) el.classList.add('sel');
+    const toggle = () => { if (busy) return; const i = sel.indexOf(id); if (i >= 0) sel.splice(i, 1); else if (sel.length < 5) sel.push(id); renderMatch(); };
+    el.onclick = toggle; el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+    h.appendChild(el);
+  });
+  $('#deckinfo').textContent = `Pioche ${M.deck.length} · Défausse ${M.discard.length} · Fatigués ${M.out.length}`;
+  $('#btn-play').disabled = !sel.length || busy;
+  $('#btn-play').textContent = sel.length ? `Jouer l'action (${sel.length})` : 'Jouer l\'action';
+  $('#btn-change').disabled = !sel.length || sel.length > 4 || M.changes <= 0 || busy;
+  $('#btn-change').textContent = `Changement (${M.changes})`;
+  renderCalc();
+}
+
+function renderCalc() {
+  const ev = sel.length ? evaluate(sel, M, G) : null;
+  if (!ev) {
+    $('#c-move').textContent = 'Choisis 1 à 5 joueurs';
+    $('#c-formula').textContent = '(notes + base) × précision';
+    $('#c-danger').textContent = '0';
+    $('#c-verdict').textContent = ''; $('#c-syn').innerHTML = '';
+  } else {
+    $('#c-move').textContent = ev.move ? MOVES[ev.move].name + (ev.lv ? ` niv. ${ev.lv + 1}` : '') : 'Aucun mouvement';
+    $('#c-formula').textContent = `(${ev.sum} + ${ev.base}) × ${String(ev.prec).replace('.', ',')}`;
+    $('#c-danger').textContent = ev.danger;
+    const v = $('#c-verdict');
+    v.className = 'c-verdict ' + (ev.goals ? 'goal' : 'none');
+    v.textContent = !ev.move ? 'Aucun de tes mouvements ne correspond' : ev.goals === 2 ? `Doublé ! (mur ${ev.wall})` : ev.goals ? `But ! (mur ${ev.wall}, doublé à ${ev.wall * 2})` : `Arrêté : il faut ${ev.wall}`;
+    $('#c-syn').innerHTML = ev.syn.map(s => `<li class="${s.startsWith('Ego :') ? 'bad' : ''}">${s}</li>`).join('');
+  }
+  const active = ev && ev.move;
+  $('#c-moves-label').textContent = `Tes mouvements (${G.moves.length}/6)`;
+  $('#c-moves').innerHTML = G.moves.map(k => { const mv = MOVES[k], lv = G.levels[k] || 0;
+    return `<div class="mv${k === active ? ' on' : ''}"><div><b>${mv.name}</b>${lv ? ' <span class="lv">niv. ' + (lv + 1) + '</span>' : ''}<br><span class="hint">${mv.desc}</span></div><span class="num">${mv.base + 10 * lv} × ${String(mv.prec + 0.5 * lv).replace('.', ',')}</span></div>`; }).join('');
+}
+
+function playSelected() {
+  if (busy || !sel.length) return;
+  const ev = evaluate(sel, M, G);
+  busy = true; renderMatch();
+  animateAction(ev.ordered, ev, () => {
+    const res = playAction(sel.slice(), M, G);
+    sel = [];
+    const b = $('#burst');
+    let txt = res.scored === 2 ? 'DOUBLÉ !!' : res.scored === 1 ? 'BUT !!' : res.cancelled ? 'BUT ANNULÉ' : 'ARRÊT !';
+    b.innerHTML = `<span class="${res.scored ? '' : 'miss'}">${txt}</span>`;
+    if (res.sentOff) b.innerHTML += `<span class="miss" style="position:absolute;bottom:8%">${shortName(PLAYERS[res.sentOff])} exclu</span>`;
+    setTimeout(() => { b.innerHTML = ''; busy = false; renderMatch(); if (M.over) endMatch(); }, 1100);
+  });
+}
+
+function endMatch() {
+  const r = settle(M, G);
+  const won = M.over === 'win';
+  G.history.push({ stage: G.stage, opp: M.opp, us: M.goals, them: M.oppGoals, won });
+  const rows = won ? `<tr><td>Prime de match</td><td>+${fmt(r.prime)}</td></tr><tr><td>Écart de buts</td><td>+${fmt(r.diff)}</td></tr>
+     <tr><td>Billetterie (possessions restantes)</td><td>+${fmt(r.ticket)}</td></tr>${r.comm ? `<tr><td>Directeur commercial</td><td>+${fmt(r.comm)}</td></tr>` : ''}` : '';
+  const table = `<table>${rows}<tr><td>Masse salariale</td><td>-${fmt(r.wage)}</td></tr><tr><td><b>Budget</b></td><td><b>${fmt(G.budget)}</b></td></tr></table>`;
+  if (!won) {
+    modal(`<div class="big">Éliminé</div><div>Olympique ${M.goals} - ${M.oppGoals} ${M.opp}</div>${seasonSummary()}`, [['Nouvelle saison', startGame], ['Menu', () => show('#title'), 'ghost']]);
+    return;
+  }
+  if (G.stage === SEASON.length - 1) {
+    modal(`<div class="big">Champion d'Europe !</div><div>Olympique ${M.goals} - ${M.oppGoals} ${M.opp}</div>${seasonSummary()}`, [['Rejouer', startGame]]);
+    return;
+  }
+  modal(`<div class="big">Victoire</div><div>Olympique ${M.goals} - ${M.oppGoals} ${M.opp}</div>${table}`, [['Aller au mercato', () => { G.stage++; G.rerolls = 0; makeOffer(G); openMercato(); }]]);
+}
+
+function seasonSummary() {
+  const top = Object.entries(G.goals).sort((a, b) => b[1] - a[1])[0];
+  const wins = G.history.filter(h => h.won).length;
+  return `<table><tr><td>Matchs gagnés</td><td>${wins} / 9</td></tr>
+    <tr><td>Meilleur buteur</td><td>${top ? PLAYERS[top[0]].name + ' (' + top[1] + ')' : 'personne'}</td></tr>
+    <tr><td>Budget final</td><td>${fmt(G.budget)}</td></tr></table>`;
+}
+
+// ===== Mercato =====
+function wageTotal() { return Math.round(G.squad.reduce((a, id) => a + PLAYERS[id].salary, 0) * 10) / 10; }
+function buy(cost, fn) { if (G.budget < cost) return; G.budget = Math.round((G.budget - cost) * 10) / 10; fn(); openMercato(); }
+
+function openMercato() {
+  show('#mercato');
+  const s = SEASON[G.stage];
+  $('#merc-money').innerHTML = `Budget : <span class="${G.budget < 0 ? 'warn' : ''}">${fmt(G.budget)}</span><br>Masse salariale : ${fmt(wageTotal())} / match`;
+  const rc = rerollCost(G);
+  $('#btn-reroll').textContent = `Relancer (${fmt(rc)})`;
+  $('#btn-reroll').disabled = G.budget < rc;
+  const sp = $('#shop-players'); sp.innerHTML = '';
+  G.offer.players.forEach(id => {
+    const p = PLAYERS[id];
+    const d = document.createElement('div'); d.className = 'offer';
+    if (!id || G.squad.includes(id)) { d.innerHTML = '<div class="slot empty">Vendu</div>'; sp.appendChild(d); return; }
+    d.innerHTML = `<div class="price num">${fmt(p.price)}</div>`;
+    d.appendChild(cardEl(id));
+    const b = document.createElement('button'); b.textContent = 'Recruter';
+    b.disabled = G.budget < p.price || G.squad.length >= 18;
+    b.onclick = () => buy(p.price, () => { G.squad.push(id); });
+    d.appendChild(b); sp.appendChild(d);
+  });
+  const tile = (cls, kind, name, desc, cost, ok, fn) => {
+    const d = document.createElement('div'); d.className = 'tile ' + cls;
+    d.innerHTML = `<span class="kind">${kind}</span><b>${name}</b><span>${desc}</span><div class="row"><span class="num">${fmt(cost)}</span></div>`;
+    const b = document.createElement('button'); b.textContent = 'Acheter'; b.disabled = !ok || G.budget < cost; b.onclick = () => buy(cost, fn);
+    d.querySelector('.row').appendChild(b); return d;
+  };
+  const ss = $('#shop-staff'); ss.innerHTML = '';
+  G.offer.staff.forEach(k => { if (G.staff.includes(k)) return; ss.appendChild(tile('staff', 'Staff', STAFF[k].name, STAFF[k].desc, STAFF[k].cost, G.staff.length < 4, () => G.staff.push(k))); });
+  if (!ss.children.length) ss.innerHTML = '<div class="hint">Plus de staff disponible.</div>';
+  if (G.staff.length) { const mine = document.createElement('div'); mine.className = 'hint'; mine.textContent = 'Ton staff : ' + G.staff.map(k => STAFF[k].name).join(', '); ss.appendChild(mine); }
+  const si = $('#shop-items'); si.innerHTML = '';
+  G.offer.items.forEach((k, i) => { if (!k) return; si.appendChild(tile('item', 'Consigne', ITEMS[k].name, ITEMS[k].desc, ITEMS[k].cost, G.items.length < 3, () => { G.items.push(k); G.offer.items[i] = null; })); });
+  if (G.items.length) { const mine = document.createElement('div'); mine.className = 'hint'; mine.textContent = 'Tes consignes : ' + G.items.map(k => ITEMS[k].name).join(', '); si.appendChild(mine); }
+  const sm = $('#shop-moves'); sm.innerHTML = '';
+  G.offer.moves.forEach((o, i) => {
+    if (!o) return;
+    const cost = movePrice(o.k, o.lv);
+    const d = document.createElement('div'); d.innerHTML = moveTile(o.k, o.lv, `<div class="row"><span class="num">${fmt(cost)}</span></div>`);
+    const b = document.createElement('button'); b.textContent = 'Acheter';
+    b.disabled = G.budget < cost || G.moves.length >= 6;
+    b.onclick = () => buy(cost, () => { addMove(G, o.k, o.lv); G.offer.moves[i] = null; });
+    d.querySelector('.row').appendChild(b); sm.appendChild(d.firstElementChild);
+  });
+  if (!sm.children.length) sm.innerHTML = '<div class="hint">Plus de mouvement en vente.</div>';
+  const om = $('#own-moves'); om.innerHTML = '';
+  $('#own-moves-label').textContent = `Tes mouvements (${G.moves.length}/6)` + (G.moves.length >= 6 ? ' : retire-en un pour en acheter un autre' : '');
+  G.moves.forEach(k => {
+    const d = document.createElement('div'); d.innerHTML = moveTile(k, G.levels[k] || 0, '<div class="row"><span></span></div>');
+    const b = document.createElement('button'); b.textContent = 'Retirer'; b.className = 'danger';
+    b.disabled = G.moves.length <= 1;
+    b.onclick = () => { removeMove(G, k); openMercato(); };
+    d.querySelector('.row').appendChild(b); om.appendChild(d.firstElementChild);
+  });
+  const st = $('#shop-train'); st.innerHTML = '';
+  G.offer.train.forEach((k, i) => { if (!k || !G.moves.includes(k)) return; const lv = G.levels[k]; st.appendChild(tile('train', 'Entraînement', MOVES[k].name + ` → niv. ${lv + 2}`, `${MOVES[k].desc}. +10 base, +0,5 précision.`, 4 + lv * 2, true, () => { G.levels[k]++; G.offer.train[i] = null; })); });
+  // effectif
+  $('#squad-label').textContent = `Ton effectif (${G.squad.length} / 18 joueurs)`;
+  const sq = $('#squad'); sq.innerHTML = '';
+  G.squad.slice().sort((a, b) => 'GDMA'.indexOf(PLAYERS[a].pos[0]) - 'GDMA'.indexOf(PLAYERS[b].pos[0]) || PLAYERS[b].r - PLAYERS[a].r).forEach(id => {
+    const c = document.createElement('div'); c.className = 'cell';
+    c.appendChild(cardEl(id));
+    const goals = G.goals[id] || 0;
+    const b = document.createElement('button'); b.textContent = `Vendre ${fmt(sellValue(G, id))}`;
+    b.title = goals ? `${goals} but${goals > 1 ? 's' : ''} : +${goals} M€ de plus-value` : 'Moitié du prix d\'achat';
+    b.disabled = G.squad.length <= 8;
+    b.onclick = () => { G.budget = Math.round((G.budget + sellValue(G, id)) * 10) / 10; G.squad.splice(G.squad.indexOf(id), 1); openMercato(); };
+    c.appendChild(b);
+    if (goals) { const g = document.createElement('span'); g.className = 'hint'; g.textContent = `${goals} but${goals > 1 ? 's' : ''} cette saison`; c.appendChild(g); }
+    sq.appendChild(c);
+  });
+  $('#next-info').textContent = G.budget < 0
+    ? 'Budget négatif : vends un joueur avant le prochain match.'
+    : `Prochain : ${s.comp}, ${s.label}. Mur ${s.wall}, l'adversaire annonce ${s.opp} but${s.opp > 1 ? 's' : ''}${s.boss ? ', avec une règle spéciale' : ''}.`;
+  $('#btn-next').disabled = G.budget < 0;
+}
+
+// ===== Démarrage =====
+let titlePitch;
+window.addEventListener('DOMContentLoaded', () => {
+  pitch.cv = $('#pitch'); Object.assign(pitch, initPitch(pitch.cv));
+  titlePitch = initPitch($('#title-canvas'));
+  $('#btn-new').onclick = startGame;
+  $('#btn-play').onclick = playSelected;
+  $('#btn-change').onclick = () => { if (busy) return; if (changeCards(sel.slice(), M)) { sel = []; renderMatch(); } };
+  $('#btn-reroll').onclick = () => { const c = rerollCost(G); if (G.budget < c) return; G.budget = Math.round((G.budget - c) * 10) / 10; G.rerolls++; makeOffer(G); openMercato(); };
+  $('#btn-next').onclick = startMatch;
+  idleLoop();
+});
+</script>
+</body></html>

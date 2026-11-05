@@ -1,0 +1,95 @@
+
+<section id="title" class="screen">
+  <div class="logo">MERCATO</div>
+  <div class="tagline">Recrute des légendes. Enchaîne les combos. Gagne la saison.</div>
+  <canvas id="title-canvas" width="240" height="136"></canvas>
+  <button id="btn-new">Nouvelle saison</button>
+  <div class="panel howto">
+    <h2>Comment jouer</h2>
+    <ol>
+      <li>L'adversaire annonce son score. Marque un but de plus pour gagner.</li>
+      <li>Choisis 1 à 5 joueurs et joue l'action. Elle ne marque que si elle correspond à un de tes mouvements (6 emplacements). Tu en débloques de nouveaux au booster de départ puis au mercato.</li>
+      <li>Danger = (somme des notes + base) × précision. Danger au-dessus du mur : but. Deux fois le mur : doublé.</li>
+      <li>Même club, même nationalité, même génération et trios de styles boostent l'action.</li>
+      <li>Un joueur est fatigué après 2 actions. Entre les matchs, achète joueurs, staff et consignes au mercato. Attention à la masse salariale.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="match" class="screen" hidden>
+  <div class="panel scorebar">
+    <div class="sb-team">Olympique</div>
+    <div class="sb-score num"><span id="g-us">0</span> - <span id="g-opp">0</span><span class="need" id="g-need"></span></div>
+    <div class="sb-team opp" id="opp-name"></div>
+  </div>
+  <div class="panel meta">
+    <span class="chip"><span class="label" id="m-comp"></span></span>
+    <span class="chip"><span class="label">Possessions</span><span class="pips" id="m-poss"></span></span>
+    <span class="chip"><span class="label">Changements</span><span class="val num" id="m-chg"></span></span>
+    <span class="chip"><span class="label">Mur du gardien</span><span class="val num" id="m-wall"></span></span>
+    <span class="rule-chip" id="m-rule" hidden></span>
+  </div>
+  <div class="arena">
+    <aside class="side">
+      <div class="panel"><div class="label">Staff · permanent</div><div class="slot-list" id="m-staff"></div></div>
+      <div class="panel"><div class="label">Consignes · usage unique</div><div class="hint" style="font-size:12px">Clique pour l'utiliser pendant ce match.</div><div class="slot-list" id="m-items"></div></div>
+    </aside>
+    <div class="pitchwrap"><canvas id="pitch" width="240" height="136"></canvas><div class="burst" id="burst"></div></div>
+    <aside class="calc">
+      <div class="panel">
+        <div class="label">Action en cours</div>
+        <div class="c-move" id="c-move">Choisis des joueurs</div>
+        <div class="c-formula num" id="c-formula">(notes + base) × précision</div>
+        <div class="c-danger num" id="c-danger">0</div>
+        <div class="c-verdict none" id="c-verdict"></div>
+        <ul class="syn" id="c-syn"></ul>
+      </div>
+      <div class="panel">
+        <div class="label" id="c-moves-label">Tes mouvements</div><div class="moves" id="c-moves"></div>
+      </div>
+    </aside>
+  </div>
+  <div class="handbar">
+    <div class="hand" id="hand"></div>
+    <div class="actions">
+      <span class="deckinfo" id="deckinfo"></span>
+      <div class="btns">
+        <button id="btn-change" class="ghost">Changement</button>
+        <button id="btn-play">Jouer l'action</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mercato" class="screen" hidden>
+  <div class="panel merc-head">
+    <h2>Mercato entre deux matchs</h2>
+    <div class="money num" id="merc-money"></div>
+    <button id="btn-reroll" class="alt">Relancer</button>
+  </div>
+  <div class="panel">
+    <div class="label">Joueurs à vendre</div>
+    <div class="shop" id="shop-players"></div>
+  </div>
+  <div class="panel">
+    <div class="label">Mouvements à vendre</div>
+    <div class="shop-row" id="shop-moves"></div>
+    <div class="label" id="own-moves-label" style="margin-top:12px">Tes mouvements</div>
+    <div class="own-moves" id="own-moves"></div>
+  </div>
+  <div class="shop-row">
+    <div class="panel shop-col"><div class="label">Staff permanent (4 places)</div><div class="hint">Agit à chaque match tant qu'il est au club.</div><div id="shop-staff" class="shop-col"></div></div>
+    <div class="panel shop-col"><div class="label">Consignes à usage unique (3 max)</div><div class="hint">À utiliser pendant un match, puis elles disparaissent.</div><div id="shop-items" class="shop-col"></div></div>
+    <div class="panel shop-col"><div class="label">Séances d'entraînement</div><div id="shop-train" class="shop-col"></div></div>
+  </div>
+  <div class="panel">
+    <div class="label" id="squad-label">Ton effectif</div>
+    <div class="squad" id="squad"></div>
+  </div>
+  <div class="panel next-bar">
+    <span class="hint" id="next-info"></span>
+    <button id="btn-next">Prochain match</button>
+  </div>
+</section>
+
+<div class="modal" id="modal" hidden><div class="box" id="modal-box"></div></div>
