@@ -182,7 +182,7 @@ export class MatchScene extends Phaser.Scene {
       keep.push(v);
     });
     this.views = M.hand.map((id: string) => keep.find(v => v.id === id)!);
-    const n = this.views.length, gap = Math.min(119, 900 / Math.max(n, 1));
+    const n = this.views.length, gap = Math.min(110, 840 / Math.max(n, 1));
     this.views.forEach((v, i) => {
       const k = i - (n - 1) / 2;
       v.setHome(HAND_CX + k * gap, HAND_Y + Math.abs(k) * Math.abs(k) * 1.3, k * 0.02);

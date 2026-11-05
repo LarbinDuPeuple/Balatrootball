@@ -33,7 +33,7 @@ export class CardView extends Phaser.GameObjects.Container {
     const flag = scene.add.image(x0 + 18, y0 + 14, flagKey(scene, p.nat)).setScale(1.5);
     const pic = scene.add.image(0, y0 + 25 + (w - 18) / 2, portraitKey(scene, id)).setDisplaySize(w - 18, w - 18);
     const note = scene.add.graphics();
-    const nx = x0 + 22, ny = y0 + 24 + w - 20;
+    const nx = x0 + 22, ny = y0 + 24 + w - 38;
     note.fillStyle(C.edge, 1).fillCircle(nx, ny, 17);
     note.fillStyle(rar === 'or' || rar === 'legende' ? C.gold : C.green, 1).fillCircle(nx, ny, 14);
     const noteT = big(scene, nx + 1, ny + 1, String(p.r), 11, C.ink).setOrigin(0.5);
