@@ -24,6 +24,10 @@ async function run(vw, vh, tag) {
   await click(640, 570, 3500);
   await click(640, 402, 500); await click(640, 442, 600); // bouton Jouer de l'intro (avec ou sans règle)
   await pg.screenshot({ path: `${out}/${tag}-3-match.png` });
+  await pg.mouse.move(box.x + 552 * s, box.y + 560 * s); await pg.waitForTimeout(400);
+  await pg.screenshot({ path: `${out}/${tag}-3b-tip-card.png` });
+  await pg.mouse.move(box.x + 1000 * s, box.y + 210 * s); await pg.waitForTimeout(400);
+  await pg.screenshot({ path: `${out}/${tag}-3c-tip-move.png` });
   // sélectionne 4 cartes et joue, jusqu'à la fin du match
   for (let k = 0; k < 8; k++) {
     for (const x of [434, 552, 670, 788]) await click(x, 560, 120);
@@ -39,6 +43,8 @@ async function run(vw, vh, tag) {
   await pg.screenshot({ path: `${out}/${tag}-5-end.png` });
   await click(640, 570, 3500);
   await pg.screenshot({ path: `${out}/${tag}-6-mercato.png` });
+  await pg.mouse.move(box.x + 360 * s, box.y + 668 * s); await pg.waitForTimeout(400);
+  await pg.screenshot({ path: `${out}/${tag}-6b-tip-chip.png` });
   await click(156, 594, 800);
   await pg.screenshot({ path: `${out}/${tag}-7-squad.png` });
   await pg.close();

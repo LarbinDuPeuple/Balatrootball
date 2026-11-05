@@ -7,7 +7,9 @@ import {
 import { drawField, actorsFor, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
 import { W, H, C, hex, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
-import { CardView, CARD_W, shortName } from '../ui/Card';
+import { CardView, shortName, cardTip } from '../ui/Card';
+import { tip, wasLongPress } from '../ui/Tooltip';
+import { moveBadge, staffBadge, itemBadge, moveTip, staffTip, itemTip } from '../ui/icons';
 
 const SB_X = 16, SB_W = 280;          // barre latérale
 const RX = 312;                       // début de la zone droite
@@ -22,6 +24,7 @@ export class MatchScene extends Phaser.Scene {
   pitchTex!: Phaser.Textures.CanvasTexture;
   pitchState: { actors: any; ball: any; flash: number } = { actors: null, ball: { x: 120, y: 68 }, flash: 0 };
   oppColor = '#c8102e';
+  lastSyn: string[] = [];
   t = 0;
 
   constructor() { super('match'); }
@@ -90,7 +93,10 @@ export class MatchScene extends Phaser.Scene {
     panel(this, SB_X, 624, SB_W, 80);
     txt(this, SB_X + 14, 632, 'BUDGET', 13, C.muted);
     u.budget = big(this, SB_X + 14, 656, fmt(S.G.budget), 14, C.green);
-    u.syn = txt(this, SB_X + 14, 682, '', 12, C.gold);
+    u.syn = txt(this, SB_X + SB_W - 14, 640, '', 14, C.gold).setOrigin(1, 0);
+    tip(u.syn, () => ({ title: 'Bonus de l\'action', lines: this.lastSyn.length ? this.lastSyn : ['Aucun bonus'], accent: C.gold }));
+    tip(this.add.rectangle(SB_X, 104, SB_W, 86, 0, 0).setOrigin(0), () => ({ title: 'Mur du gardien', lines: ['Danger à atteindre pour marquer 1 but.', 'Deux fois le mur : doublé.', 'Le staff, le pressing et certaines règles le font varier.'] }));
+    tip(this.add.rectangle(SB_X, 310, SB_W, 214, 0, 0).setOrigin(0), () => ({ title: 'Calcul du danger', lines: ['(notes des joueurs + base du mouvement) × précision.', 'Les bonus (club, nationalité, génération, styles, staff) ajoutent de la base ou de la précision.'], accent: C.sky }));
   }
 
   buildTop() {
@@ -99,10 +105,10 @@ export class MatchScene extends Phaser.Scene {
       const x = RX + i * 150;
       panel(this, x, 16, 140, 96, G.staff[i] ? C.cream : C.panel, G.staff[i] ? C.green : C.panel2);
       if (G.staff[i]) {
-        const st = (STAFF as any)[G.staff[i]];
-        txt(this, x + 8, 22, 'STAFF', 10, 0x6b6478);
-        txt(this, x + 8, 36, st.name.toUpperCase(), 12, C.ink, { wordWrap: { width: 124 } });
-        txt(this, x + 8, 66, st.desc, 11, 0x3a3444, { fontStyle: '400', wordWrap: { width: 126 } });
+        const k = G.staff[i], st = (STAFF as any)[k];
+        this.add.image(x + 70, 46, staffBadge(this, k, 44));
+        txt(this, x + 70, 74, st.name, 14, C.ink, { align: 'center', wordWrap: { width: 130 } }).setOrigin(0.5, 0).setLineSpacing(-4);
+        tip(this.add.rectangle(x, 16, 140, 96, 0, 0).setOrigin(0), () => staffTip(k));
       } else txt(this, x + 70, 64, 'Staff\nplace libre', 13, C.muted, { align: 'center' }).setOrigin(0.5);
     }
     this.ui.items = this.add.container(0, 0);
@@ -118,11 +124,11 @@ export class MatchScene extends Phaser.Scene {
       box.add(pg);
       if (k) {
         const it = (ITEMS as any)[k];
-        box.add(txt(this, x + 6, 20, 'CONSIGNE', 10, C.ink));
-        box.add(txt(this, x + 6, 34, it.name.toUpperCase(), 12, C.ink, { wordWrap: { width: 94 } }));
-        box.add(txt(this, x + 6, 66, it.desc, 10, C.ink, { fontStyle: '400', wordWrap: { width: 94 } }));
+        box.add(this.add.image(x + 52, 46, itemBadge(this, k, 44)));
+        box.add(txt(this, x + 52, 74, it.name, 13, C.ink, { align: 'center', wordWrap: { width: 98 } }).setOrigin(0.5, 0).setLineSpacing(-4));
         const hit = this.add.rectangle(x, 16, 104, 96, 0, 0).setOrigin(0).setInteractive({ useHandCursor: true });
-        hit.on('pointerup', () => this.useItem(k, x + 52));
+        tip(hit, () => itemTip(k, true));
+        hit.on('pointerup', () => { if (!wasLongPress(hit)) this.useItem(k, x + 52); });
         box.add(hit);
       } else box.add(txt(this, x + 52, 64, 'Consigne\nlibre', 12, C.muted, { align: 'center' }).setOrigin(0.5));
     }
@@ -171,7 +177,8 @@ export class MatchScene extends Phaser.Scene {
       v.setInteractive({ useHandCursor: true });
       v.on('pointerover', () => { v.hovered = true; });
       v.on('pointerout', () => { v.hovered = false; });
-      v.on('pointerup', () => this.toggle(v.id));
+      tip(v, () => cardTip(v.id, [`Fatigue : ${S.M.fatigue[v.id] || 0} action(s) sur ${fatigueLimit(S.G)}`]));
+      v.on('pointerup', () => { if (!wasLongPress(v)) this.toggle(v.id); });
       keep.push(v);
     });
     this.views = M.hand.map((id: string) => keep.find(v => v.id === id)!);
@@ -219,29 +226,34 @@ export class MatchScene extends Phaser.Scene {
     const u = this.ui;
     if (!ev) {
       u.move.setText('Choisis 1 à 5 joueurs'); u.chips.setText('0'); u.mult.setText('0'); u.danger.setText('0');
-      u.verdict.setText('').setColor(hex(C.muted)); u.syn.setText(''); return;
+      u.verdict.setText('').setColor(hex(C.muted)); u.syn.setText(''); this.lastSyn = []; return;
     }
     u.move.setText(ev.move ? (MOVES as any)[ev.move].name.toUpperCase() + (ev.lv ? ` niv.${ev.lv + 1}` : '') : 'AUCUN MOUVEMENT');
     u.chips.setText(String(ev.sum + ev.base)); u.mult.setText(dec(ev.prec)); u.danger.setText(String(ev.danger));
     u.verdict.setText(!ev.move ? 'Aucun de tes mouvements ne correspond' : ev.goals === 2 ? 'DOUBLÉ !' : ev.goals ? 'BUT !' : `Arrêté, il faut ${ev.wall}`)
       .setColor(hex(ev.goals ? C.green : C.muted));
-    u.syn.setText(ev.syn.length ? ev.syn.length + ' bonus : ' + ev.syn.map((s: string) => s.split(' :')[0]).join(', ') : '').setWordWrapWidth(SB_W - 28);
+    this.lastSyn = ev.syn;
+    u.syn.setText(ev.syn.length ? `${ev.syn.length} bonus (détail)` : '');
   }
 
   drawMoves(active: string | null) {
-    const G = S.G, box = this.ui.moves as Phaser.GameObjects.Container;
-    box.removeAll(true);
-    this.ui.movesTitle.setText(`TES MOUVEMENTS (${G.moves.length}/6)`);
-    G.moves.forEach((k: string, i: number) => {
-      const mv = (MOVES as any)[k], lv = G.levels[k] || 0, y = 154 + i * 39, on = k === active;
-      const g = this.add.graphics();
-      g.fillStyle(on ? 0x2f5a3a : C.panel2, 1).fillRect(818, y, 434, 35);
-      g.fillStyle(on ? C.green : C.muted, 1).fillRect(818, y, 5, 35);
-      box.add(g);
-      box.add(txt(this, 830, y + 2, mv.name + (lv ? `  niv.${lv + 1}` : ''), 15, on ? C.gold : C.cream));
-      box.add(txt(this, 830, y + 19, mv.desc, 11, C.muted, { fontStyle: '400' }));
-      box.add(big(this, 1244, y + 18, `${mv.base + 10 * lv}×${dec(mv.prec + 0.5 * lv)}`, 10, on ? C.gold : C.cream2).setOrigin(1, 0.5));
-      if (on) { g.setAlpha(0.6); this.tweens.add({ targets: g, alpha: 1, duration: 150 }); }
+    const G = S.G;
+    if (!this.ui.moveRows) {
+      this.ui.movesTitle.setText(`TES MOUVEMENTS (${G.moves.length}/6)`);
+      this.ui.moveRows = G.moves.map((k: string, i: number) => {
+        const mv = (MOVES as any)[k], lv = G.levels[k] || 0, y = 154 + i * 39;
+        const g = this.add.graphics();
+        this.add.image(838, y + 17, moveBadge(this, k, 30));
+        const name = txt(this, 862, y + 6, mv.name + (lv ? `  niv.${lv + 1}` : ''), 16, C.cream);
+        const sc = big(this, 1244, y + 18, `${mv.base + 10 * lv}×${dec(mv.prec + 0.5 * lv)}`, 10, C.cream2).setOrigin(1, 0.5);
+        tip(this.add.rectangle(818, y, 434, 35, 0, 0).setOrigin(0), () => moveTip(k, lv));
+        return { k, y, g, name, sc };
+      });
+    }
+    this.ui.moveRows.forEach((r: any) => {
+      const on = r.k === active;
+      r.g.clear().fillStyle(on ? 0x2f5a3a : C.panel2, 1).fillRect(818, r.y, 434, 35).fillStyle(on ? C.green : C.muted, 1).fillRect(818, r.y, 5, 35);
+      r.name.setColor(hex(on ? C.gold : C.cream)); r.sc.setColor(hex(on ? C.gold : C.cream2));
     });
   }
 

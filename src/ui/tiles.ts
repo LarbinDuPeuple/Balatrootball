@@ -32,8 +32,8 @@ export class Tile extends Phaser.GameObjects.Container {
   setOn(v: boolean) { this.picked = v; this.draw(); return this; }
 }
 
-export function moveTile(scene: Phaser.Scene, x: number, y: number, w: number, h: number, k: string, lv: number) {
+export function moveTile(scene: Phaser.Scene, x: number, y: number, w: number, h: number, k: string, lv: number, compact = false) {
   const mv = (MOVES as any)[k];
-  return new Tile(scene, x, y, w, h, TIER_NAME[mv.tier] + (lv ? ` · niv. ${lv + 1}` : ''), mv.name, mv.desc,
+  return new Tile(scene, x, y, w, h, TIER_NAME[mv.tier] + (lv ? ` · niv. ${lv + 1}` : ''), mv.name, compact ? '' : mv.desc,
     `${mv.base + 10 * lv} base × ${dec(mv.prec + 0.5 * lv)}`, TIER_COLOR[mv.tier]);
 }

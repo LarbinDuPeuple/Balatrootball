@@ -2,7 +2,9 @@
 import Phaser from 'phaser';
 import { PLAYERS, CLUBS } from '../game/logic.js';
 import { portraitKey, flagKey } from '../game/art';
-import { C, hex, txt, big } from './theme';
+import { C, txt, big, fmt } from './theme';
+import { styleBadge, STYLE_DESC } from './icons';
+import type { TipContent } from './Tooltip';
 
 export const CARD_W = 120, CARD_H = 180;
 
@@ -35,11 +37,10 @@ export class CardView extends Phaser.GameObjects.Container {
     note.fillStyle(C.edge, 1).fillCircle(nx, ny, 17);
     note.fillStyle(rar === 'or' || rar === 'legende' ? C.gold : C.green, 1).fillCircle(nx, ny, 14);
     const noteT = big(scene, nx + 1, ny + 1, String(p.r), 11, C.ink).setOrigin(0.5);
-    const nm = txt(scene, x0 + 8, y0 + w + 10, `${p.pos} - ${shortName(p).toUpperCase()}`, 13, C.ink, { wordWrap: { width: w - 16 } }).setLineSpacing(-3);
-    const st = txt(scene, x0 + 8, y0 + w + 26 + (nm.height > 20 ? 12 : 0), p.styles.join(' · ').toUpperCase(), 10, 0x4a4458, { wordWrap: { width: w - 16 }, fontStyle: '600' }).setLineSpacing(-3);
-    const sal = txt(scene, x0 + 8, y0 + h - 20, (String(p.salary).replace('.', ',')) + ' M€/m', 10, 0x4a4458);
+    const nm = txt(scene, x0 + 8, y0 + w + 10, `${p.pos} · ${shortName(p).toUpperCase()}`, 14, C.ink).setFixedSize(w - 14, 20);
+    const badges = p.styles.map((st: string, i: number) => scene.add.image(x0 + 16 + i * 20, y0 + h - 18, styleBadge(scene, st, 18)));
     this.pips = scene.add.graphics();
-    this.add([g, this.glow, head, flag, pic, note, noteT, nm, st, sal, this.pips]);
+    this.add([g, this.glow, head, flag, pic, note, noteT, nm, ...badges, this.pips]);
     if (p.star) {
       const sb = scene.add.graphics(); sb.fillStyle(C.edge, 1).fillRect(x0 + 7, y0 + 26, 38, 15); sb.fillStyle(C.red, 1).fillRect(x0 + 8, y0 + 27, 36, 13);
       this.add([sb, big(scene, x0 + 26, y0 + 34, 'STAR', 7, C.cream).setOrigin(0.5)]);
@@ -76,4 +77,17 @@ export class CardView extends Phaser.GameObjects.Container {
     const rot = (this.getData('rot') || 0) + Math.sin(t / 900 + this.phase) * 0.02;
     this.rotation += (rot - this.rotation) * 0.2;
   }
+}
+
+/** Contenu de l'info-bulle d'un joueur. */
+export function cardTip(id: string, extra: string[] = []): TipContent {
+  const p = (PLAYERS as any)[id];
+  const lines = [
+    `${p.club || 'Sans club'} · ${p.nat} · années ${p.dec}`,
+    ...p.styles.map((s: string) => `${s} : ${STYLE_DESC[s]}`),
+    ...(p.star ? ['Star : 2 stars sans Leader dans une action = précision x0,7'] : []),
+    `Salaire ${fmt(p.salary)} par match · valeur ${fmt(p.price)}`,
+    ...extra,
+  ];
+  return { title: p.name, sub: `${p.pos} · note ${p.r}`, lines, accent: FRAME[rarity(p.r)] };
 }
