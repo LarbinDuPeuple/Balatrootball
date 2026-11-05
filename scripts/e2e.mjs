@@ -18,7 +18,15 @@ async function run(vw, vh, tag) {
   const s = box.width / 1280;
   const click = async (x, y, wait = 300) => { await pg.mouse.click(box.x + x * s, box.y + y * s); await pg.waitForTimeout(wait); };
   await pg.screenshot({ path: `${out}/${tag}-1-title.png` });
-  await click(640, 570, 3000);
+  // profil de test : une collection et la 1re campagne gagnée
+  await pg.evaluate(() => localStorage.setItem('mercato-profil-v1', JSON.stringify({ unlocked: ['zinedine-zidane', 'thierry-henry', 'paolo-maldini'], won: { saison: 1 }, runs: 1 })));
+  await pg.reload(); await pg.waitForTimeout(1500);
+  await click(800, 570, 800);
+  await pg.screenshot({ path: `${out}/${tag}-1c-collection.png` });
+  await click(1180, 96, 600);
+  await click(480, 570, 800);
+  await pg.screenshot({ path: `${out}/${tag}-1d-campagnes.png` });
+  await click(260, 510, 3000);
   // booster de départ : 4 paquets (GAR 4→2, puis 6→4)
   for (const [n, keep] of [[4, 2], [6, 4], [6, 4], [6, 4]]) {
     const x0 = 640 - (n - 1) * 84;

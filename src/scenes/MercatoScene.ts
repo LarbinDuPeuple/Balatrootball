@@ -1,7 +1,7 @@
 // Mercato entre deux matchs : joueurs, mouvements, staff, consignes, entraînement et effectif.
 import Phaser from 'phaser';
 import {
-  SEASON, STAFF, ITEMS, MOVES, PLAYERS, makeOffer, rerollCost, sellValue, addMove, removeMove, movePrice, wageTotal, MOVE_SLOTS,
+  stageOf, RULES, STAFF, ITEMS, MOVES, PLAYERS, makeOffer, rerollCost, sellValue, addMove, removeMove, movePrice, wageTotal, MOVE_SLOTS,
 } from '../game/logic.js';
 import { S } from '../game/state';
 import { W, C, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
@@ -36,7 +36,7 @@ export class MercatoScene extends Phaser.Scene {
   }
 
   render() {
-    const G = S.G, s = SEASON[G.stage], R = this.root;
+    const G = S.G, s = stageOf(G), R = this.root;
     R.removeAll(true); this.cards = []; hideTip(this);
     const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { R.add(o); return o; };
     // ----- barre latérale
@@ -51,7 +51,7 @@ export class MercatoScene extends Phaser.Scene {
     add(txt(this, SB_X + 14, 230, 'PROCHAIN MATCH', 13, C.muted));
     add(txt(this, SB_X + 14, 250, `${s.comp} · ${s.label}`, 16, C.cream, { wordWrap: { width: SB_W - 28 } }));
     add(txt(this, SB_X + 14, 276, `Mur ${s.wall} · l'adversaire annonce ${s.opp} but${s.opp > 1 ? 's' : ''}`, 14, C.cream2, { wordWrap: { width: SB_W - 28 } }));
-    add(txt(this, SB_X + 14, 318, s.boss ? 'Match spécial avec une règle surprise' : `Match ${G.stage + 1} sur 9`, 14, s.boss ? C.red : C.muted));
+    add(txt(this, SB_X + 14, 318, s.coach ? `Boss : ${(RULES as any)[s.coach].coach}` : s.boss ? 'Match spécial avec une règle surprise' : `Match ${G.stage + 1} sur 9`, 14, s.boss ? C.red : C.muted));
     add(panel(this, SB_X, 366, SB_W, 130));
     add(txt(this, SB_X + 14, 374, 'TON STAFF (PERMANENT)', 13, C.muted));
     if (!G.staff.length) add(txt(this, SB_X + 14, 400, 'Aucun', 14, C.muted));

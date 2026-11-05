@@ -28,6 +28,7 @@ const NATIONS = {
   'Mexique': { t: 'v', c: ['#1d7a3a', '#f4f4f4', '#c8102e'] },
   'Nigéria': { t: 'v', c: ['#1d8a43', '#f4f4f4', '#1d8a43'] },
   'Mali': { t: 'v', c: ['#1d8a43', '#f2d22e', '#c8102e'] },
+  'Uruguay': { t: 'h', c: ['#f4f4f4', '#5aa0dc', '#f4f4f4', '#5aa0dc'] },
 };
 
 // maillot, liseré
@@ -136,7 +137,7 @@ const MIDS = [
   // GARDIENS
   ['Mickaël Landreau', 'GAR', 70, 'Nantes', 'France', 2000, ['Spécialiste'], L(0, 2, 'court')],
   ['Grégory Coupet', 'GAR', 71, 'Lyon', 'France', 2000, ['Leader'], L(0, 0, 'chauve')],
-  ['Ulrich Ramé', 'GAR', 66, 'Bordeaux', 'France', 2000, [], L(0, 2, 'court')],
+  ['Vítor Baía', 'GAR', 68, 'Porto', 'Portugal', 2000, ['Technique'], L(1, 0, 'court')],
   ['Pepe Reina', 'GAR', 70, 'Liverpool', 'Espagne', 2010, ['Technique'], L(1, 0, 'court', 'barbe')],
   ['David James', 'GAR', 66, 'Liverpool', 'Angleterre', 2000, ['Physique'], L(4, 0, 'court')],
   ['Jerzy Dudek', 'GAR', 68, 'Liverpool', 'Pologne', 2000, ['Spécialiste'], L(0, 2, 'court', 'moustache')],
@@ -151,13 +152,13 @@ const MIDS = [
   ['Bruno Alves', 'DEF', 70, 'Porto', 'Portugal', 2010, ['Physique'], L(1, 0, 'court', 'barbe')],
   ['Gaël Clichy', 'DEF', 70, 'Arsenal', 'France', 2010, ['Vitesse'], L(3, 0, 'court')],
   ['Bacary Sagna', 'DEF', 70, 'Arsenal', 'France', 2010, ['Pressing'], L(4, 0, 'afro')],
-  ['Jérémy Mathieu', 'DEF', 68, 'FC Barcelone', 'France', 2010, ['Physique'], L(0, 0, 'court')],
+  ['Martín Demichelis', 'DEF', 68, 'Bayern Munich', 'Argentine', 2010, ['Physique'], L(1, 1, 'long')],
   ['Taye Taiwo', 'DEF', 68, 'Marseille', 'Nigéria', 2000, ['Vitesse'], L(4, 0, 'court')],
-  ['Mathieu Debuchy', 'DEF', 68, 'Newcastle', 'France', 2010, ['Vitesse'], L(0, 2, 'court')],
-  ['Rod Fanni', 'DEF', 66, 'Marseille', 'France', 2010, ['Vitesse'], L(4, 0, 'court')],
-  ['Jean-Alain Boumsong', 'DEF', 66, 'Juventus', 'France', 2000, ['Physique'], L(4, 0, 'chauve')],
-  ['Benoît Trémoulinas', 'DEF', 66, 'Bordeaux', 'France', 2010, [], L(0, 2, 'court')],
-  ['Sébastien Squillaci', 'DEF', 66, 'Arsenal', 'France', 2010, [], L(0, 0, 'court')],
+  ['Fabio Grosso', 'DEF', 68, 'Inter Milan', 'Italie', 2000, ['Spécialiste'], L(1, 1, 'long')],
+  ['Glen Johnson', 'DEF', 66, 'Liverpool', 'Angleterre', 2010, ['Vitesse'], L(3, 0, 'court')],
+  ['Rigobert Song', 'DEF', 66, 'Liverpool', 'Cameroun', 1990, ['Leader'], L(4, 0, 'afro')],
+  ['Gabriel Heinze', 'DEF', 66, 'Manchester United', 'Argentine', 2000, ['Pressing'], L(1, 0, 'long', 'barbe')],
+  ['Wes Brown', 'DEF', 66, 'Manchester United', 'Angleterre', 2000, [], L(0, 0, 'court')],
   ['Pascal Cygan', 'DEF', 64, 'Arsenal', 'France', 2000, ['Physique'], L(0, 0, 'degarni')],
   ['Djimi Traoré', 'DEF', 63, 'Liverpool', 'Mali', 2000, [], L(4, 0, 'court')],
   ['Titus Bramble', 'DEF', 62, 'Newcastle', 'Angleterre', 2000, ['Physique'], L(4, 0, 'chauve')],
@@ -165,35 +166,35 @@ const MIDS = [
   ['Yoann Gourcuff', 'MIL', 72, 'Bordeaux', 'France', 2010, ['Technique'], L(0, 2, 'court')],
   ['Florent Malouda', 'MIL', 72, 'Chelsea', 'France', 2010, ['Vitesse'], L(4, 0, 'chauve')],
   ['Mathieu Valbuena', 'MIL', 71, 'Marseille', 'France', 2010, ['Spécialiste'], L(1, 0, 'court')],
-  ['Johan Micoud', 'MIL', 71, 'Bordeaux', 'France', 2000, ['Technique'], L(0, 2, 'degarni')],
+  ['Gaizka Mendieta', 'MIL', 71, 'FC Barcelone', 'Espagne', 2000, ['Technique'], L(1, 3, 'long')],
   ['Ludovic Giuly', 'MIL', 71, 'FC Barcelone', 'France', 2000, ['Vitesse'], L(0, 2, 'long')],
   ['Lassana Diarra', 'MIL', 71, 'Real Madrid', 'France', 2010, ['Pressing'], L(4, 0, 'court')],
-  ['Jérémy Toulalan', 'MIL', 70, 'Lyon', 'France', 2010, ['Pressing'], L(0, 0, 'court')],
+  ['Mark van Bommel', 'MIL', 70, 'Bayern Munich', 'Pays-Bas', 2010, ['Pressing'], L(0, 2, 'court')],
   ['Christian Karembeu', 'MIL', 70, 'Real Madrid', 'France', 1990, ['Pressing'], L(3, 0, 'long')],
-  ['Jérôme Rothen', 'MIL', 68, 'PSG', 'France', 2000, ['Spécialiste'], L(0, 2, 'court')],
-  ['Alou Diarra', 'MIL', 68, 'Bordeaux', 'France', 2010, ['Physique'], L(4, 0, 'chauve')],
+  ['Ricardo Quaresma', 'MIL', 68, 'Porto', 'Portugal', 2000, ['Technique'], L(2, 0, 'court')],
+  ['Dietmar Hamann', 'MIL', 68, 'Liverpool', 'Allemagne', 2000, ['Physique'], L(0, 2, 'court')],
   ['Mohamed Sissoko', 'MIL', 67, 'Liverpool', 'Mali', 2000, ['Physique'], L(4, 0, 'court')],
   ['Joey Barton', 'MIL', 66, 'Newcastle', 'Angleterre', 2010, ['Pressing', 'Physique'], L(0, 2, 'court', 'barbe')],
   ['Kevin Nolan', 'MIL', 66, 'Newcastle', 'Angleterre', 2010, ['Physique'], L(0, 2, 'court')],
-  ['Rio Mavuba', 'MIL', 66, 'Lille', 'France', 2010, ['Pressing'], L(4, 0, 'court')],
-  ['Abou Diaby', 'MIL', 66, 'Arsenal', 'France', 2010, ['Technique'], L(4, 0, 'court')],
+  ['Lucas Leiva', 'MIL', 66, 'Liverpool', 'Brésil', 2010, ['Pressing'], L(1, 2, 'long')],
+  ['Kim Källström', 'MIL', 66, 'Lyon', 'Suède', 2010, ['Spécialiste'], L(0, 3, 'court')],
   // ATTAQUANTS
   ['Djibril Cissé', 'ATT', 72, 'Liverpool', 'France', 2000, ['Vitesse'], L(4, 3, 'crete', 'barbe')],
   ['Nwankwo Kanu', 'ATT', 71, 'Arsenal', 'Nigéria', 1990, ['Technique'], L(4, 0, 'chauve')],
   ['Mamadou Niang', 'ATT', 70, 'Marseille', 'Sénégal', 2010, ['Vitesse'], L(4, 0, 'court')],
   ['Christophe Dugarry', 'ATT', 70, 'Bordeaux', 'France', 1990, ['Technique'], L(0, 2, 'court')],
   ['Louis Saha', 'ATT', 70, 'Manchester United', 'France', 2000, ['Physique'], L(4, 0, 'chauve')],
-  ['Bafétimbi Gomis', 'ATT', 70, 'Lyon', 'France', 2010, ['Physique'], L(4, 0, 'court', 'barbe')],
+  ['Luca Toni', 'ATT', 70, 'Bayern Munich', 'Italie', 2000, ['Physique'], L(1, 0, 'long', 'barbe')],
   ['André-Pierre Gignac', 'ATT', 70, 'Marseille', 'France', 2010, ['Physique'], L(1, 0, 'court', 'barbe')],
-  ['Sidney Govou', 'ATT', 69, 'Lyon', 'France', 2000, ['Vitesse'], L(4, 0, 'court')],
-  ['Kevin Gameiro', 'ATT', 69, 'Atlético Madrid', 'France', 2010, ['Vitesse'], L(1, 0, 'court')],
+  ['Dirk Kuyt', 'ATT', 70, 'Liverpool', 'Pays-Bas', 2010, ['Pressing'], L(0, 3, 'court')],
+  ['Diego Forlán', 'ATT', 72, 'Atlético Madrid', 'Uruguay', 2010, ['Spécialiste'], L(0, 3, 'long')],
   ['Peter Crouch', 'ATT', 68, 'Liverpool', 'Angleterre', 2000, ['Physique'], L(0, 2, 'court')],
   ['Andy Carroll', 'ATT', 68, 'Newcastle', 'Angleterre', 2010, ['Physique'], L(0, 2, 'queue', 'barbe')],
-  ['Péguy Luyindula', 'ATT', 66, 'PSG', 'France', 2000, ['Technique'], L(4, 0, 'court')],
+  ['Nicklas Bendtner', 'ATT', 66, 'Arsenal', 'Danemark', 2010, ['Physique'], L(0, 3, 'court')],
   ['Emile Heskey', 'ATT', 66, 'Liverpool', 'Angleterre', 2000, ['Physique'], L(4, 0, 'chauve')],
-  ['Jimmy Briand', 'ATT', 66, 'Lyon', 'France', 2010, ['Vitesse'], L(4, 0, 'court')],
+  ['Mido', 'ATT', 66, 'AS Roma', 'Égypte', 2000, ['Physique'], L(2, 0, 'long')],
   ['Stéphane Guivarc\'h', 'ATT', 64, 'Auxerre', 'France', 1990, ['Physique'], L(0, 2, 'court')],
-  ['Pierre-Alain Frau', 'ATT', 64, 'Sochaux', 'France', 2000, [], L(0, 2, 'court')],
+  ['Javier Saviola', 'ATT', 68, 'FC Barcelone', 'Argentine', 2000, ['Vitesse'], L(1, 0, 'long')],
 ];
 
 // Indice de force : courbe qui accélère avec la note FIFA (62 → 10, 72 → 20, 85 → 47, 96 → 100).
@@ -226,7 +227,13 @@ MIDS.forEach(([name, pos, r, club, nat, dec, styles, look]) => {
 
 // Booster de départ : un paquet par ligne, on garde une partie des joueurs.
 const STARTER = { GAR: [4, 2], DEF: [6, 4], MIL: [6, 4], ATT: [6, 4] };
-function starterPack(pos) { return shuffle(Object.values(PLAYERS).filter(p => p.mid && p.pos === pos).map(p => p.id)).slice(0, STARTER[pos][0]); }
+/** Un paquet de départ ; un joueur de la collection peut remplacer une carte (une chance sur deux). */
+function starterPack(pos, unlocked = []) {
+  const pack = shuffle(Object.values(PLAYERS).filter(p => p.mid && p.pos === pos).map(p => p.id)).slice(0, STARTER[pos][0]);
+  const mine = shuffle(unlocked.filter(id => PLAYERS[id] && PLAYERS[id].pos === pos));
+  if (mine.length && rng() < 0.5) pack[Math.floor(rng() * pack.length)] = mine[0];
+  return pack;
+}
 function autoStarter() { return Object.keys(STARTER).flatMap(pos => starterPack(pos).sort((a, b) => PLAYERS[b].r - PLAYERS[a].r).slice(0, STARTER[pos][1])); }
 
 // tier : base (départ), commun (booster), rare, epique
@@ -279,7 +286,16 @@ const RULES = {
   arbitre: { name: 'Arbitre tatillon', desc: 'Une action à 5 joueurs : le mieux noté est exclu du match' },
   derby: { name: 'Derby bouillant', desc: 'Synergies de club doublées, mais mur +20 %' },
   grace: { name: 'Gardien en état de grâce', desc: 'Ton premier but est annulé' },
+  // entraîneurs cultes (boss des campagnes)
+  ferguson: { coach: 'Alex Ferguson', club: 'Manchester United', name: 'Fergie time', desc: 'L\'adversaire annonce 1 but de plus' },
+  ancelotti: { coach: 'Carlo Ancelotti', club: 'Real Madrid', name: 'Sourcil levé', desc: 'Synergies de club et de nationalité ignorées' },
+  sacchi: { coach: 'Arrigo Sacchi', club: 'AC Milan', name: 'Pressing tout terrain', desc: 'Le mur ne s\'use qu\'à moitié' },
+  klopp: { coach: 'Jürgen Klopp', club: 'Liverpool', name: 'Gegenpressing', desc: 'Fatigue : 1 action de moins par joueur' },
+  guardiola: { coach: 'Pep Guardiola', club: 'FC Barcelone', name: 'Confiscation du ballon', desc: 'Tu as 2 possessions de moins' },
+  mourinho: { coach: 'José Mourinho', club: 'Inter Milan', name: 'Bus garé', desc: 'Mur +50 %, mais il n\'annonce que 2 buts' },
+  simeone: { coach: 'Diego Simeone', club: 'Atlético Madrid', name: 'Cholismo', desc: 'Les attaquants ne comptent que la moitié de leur force' },
 };
+const BASE_RULES = ['catenaccio', 'gelee', 'arbitre', 'derby', 'grace'];
 
 const OPP_CLUBS = Object.keys(CLUBS).filter(c => c !== 'Olympique');
 
@@ -295,6 +311,25 @@ const SEASON = [
   { comp: 'Coupe d\'Europe', label: 'Finale', wall: 3600, opp: 3, prime: 25, boss: true },
 ];
 
+// Campagnes : comme les paquets de Balatro, de plus en plus dures, avec des entraîneurs cultes en boss.
+// La finale garde le mur de base : la règle du boss final suffit à la corser.
+function stagesFrom(mult, bosses, comps) {
+  return SEASON.map((st, i) => {
+    const b = i === 2 ? 0 : i === 5 ? 1 : i === 8 ? 2 : -1;
+    return { ...st, comp: comps ? comps[Math.floor(i / 3)] : st.comp, wall: Math.round(st.wall * (i === 8 ? 1 : mult) / 50) * 50, coach: b >= 0 && bosses ? bosses[b] : null };
+  });
+}
+const CAMPAIGNS = [
+  { id: 'saison', name: 'Saison classique', desc: 'Championnat, coupe nationale puis coupe d\'Europe. Règles surprises aux matchs spéciaux.', budget: 12, req: null, stages: stagesFrom(1, null) },
+  { id: 'c1', name: 'Coupe des clubs champions', desc: 'Ferguson, Ancelotti et Sacchi t\'attendent. Murs +20 %, budget 10 M€.', budget: 10, req: 'saison',
+    stages: stagesFrom(1.2, ['ferguson', 'ancelotti', 'sacchi'], ['Phase de groupes', 'Huitièmes et quarts', 'Dernier carré']) },
+  { id: 'ldc', name: 'Ligue des champions mythique', desc: 'Klopp, Guardiola puis Mourinho en finale. Murs +30 %, budget 8 M€.', budget: 8, req: 'c1',
+    stages: stagesFrom(1.3, ['klopp', 'guardiola', 'mourinho'], ['Phase de ligue', 'Huitièmes et quarts', 'Dernier carré']) },
+];
+function campaignOf(G) { return CAMPAIGNS.find(c => c.id === (G.campaign || 'saison')) || CAMPAIGNS[0]; }
+function stageOf(G, i = G.stage) { return campaignOf(G).stages[i]; }
+function seasonLength(G) { return campaignOf(G).stages.length; }
+
 // ===== Aléatoire =====
 let rng = Math.random;
 function setRng(f) { rng = f; }
@@ -302,9 +337,9 @@ function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.fl
 function pick(a) { return a[Math.floor(rng() * a.length)]; }
 
 // ===== Partie =====
-function newGame() {
+function newGame(campaign = 'saison') {
   const G = {
-    budget: 12, squad: autoStarter(),
+    campaign, budget: (CAMPAIGNS.find(c => c.id === campaign) || CAMPAIGNS[0]).budget, squad: autoStarter(),
     goals: {}, staff: [], items: [], levels: {}, moves: ['frappe', 'passe', 'unedeux'], stage: 0, rerolls: 0, offer: null, history: [],
   };
   Object.keys(MOVES).forEach(k => G.levels[k] = 0);
@@ -313,23 +348,25 @@ function newGame() {
 function hasStaff(G, k) { return G.staff.includes(k); }
 
 function newMatch(G) {
-  const s = SEASON[G.stage];
+  const s = stageOf(G);
   const natCount = {};
   G.squad.forEach(id => { const n = PLAYERS[id].nat; natCount[n] = (natCount[n] || 0) + 1; });
   const ossature = Object.entries(natCount).find(([, c]) => c >= 5);
-  let poss = 6 + (hasStaff(G, 'mental') ? 1 : 0) + (ossature ? 1 : 0);
+  const rule = s.coach || (s.boss ? pick(BASE_RULES) : null);
+  let poss = 6 + (hasStaff(G, 'mental') ? 1 : 0) + (ossature ? 1 : 0) - (rule === 'guardiola' ? 2 : 0);
+  const oppGoals = rule === 'mourinho' ? 2 : s.opp + (rule === 'ferguson' ? 1 : 0);
   const m = {
-    stage: G.stage, opp: pick(OPP_CLUBS), wall: s.wall, wear: 0, oppGoals: s.opp, goals: 0,
+    stage: G.stage, prime: s.prime, opp: s.coach ? RULES[s.coach].club : pick(OPP_CLUBS), wall: s.wall, wear: 0, oppGoals, goals: 0,
     poss, possStart: poss, changes: 2 + (hasStaff(G, 'kine') ? 1 : 0),
     deck: shuffle(G.squad.slice()), hand: [], discard: [], out: [], fatigue: {},
-    rule: s.boss ? pick(Object.keys(RULES)) : null, pressing: 0, nextWall: 1, nextPrec: 1,
+    rule, pressing: 0, nextWall: 1, nextPrec: 1,
     techUsed: false, graceUsed: false, played: 0, over: null, ossature: ossature ? ossature[0] : null, log: [],
   };
   draw(m);
   return m;
 }
 
-function fatigueLimit(G) { return hasStaff(G, 'prepa') ? 3 : 2; }
+function fatigueLimit(G, m) { return (hasStaff(G, 'prepa') ? 3 : 2) - (m && m.rule === 'klopp' ? 1 : 0); }
 
 function draw(m) {
   while (m.hand.length < 8) {
@@ -347,7 +384,7 @@ function stylesOf(p, m) {
 /** Force d'une carte dans une action (règle Catenaccio, bonus de génération). */
 function cardForce(p, m, decCount) {
   let f = p.f;
-  if (m && m.rule === 'catenaccio' && p.pos === 'ATT') f = Math.floor(f / 2);
+  if (m && (m.rule === 'catenaccio' || m.rule === 'simeone') && p.pos === 'ATT') f = Math.floor(f / 2);
   if (decCount[p.dec] >= 2 && !p.youth) f = Math.round(f * 1.3);
   return f;
 }
@@ -381,14 +418,14 @@ function evaluate(ids, m, G) {
   ps.forEach(p => { if (p.club) clubCount[p.club] = (clubCount[p.club] || 0) + 1; });
   const derby = m.rule === 'derby' ? 2 : 1;
   Object.entries(clubCount).forEach(([c, k]) => {
-    if (c === 'Olympique') return; // les jeunes du centre ne créent pas d'automatismes
+    if (c === 'Olympique' || m.rule === 'ancelotti') return; // les jeunes du centre ne créent pas d'automatismes
     if (k === 2) { addPrec += 0.5 * derby; syn.push(`Automatismes ${c} : +${0.5 * derby} préc.`); }
     if (k >= 3) { addPrec += 1.5 * derby; ps.filter(p => p.club === c).forEach(p => fatigueFree.add(p.id)); syn.push(`Bloc ${c} : +${1.5 * derby} préc., sans fatigue`); }
   });
   const natCount = {};
   ps.forEach(p => natCount[p.nat] = (natCount[p.nat] || 0) + 1);
   Object.entries(natCount).forEach(([nat, k]) => {
-    if (k >= 2) { addBase += 15 * k; syn.push(`Sélection ${nat} : +${15 * k} base`); }
+    if (k >= 2 && m.rule !== 'ancelotti') { addBase += 15 * k; syn.push(`Sélection ${nat} : +${15 * k} base`); }
   });
   let techBonus = false, pressingAdd = false;
   if ((styleCount.Vitesse || 0) >= 3) { const v = m.played === 0 ? 2 : 1; addPrec += v; syn.push(`Trio Vitesse : +${v} préc.`); }
@@ -408,7 +445,7 @@ function evaluate(ids, m, G) {
   if (hasStaff(G, 'video')) wallMult *= 0.9;
   if (m.nextPrec !== 1) { multPrec *= m.nextPrec; syn.push('Remontada : préc. x2'); }
   if (m.nextWall !== 1) { wallMult *= m.nextWall; syn.push('Pressing haut : mur -20 %'); }
-  if (m.rule === 'derby') wallMult *= 1.2;
+  wallMult *= ruleWall(m);
   wallMult *= Math.pow(0.9, m.pressing);
 
   let best = null;
@@ -428,7 +465,7 @@ function evaluate(ids, m, G) {
 }
 
 function playable(m, G, id) {
-  return (m.fatigue[id] || 0) < fatigueLimit(G);
+  return (m.fatigue[id] || 0) < fatigueLimit(G, m);
 }
 
 function playAction(ids, m, G) {
@@ -443,7 +480,7 @@ function playAction(ids, m, G) {
     G.goals[scorer] = (G.goals[scorer] || 0) + goals;
   }
   m.goals += goals;
-  if (ev.goals > 0) m.wear = 0; else if (ev.move) m.wear = (m.wear || 0) + ev.danger;
+  if (ev.goals > 0) m.wear = 0; else if (ev.move) m.wear = (m.wear || 0) + (m.rule === 'sacchi' ? Math.round(ev.danger / 2) : ev.danger);
   if (ev.pressingAdd) m.pressing++;
   if (ev.techBonus) { m.changes++; m.techUsed = true; }
   m.nextWall = 1; m.nextPrec = 1;
@@ -456,7 +493,7 @@ function playAction(ids, m, G) {
     m.hand.splice(m.hand.indexOf(id), 1);
     if (!ev.fatigueFree.has(id)) m.fatigue[id] = (m.fatigue[id] || 0) + 1;
     if (id === sentOff) m.fatigue[id] = 99;
-    if (m.fatigue[id] >= fatigueLimit(G)) m.out.push(id); else m.discard.push(id);
+    if (m.fatigue[id] >= fatigueLimit(G, m)) m.out.push(id); else m.discard.push(id);
   });
   m.poss--; m.played++;
   draw(m);
@@ -493,15 +530,20 @@ function useItem(k, m, G) {
 }
 
 function settle(m, G) {
-  const s = SEASON[m.stage];
   const wage = Math.round(G.squad.reduce((a, id) => a + PLAYERS[id].salary, 0) * 10) / 10;
   const r = { wage, prime: 0, diff: 0, ticket: 0, comm: 0 };
   if (m.over === 'win') {
-    r.prime = s.prime; r.diff = 2 * (m.goals - m.oppGoals); r.ticket = m.poss; r.comm = hasStaff(G, 'comm') ? 3 : 0;
+    r.prime = m.prime; r.diff = 2 * (m.goals - m.oppGoals); r.ticket = m.poss; r.comm = hasStaff(G, 'comm') ? 3 : 0;
   }
   r.total = Math.round((r.prime + r.diff + r.ticket + r.comm - wage) * 10) / 10;
   G.budget = Math.round((G.budget + r.total) * 10) / 10;
   return r;
+}
+
+/** Fin de campagne gagnée : jusqu'à 3 joueurs (meilleurs buteurs, hors joueurs de départ) entrent dans la collection. */
+function campaignUnlocks(G, unlocked = []) {
+  const pool = G.squad.filter(id => !PLAYERS[id].mid && !unlocked.includes(id));
+  return pool.sort((a, b) => (G.goals[b] || 0) - (G.goals[a] || 0) || PLAYERS[b].r - PLAYERS[a].r).slice(0, 3);
 }
 
 function sellValue(G, id) { return Math.round((PLAYERS[id].price * 0.5 + (G.goals[id] || 0)) * 2) / 2; }
@@ -531,10 +573,11 @@ function makeOffer(G) {
 
 
 function wageTotal(G) { return Math.round(G.squad.reduce((a, id) => a + PLAYERS[id].salary, 0) * 10) / 10; }
-function wallNow(m, G) { return Math.round(m.wall * (m.rule === 'derby' ? 1.2 : 1) * Math.pow(0.9, m.pressing) * (hasStaff(G, 'video') ? 0.9 : 1)); }
+function ruleWall(m) { return m.rule === 'derby' ? 1.2 : m.rule === 'mourinho' ? 1.5 : 1; }
+function wallNow(m, G) { return Math.round(m.wall * ruleWall(m) * Math.pow(0.9, m.pressing) * (hasStaff(G, 'video') ? 0.9 : 1)); }
 
 export {
-  LINES, NATIONS, CLUBS, PLAYERS, force, cardForce, MOVES, STARTER, starterPack, MOVE_SLOTS, TIER_PRICE, STAFF, ITEMS, RULES, SEASON,
+  LINES, NATIONS, CLUBS, PLAYERS, force, cardForce, MOVES, STARTER, starterPack, MOVE_SLOTS, TIER_PRICE, STAFF, ITEMS, RULES, SEASON, CAMPAIGNS, campaignOf, stageOf, seasonLength, campaignUnlocks,
   setRng, shuffle, newGame, newMatch, evaluate, playAction, changeCards, settle, makeOffer, playable, useItem,
   sellValue, rerollCost, price, booster, addMove, removeMove, movePrice, hasStaff, fatigueLimit, wageTotal, wallNow,
 };

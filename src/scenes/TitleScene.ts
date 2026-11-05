@@ -1,6 +1,7 @@
 // Écran titre et booster de départ.
 import Phaser from 'phaser';
-import { newGame, booster, addMove, makeOffer, STARTER, starterPack } from '../game/logic.js';
+import { newGame, booster, addMove, makeOffer, STARTER, starterPack, CAMPAIGNS, RULES, PLAYERS } from '../game/logic.js';
+import { loadProfile } from '../game/profile';
 import { drawField, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
 import { W, C, big, txt, Button, backdrop, crt, modal, panel, onUpdate } from '../ui/theme';
@@ -24,16 +25,58 @@ export class TitleScene extends Phaser.Scene {
     this.add.image(W / 2, 367, 'titlePitch').setScale(2);
     let t = 0;
     onUpdate(this, () => { t++; drawField(tex.getContext(), '#c8102e', null, { x: 120 + Math.sin(t / 30) * 40, y: 68 + Math.cos(t / 23) * 20 }, t); tex.refresh(); });
-    new Button(this, W / 2, 570, 300, 60, 'Nouvelle saison', C.gold, () => this.startSeason(), 22);
+    const prof = loadProfile();
+    new Button(this, W / 2 - 160, 570, 300, 60, 'Nouvelle partie', C.gold, () => this.openCampaigns(), 22);
+    new Button(this, W / 2 + 160, 570, 300, 60, `Collection (${prof.unlocked.length})`, C.sky, () => this.openCollection(), 22);
     txt(this, W / 2, 640, 'Bats le mur du gardien avec tes mouvements. Combine club, nationalité, génération et styles.', 15, C.muted).setOrigin(0.5);
     crt(this);
   }
 
   /** Nouvelle saison : un booster de joueurs par ligne, puis le booster de mouvements. */
-  startSeason() {
-    S.G = newGame();
+  startSeason(campaign: string) {
+    S.G = newGame(campaign);
     S.G.squad = [];
     this.openDraft(0);
+  }
+
+  /** Choix de la campagne : chacune se débloque en gagnant la précédente. */
+  openCampaigns() {
+    const prof = loadProfile();
+    const { layer, close } = modal(this, 1160, 560);
+    layer.add(big(this, W / 2, 110, 'Choisis ta campagne', 22).setOrigin(0.5));
+    CAMPAIGNS.forEach((c: any, i: number) => {
+      const x = W / 2 - 380 + i * 380, open = !c.req || prof.won[c.req];
+      const won = prof.won[c.id] || 0;
+      layer.add(panel(this, x - 175, 150, 350, 400, open ? C.panel2 : C.panel, open ? C.gold : C.edge));
+      layer.add(big(this, x, 180, `${i + 1}`, 18, open ? C.gold : C.muted).setOrigin(0.5));
+      layer.add(txt(this, x, 214, c.name.toUpperCase(), 19, open ? C.cream : C.muted, { align: 'center', wordWrap: { width: 320 } }).setOrigin(0.5, 0));
+      layer.add(txt(this, x, 262, c.desc, 16, open ? C.cream2 : C.muted, { align: 'center', wordWrap: { width: 310 } }).setOrigin(0.5, 0));
+      const coaches = c.stages.filter((s: any) => s.coach).map((s: any) => (RULES as any)[s.coach].coach);
+      if (coaches.length) layer.add(txt(this, x, 370, 'Boss : ' + coaches.join(', '), 15, open ? C.red : C.muted, { align: 'center', wordWrap: { width: 310 } }).setOrigin(0.5, 0));
+      layer.add(txt(this, x, 440, open ? (won ? `Gagnée ${won} fois` : 'Pas encore gagnée') : `Verrouillée : gagne « ${CAMPAIGNS.find((o: any) => o.id === c.req)!.name} »`, 15, open ? (won ? C.green : C.muted) : C.muted, { align: 'center', wordWrap: { width: 310 } }).setOrigin(0.5, 0));
+      const b = new Button(this, x, 510, 220, 48, open ? 'Jouer' : 'Verrouillée', open ? C.gold : C.panel2, () => { close(); this.time.delayedCall(140, () => this.startSeason(c.id)); }, 19);
+      b.setEnabled(!!open); layer.add(b);
+    });
+    layer.add(new Button(this, W / 2 + 540, 110, 50, 44, '✕', C.red, () => close(), 20));
+  }
+
+  /** Collection : les joueurs débloqués, qui peuvent sortir du booster de départ. */
+  openCollection() {
+    const prof = loadProfile();
+    const { layer, close } = modal(this, 1160, 600);
+    layer.add(big(this, W / 2, 96, 'Ta collection', 22).setOrigin(0.5));
+    layer.add(txt(this, W / 2, 136, 'Gagne une campagne : tes meilleurs buteurs entrent ici et peuvent sortir du booster de départ.', 17, C.cream2).setOrigin(0.5));
+    const ids = prof.unlocked.filter(id => (PLAYERS as any)[id]);
+    if (!ids.length) layer.add(txt(this, W / 2, 340, 'Aucun joueur pour l\'instant.', 20, C.muted).setOrigin(0.5));
+    const per = 9, sc = 0.78, gx = 118, gy = 160;
+    ids.slice(0, 27).forEach((id, i) => {
+      const inRow = Math.min(per, Math.min(ids.length, 27) - Math.floor(i / per) * per);
+      const v = new CardView(this, W / 2 - (inRow - 1) * gx / 2 + (i % per) * gx, 260 + Math.floor(i / per) * gy, id);
+      v.sway = false; v.setScale(sc); layer.add(v);
+      tip(v, () => cardTip(id));
+    });
+    if (ids.length > 27) layer.add(txt(this, W / 2, 640, `et ${ids.length - 27} autres`, 15, C.muted).setOrigin(0.5));
+    layer.add(new Button(this, W / 2 + 540, 96, 50, 44, '✕', C.red, () => { hideTip(this); close(); }, 20));
   }
 
   openDraft(step: number) {
@@ -41,7 +84,7 @@ export class TitleScene extends Phaser.Scene {
     if (step >= lines.length) { this.openBooster(); return; }
     const pos = lines[step], [n, keep] = (STARTER as any)[pos];
     const label: Record<string, string> = { GAR: 'Gardiens', DEF: 'Défenseurs', MIL: 'Milieux', ATT: 'Attaquants' };
-    const pack: string[] = starterPack(pos);
+    const pack: string[] = starterPack(pos, loadProfile().unlocked);
     const chosen: string[] = [];
     const { layer, close } = modal(this, 1160, 600);
     layer.add(txt(this, W / 2, 84, `BOOSTER DE DÉPART · ${step + 1}/${lines.length}`, 16, C.muted).setOrigin(0.5));

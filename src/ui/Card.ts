@@ -56,8 +56,9 @@ export class CardView extends Phaser.GameObjects.Container {
     band.fillStyle(0xffffff, holo ? 0.22 : 0.16);
     band.fillPoints([new Phaser.Math.Vector2(-10, -h / 2), new Phaser.Math.Vector2(10, -h / 2), new Phaser.Math.Vector2(40, h / 2), new Phaser.Math.Vector2(20, h / 2)], true);
     this.addAt(band, 2);
-    band.x = -w;
-    this.scene.tweens.add({ targets: band, x: w, duration: 1400, delay: Math.random() * 2000, repeat: -1, repeatDelay: holo ? 900 : 2600, ease: 'Sine.inOut' });
+    // le reflet reste dans la carte (pas de masque sur un conteneur)
+    band.x = -w / 2 + 10;
+    this.scene.tweens.add({ targets: band, x: w / 2 - 40, duration: 1400, delay: Math.random() * 2000, repeat: -1, repeatDelay: holo ? 900 : 2600, ease: 'Sine.inOut' });
     if (holo) {
       let t = 0; const hue = this.glow;
       const fn = () => { if (!this.active) return; t += 0.02; hue.clear(); const c = Phaser.Display.Color.HSVToRGB((t % 1), 0.5, 1) as any; hue.lineStyle(3, c.color, 0.9).strokeRect(-w / 2 + 1, -h / 2 + 1, w - 2, h - 2); };

@@ -1,11 +1,12 @@
 // Écran de match : barre latérale de calcul, staff et consignes, terrain, mouvements et main de cartes.
 import Phaser from 'phaser';
 import {
-  SEASON, RULES, STAFF, ITEMS, MOVES, CLUBS, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
+  stageOf, seasonLength, campaignOf, campaignUnlocks, RULES, STAFF, ITEMS, MOVES, CLUBS, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
   settle, fatigueLimit, wallNow, cardForce,
 } from '../game/logic.js';
 import { drawField, actorsFor, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
+import { loadProfile, saveProfile } from '../game/profile';
 import { W, H, C, hex, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
 import { CardView, shortName, cardTip } from '../ui/Card';
 import { tip, wasLongPress } from '../ui/Tooltip';
@@ -50,13 +51,13 @@ export class MatchScene extends Phaser.Scene {
 
   // ---------- construction ----------
   buildSidebar() {
-    const M = S.M, s = SEASON[S.G.stage], u = this.ui;
+    const M = S.M, s = stageOf(S.G), u = this.ui;
     panel(this, SB_X, 16, SB_W, 76, M.rule ? C.red : C.panel);
     txt(this, SB_X + 14, 24, `${s.comp} · ${s.label}`.toUpperCase(), 13, C.cream);
     u.opp = big(this, SB_X + 14, 50, M.opp.toUpperCase(), 14, C.cream, { wordWrap: { width: SB_W - 28 } });
     if (M.rule) {
       u.opp.setY(46);
-      txt(this, SB_X + 14, 70, 'Règle : ' + RULES[M.rule].name, 14, C.gold);
+      txt(this, SB_X + 14, 70, ((RULES as any)[M.rule].coach ? (RULES as any)[M.rule].coach + ' · ' : 'Règle : ') + (RULES as any)[M.rule].name, 14, C.gold);
     }
     panel(this, SB_X, 104, SB_W, 86);
     txt(this, SB_X + 14, 112, 'MUR DU GARDIEN', 13, C.muted);
@@ -177,7 +178,7 @@ export class MatchScene extends Phaser.Scene {
       v.setInteractive({ useHandCursor: true });
       v.on('pointerover', () => { v.hovered = true; });
       v.on('pointerout', () => { v.hovered = false; });
-      tip(v, () => cardTip(v.id, [`Fatigue : ${S.M.fatigue[v.id] || 0} action(s) sur ${fatigueLimit(S.G)}`]));
+      tip(v, () => cardTip(v.id, [`Fatigue : ${S.M.fatigue[v.id] || 0} action(s) sur ${fatigueLimit(S.G, S.M)}`]));
       v.on('pointerup', () => { if (!wasLongPress(v)) this.toggle(v.id); });
       keep.push(v);
     });
@@ -187,7 +188,7 @@ export class MatchScene extends Phaser.Scene {
       const k = i - (n - 1) / 2;
       v.setHome(HAND_CX + k * gap, HAND_Y + Math.abs(k) * Math.abs(k) * 1.3, k * 0.02);
       v.setDepth(10 + i);
-      v.setFatigue(M.fatigue[v.id] || 0, fatigueLimit(S.G));
+      v.setFatigue(M.fatigue[v.id] || 0, fatigueLimit(S.G, S.M));
     });
   }
 
@@ -270,12 +271,12 @@ export class MatchScene extends Phaser.Scene {
 
   // ---------- actions ----------
   intro() {
-    const G = S.G, M = S.M, s = SEASON[G.stage];
+    const G = S.G, M = S.M, s = stageOf(G);
     this.busy = true;
     const { layer, close } = modal(this, 640, M.rule ? 400 : 290);
     const top = M.rule ? 180 : 230;
-    layer.add(txt(this, W / 2, top, `${s.comp} · ${s.label} · match ${G.stage + 1}/9`.toUpperCase(), 14, C.muted).setOrigin(0.5));
-    layer.add(big(this, W / 2, top + 36, s.boss ? 'MATCH SPÉCIAL' : 'COUP D\'ENVOI', 22).setOrigin(0.5));
+    layer.add(txt(this, W / 2, top, `${s.comp} · ${s.label} · match ${G.stage + 1}/${seasonLength(G)}`.toUpperCase(), 14, C.muted).setOrigin(0.5));
+    layer.add(big(this, W / 2, top + 36, s.coach ? (RULES as any)[s.coach].coach.toUpperCase() : s.boss ? 'MATCH SPÉCIAL' : 'COUP D\'ENVOI', 22, s.coach ? C.red : C.gold).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 76, `Olympique contre ${M.opp}`, 20).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 108, `${M.opp} annonce ${M.oppGoals} but${M.oppGoals > 1 ? 's' : ''}. Marques-en ${M.oppGoals + 1} en ${M.poss} possessions.`, 16, C.cream2).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 134, `Mur du gardien : ${wallNow(M, G)}. Chaque tir arrêté l'use jusqu'au but.${M.ossature ? `  Ossature ${M.ossature} : +1 possession.` : ''}`, 16, C.cream2).setOrigin(0.5));
@@ -416,9 +417,19 @@ export class MatchScene extends Phaser.Scene {
     const r = settle(M, G);
     const won = M.over === 'win';
     G.history.push({ stage: G.stage, opp: M.opp, us: M.goals, them: M.oppGoals, won });
-    const last = G.stage === SEASON.length - 1;
+    const last = G.stage === seasonLength(G) - 1;
     const { layer, close } = modal(this, 560, 420);
-    const title = !won ? 'ÉLIMINÉ' : last ? 'CHAMPION D\'EUROPE !' : 'VICTOIRE';
+    const title = !won ? 'ÉLIMINÉ' : last ? 'CAMPAGNE GAGNÉE !' : 'VICTOIRE';
+    // progression permanente
+    const prof = loadProfile();
+    let unlocked: string[] = [];
+    if (!won || last) prof.runs++;
+    if (won && last) {
+      unlocked = campaignUnlocks(G, prof.unlocked);
+      prof.unlocked.push(...unlocked);
+      prof.won[G.campaign] = (prof.won[G.campaign] || 0) + 1;
+    }
+    saveProfile(prof);
     layer.add(big(this, W / 2, 180, title, 24, won ? C.gold : C.red).setOrigin(0.5));
     layer.add(txt(this, W / 2, 220, `Olympique ${M.goals} - ${M.oppGoals} ${M.opp}`, 20).setOrigin(0.5));
     const rows: [string, string][] = won && !last
@@ -432,6 +443,10 @@ export class MatchScene extends Phaser.Scene {
       close(); G.stage++; G.rerolls = 0; (S as any).makeOffer = true; this.cameras.main.fadeOut(250, 13, 15, 24); this.time.delayedCall(260, () => this.scene.start('mercato'));
     }, 20));
     else layer.add(new Button(this, W / 2, 570, 280, 52, 'Nouvelle saison', C.gold, () => { close(); this.scene.start('title'); }, 20));
+    if (unlocked.length) {
+      layer.add(txt(this, W / 2, 480, 'Entrent dans ta collection (booster de départ) :', 15, C.gold).setOrigin(0.5));
+      layer.add(txt(this, W / 2, 504, unlocked.map(id => (PLAYERS as any)[id].name).join(', '), 17, C.cream).setOrigin(0.5));
+    }
     if (won) this.burst(W / 2, 160);
   }
 
@@ -439,7 +454,7 @@ export class MatchScene extends Phaser.Scene {
     const G = S.G;
     const top = Object.entries(G.goals as Record<string, number>).sort((a, b) => b[1] - a[1])[0];
     return [
-      ['Matchs gagnés', `${G.history.filter((h: any) => h.won).length} / 9`],
+      ['Matchs gagnés', `${G.history.filter((h: any) => h.won).length} / ${seasonLength(G)}`],
       ['Meilleur buteur', top ? `${(PLAYERS as any)[top[0]].name} (${top[1]})` : 'personne'],
       ['Budget final', fmt(G.budget)],
     ];
