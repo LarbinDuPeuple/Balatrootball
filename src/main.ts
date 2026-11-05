@@ -3,6 +3,7 @@ import { W, H, C } from './ui/theme';
 import { TitleScene } from './scenes/TitleScene';
 import { MatchScene } from './scenes/MatchScene';
 import { MercatoScene } from './scenes/MercatoScene';
+import { fullscreenButton } from './ui/fullscreen';
 
 async function boot() {
   // Les polices pixel doivent être chargées avant le premier texte Phaser.
@@ -19,3 +20,4 @@ async function boot() {
   });
 }
 boot();
+fullscreenButton();
