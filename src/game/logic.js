@@ -196,6 +196,9 @@ const MIDS = [
   ['Pierre-Alain Frau', 'ATT', 64, 'Sochaux', 'France', 2000, [], L(0, 2, 'court')],
 ];
 
+// Indice de force : courbe qui accélère avec la note FIFA (62 → 10, 72 → 20, 85 → 47, 96 → 100).
+function force(r) { return Math.max(5, Math.round(10 * Math.pow(10, (r - 62) / 34))); }
+
 function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-'); }
 function price(r) { return Math.max(1, Math.round(((r - 55) ** 2) / 60 * 2) / 2); }
 function salary(r) { return Math.max(0.2, Math.round(price(r) * 0.035 * 10) / 10); }
@@ -203,13 +206,13 @@ function salary(r) { return Math.max(0.2, Math.round(price(r) * 0.035 * 10) / 10
 const PLAYERS = {};
 STARS.forEach(([name, pos, r, club, nat, dec, styles, star, look]) => {
   const id = slug(name);
-  PLAYERS[id] = { id, name, pos, r, club, nat, dec, styles, star: !!star, look, price: price(r), salary: salary(r) };
+  PLAYERS[id] = { id, name, pos, r, f: force(r), club, nat, dec, styles, star: !!star, look, price: price(r), salary: salary(r) };
 });
 YOUTH.forEach(([name, pos, r, nat, , styles], i) => {
   const id = 'jeune-' + slug(name);
   const seed = i * 7 + 3;
   PLAYERS[id] = {
-    id, name, pos, r, club: 'Olympique', nat, dec: 2020, styles, star: false, youth: true,
+    id, name, pos, r, f: force(r), club: 'Olympique', nat, dec: 2020, styles, star: false, youth: true,
     look: L(seed % 5, (seed * 3) % 6, ['court', 'long', 'boucle', 'court', 'degarni', 'afro'][seed % 6], ['rien', 'rien', 'moustache', 'barbe'][seed % 4]),
     price: price(r), salary: salary(r),
   };
@@ -218,7 +221,7 @@ YOUTH.forEach(([name, pos, r, nat, , styles], i) => {
 MIDS.forEach(([name, pos, r, club, nat, dec, styles, look]) => {
   const id = slug(name);
   // prix et salaire de jeune : le booster de départ ne doit pas être une machine à cash
-  PLAYERS[id] = { id, name, pos, r, club, nat, dec, styles, star: false, mid: true, look, price: price(r - 8), salary: 0.1 };
+  PLAYERS[id] = { id, name, pos, r, f: force(r), club, nat, dec, styles, star: false, mid: true, look, price: price(r - 8), salary: 0.1 };
 });
 
 // Booster de départ : un paquet par ligne, on garde une partie des joueurs.
@@ -271,7 +274,7 @@ const ITEMS = {
 };
 
 const RULES = {
-  catenaccio: { name: 'Catenaccio', desc: 'Les attaquants ne comptent que la moitié de leur note' },
+  catenaccio: { name: 'Catenaccio', desc: 'Les attaquants ne comptent que la moitié de leur force' },
   gelee: { name: 'Pelouse gelée', desc: 'Le style Technique ne compte pas' },
   arbitre: { name: 'Arbitre tatillon', desc: 'Une action à 5 joueurs : le mieux noté est exclu du match' },
   derby: { name: 'Derby bouillant', desc: 'Synergies de club doublées, mais mur +20 %' },
@@ -281,15 +284,15 @@ const RULES = {
 const OPP_CLUBS = Object.keys(CLUBS).filter(c => c !== 'Olympique');
 
 const SEASON = [
-  { comp: 'Championnat', label: 'Journée 1', wall: 400, opp: 1, prime: 6 },
-  { comp: 'Championnat', label: 'Journée 2', wall: 700, opp: 1, prime: 7 },
-  { comp: 'Championnat', label: 'Grande affiche', wall: 1300, opp: 2, prime: 10, boss: true },
-  { comp: 'Coupe nationale', label: 'Huitième', wall: 1500, opp: 2, prime: 10 },
-  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1900, opp: 2, prime: 12 },
-  { comp: 'Coupe nationale', label: 'Finale', wall: 2800, opp: 2, prime: 15, boss: true },
-  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 3600, opp: 2, prime: 16 },
-  { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 4000, opp: 3, prime: 18 },
-  { comp: 'Coupe d\'Europe', label: 'Finale', wall: 4300, opp: 3, prime: 25, boss: true },
+  { comp: 'Championnat', label: 'Journée 1', wall: 250, opp: 1, prime: 6 },
+  { comp: 'Championnat', label: 'Journée 2', wall: 400, opp: 1, prime: 7 },
+  { comp: 'Championnat', label: 'Grande affiche', wall: 700, opp: 2, prime: 10, boss: true },
+  { comp: 'Coupe nationale', label: 'Huitième', wall: 950, opp: 2, prime: 10 },
+  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1300, opp: 2, prime: 12 },
+  { comp: 'Coupe nationale', label: 'Finale', wall: 2000, opp: 2, prime: 15, boss: true },
+  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 2800, opp: 2, prime: 16 },
+  { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 3200, opp: 3, prime: 18 },
+  { comp: 'Coupe d\'Europe', label: 'Finale', wall: 3600, opp: 3, prime: 25, boss: true },
 ];
 
 // ===== Aléatoire =====
@@ -335,10 +338,18 @@ function draw(m) {
   }
   sortHand(m);
 }
-function sortHand(m) { m.hand.sort((a, b) => LINES[PLAYERS[a].pos] - LINES[PLAYERS[b].pos] || PLAYERS[b].r - PLAYERS[a].r); }
+function sortHand(m) { m.hand.sort((a, b) => LINES[PLAYERS[a].pos] - LINES[PLAYERS[b].pos] || PLAYERS[b].f - PLAYERS[a].f); }
 
 function stylesOf(p, m) {
   return m && m.rule === 'gelee' ? p.styles.filter(s => s !== 'Technique') : p.styles;
+}
+
+/** Force d'une carte dans une action (règle Catenaccio, bonus de génération). */
+function cardForce(p, m, decCount) {
+  let f = p.f;
+  if (m && m.rule === 'catenaccio' && p.pos === 'ATT') f = Math.floor(f / 2);
+  if (decCount[p.dec] >= 2 && !p.youth) f = Math.round(f * 1.3);
+  return f;
 }
 
 function evaluate(ids, m, G) {
@@ -350,14 +361,9 @@ function evaluate(ids, m, G) {
   const decCount = {};
   ps.forEach(p => decCount[p.dec] = (decCount[p.dec] || 0) + 1);
   let sum = 0;
-  ps.forEach(p => {
-    let r = p.r;
-    if (m.rule === 'catenaccio' && p.pos === 'ATT') r = Math.floor(r / 2);
-    if (decCount[p.dec] >= 2 && !p.youth) r += 5;
-    sum += r;
-  });
+  ps.forEach(p => { sum += cardForce(p, m, decCount); });
   const gen = Object.entries(decCount).filter(([d, c]) => c >= 2 && ps.some(p => p.dec == d && !p.youth));
-  gen.forEach(([d, c]) => syn.push(`Génération ${d}s : +5 note x${c}`));
+  gen.forEach(([d, c]) => syn.push(`Génération ${d}s : force +30 % x${c}`));
 
   const line = { GAR: 0, DEF: 0, MIL: 0, ATT: 0 };
   ps.forEach(p => line[p.pos]++);
@@ -528,7 +534,7 @@ function wageTotal(G) { return Math.round(G.squad.reduce((a, id) => a + PLAYERS[
 function wallNow(m, G) { return Math.round(m.wall * (m.rule === 'derby' ? 1.2 : 1) * Math.pow(0.9, m.pressing) * (hasStaff(G, 'video') ? 0.9 : 1)); }
 
 export {
-  LINES, NATIONS, CLUBS, PLAYERS, MOVES, STARTER, starterPack, MOVE_SLOTS, TIER_PRICE, STAFF, ITEMS, RULES, SEASON,
+  LINES, NATIONS, CLUBS, PLAYERS, force, cardForce, MOVES, STARTER, starterPack, MOVE_SLOTS, TIER_PRICE, STAFF, ITEMS, RULES, SEASON,
   setRng, shuffle, newGame, newMatch, evaluate, playAction, changeCards, settle, makeOffer, playable, useItem,
   sellValue, rerollCost, price, booster, addMove, removeMove, movePrice, hasStaff, fatigueLimit, wageTotal, wallNow,
 };

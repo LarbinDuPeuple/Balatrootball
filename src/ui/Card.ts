@@ -36,7 +36,7 @@ export class CardView extends Phaser.GameObjects.Container {
     const nx = x0 + 22, ny = y0 + 24 + w - 38;
     note.fillStyle(C.edge, 1).fillCircle(nx, ny, 17);
     note.fillStyle(rar === 'or' || rar === 'legende' ? C.gold : C.green, 1).fillCircle(nx, ny, 14);
-    const noteT = big(scene, nx + 1, ny + 1, String(p.r), 11, C.ink).setOrigin(0.5);
+    const noteT = big(scene, nx + 1, ny + 1, String(p.f), p.f >= 100 ? 8 : 11, C.ink).setOrigin(0.5);
     const nm = txt(scene, x0 + 8, y0 + w + 10, `${p.pos} · ${shortName(p).toUpperCase()}`, 14, C.ink).setFixedSize(w - 14, 20);
     const badges = p.styles.map((st: string, i: number) => scene.add.image(x0 + 16 + i * 20, y0 + h - 18, styleBadge(scene, st, 18)));
     this.pips = scene.add.graphics();
@@ -90,5 +90,5 @@ export function cardTip(id: string, extra: string[] = []): TipContent {
     `Salaire ${fmt(p.salary)} par match · valeur ${fmt(p.price)}`,
     ...extra,
   ];
-  return { title: p.name, sub: `${p.pos} · note ${p.r}`, lines, accent: FRAME[rarity(p.r)] };
+  return { title: p.name, sub: `${p.pos} · force ${p.f} · note FIFA ${p.r}`, lines, accent: FRAME[rarity(p.r)] };
 }

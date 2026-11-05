@@ -2,7 +2,7 @@
 import Phaser from 'phaser';
 import {
   SEASON, RULES, STAFF, ITEMS, MOVES, CLUBS, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
-  settle, fatigueLimit, wallNow,
+  settle, fatigueLimit, wallNow, cardForce,
 } from '../game/logic.js';
 import { drawField, actorsFor, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
@@ -79,7 +79,7 @@ export class MatchScene extends Phaser.Scene {
     u.chips = big(this, SB_X + 70, 397, '0', 18, C.cream, { stroke: hex(C.edge), strokeThickness: 4 }).setOrigin(0.5);
     big(this, SB_X + SB_W / 2, 397, '×', 18, C.cream).setOrigin(0.5);
     u.mult = big(this, SB_X + SB_W - 70, 397, '0', 18, C.cream, { stroke: hex(C.edge), strokeThickness: 4 }).setOrigin(0.5);
-    txt(this, SB_X + 70, 428, 'notes + base', 12, C.muted).setOrigin(0.5, 0);
+    txt(this, SB_X + 70, 428, 'force + base', 12, C.muted).setOrigin(0.5, 0);
     txt(this, SB_X + SB_W - 70, 428, 'précision', 12, C.muted).setOrigin(0.5, 0);
     g.fillStyle(C.edge, 1).fillRect(SB_X + 12, 448, SB_W - 24, 46);
     u.danger = big(this, SB_X + SB_W / 2, 472, '0', 22, C.red, { stroke: hex(C.edge), strokeThickness: 5 }).setOrigin(0.5);
@@ -96,7 +96,7 @@ export class MatchScene extends Phaser.Scene {
     u.syn = txt(this, SB_X + SB_W - 14, 640, '', 14, C.gold).setOrigin(1, 0);
     tip(u.syn, () => ({ title: 'Bonus de l\'action', lines: this.lastSyn.length ? this.lastSyn : ['Aucun bonus'], accent: C.gold }));
     tip(this.add.rectangle(SB_X, 104, SB_W, 86, 0, 0).setOrigin(0), () => ({ title: 'Mur du gardien', lines: ['Danger à atteindre pour marquer 1 but.', 'Deux fois le mur : doublé.', 'Le staff, le pressing et certaines règles le font varier.'] }));
-    tip(this.add.rectangle(SB_X, 310, SB_W, 214, 0, 0).setOrigin(0), () => ({ title: 'Calcul du danger', lines: ['(notes des joueurs + base du mouvement) × précision.', 'Les bonus (club, nationalité, génération, styles, staff) ajoutent de la base ou de la précision.'], accent: C.sky }));
+    tip(this.add.rectangle(SB_X, 310, SB_W, 214, 0, 0).setOrigin(0), () => ({ title: 'Calcul du danger', lines: ['(force des joueurs + base du mouvement) × précision.', 'Les bonus (club, nationalité, génération, styles, staff) ajoutent de la base ou de la précision.'], accent: C.sky }));
   }
 
   buildTop() {
@@ -319,9 +319,7 @@ export class MatchScene extends Phaser.Scene {
     views.forEach((v: CardView, i: number) => {
       this.time.delayedCall(260 * i, () => {
         const p = v.p;
-        let r = p.r;
-        if (M.rule === 'catenaccio' && p.pos === 'ATT') r = Math.floor(r / 2);
-        if (decDouble[p.dec] >= 2 && !p.youth) r += 5;
+        const r = cardForce(p, M, decDouble);
         sum += r;
         u.chips.setText(String(sum));
         this.tweens.add({ targets: v, scale: 1.14, duration: 90, yoyo: true });
