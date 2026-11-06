@@ -98,7 +98,8 @@ export class TitleScene extends Phaser.Scene {
     packG.add([pg, big(this, 0, 0, label[pos].toUpperCase(), 10, C.ink).setOrigin(0.5)]);
     layer.add(packG);
     const go = new Button(this, W / 2, 610, 340, 52, '', C.gold, () => {
-      S.G.squad.push(...chosen);
+      if (!go.enabled) return; go.setEnabled(false); // pas de double validation
+      S.G.squad.push(...chosen.filter(id => !S.G.squad.includes(id)));
       hideTip(this); close();
       this.time.delayedCall(160, () => this.openDraft(step + 1));
     });
@@ -148,6 +149,7 @@ export class TitleScene extends Phaser.Scene {
     layer.add(packG);
     const tiles: Tile[] = [];
     const go = new Button(this, W / 2, 570, 320, 52, 'Choisis 2 mouvements', C.gold, () => {
+      if (!go.enabled) return; go.setEnabled(false);
       chosen.forEach(k => addMove(S.G, k, 0));
       makeOffer(S.G);
       close();

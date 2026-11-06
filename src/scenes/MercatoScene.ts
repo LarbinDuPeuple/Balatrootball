@@ -158,8 +158,9 @@ export class MercatoScene extends Phaser.Scene {
     pg.fillStyle(C.cream, 1).fillRect(-80, -20, 160, 40);
     packG.add([pg, big(this, 0, 0, pk.name.toUpperCase(), 10, C.ink).setOrigin(0.5)]);
     layer.add(packG);
+    let taken = false; // un seul choix par booster, même avec un double appui
     const take = (id: string) => {
-      if (kind === 'joueurs') { G.squad.push(id); G.signed = (G.signed || 0) + 1; }
+      if (kind === 'joueurs' && !G.squad.includes(id)) { G.squad.push(id); G.signed = (G.signed || 0) + 1; }
       if (kind === 'entrainement') G.levels[id] = (G.levels[id] || 0) + 1;
       if (kind === 'consignes') G.items.push(id);
       hideTip(this); close(); this.time.delayedCall(140, () => this.render());
@@ -186,7 +187,7 @@ export class MercatoScene extends Phaser.Scene {
           layer.add(obj); obj.setScale(0, 1);
           this.tweens.add({ targets: obj, scaleX: 1, duration: 240, delay: i * 160, ease: 'Back.out' });
           obj.setInteractive({ useHandCursor: true });
-          obj.on('pointerup', () => { if (wasLongPress(obj)) return; this.tweens.add({ targets: obj, y: y - 30, scale: 1.1, duration: 150, onComplete: () => take(id) }); });
+          obj.on('pointerup', () => { if (wasLongPress(obj) || taken) return; taken = true; this.tweens.add({ targets: obj, y: y - 30, scale: 1.1, duration: 150, onComplete: () => take(id) }); });
         });
         layer.add(new Button(this, W / 2, 600, 220, 40, 'Ne rien prendre', C.panel2, () => { hideTip(this); close(); this.time.delayedCall(140, () => this.render()); }, 15));
       },
