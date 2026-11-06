@@ -4,6 +4,7 @@ import {
   stageOf, RULES, STAFF, STAFF_SLOTS, ITEMS, MOVES, PLAYERS, PACKS, packContent, sellStaffValue, staffCost, hasStaff, makeOffer, rerollCost, sellValue, addMove, removeMove, movePrice, wageTotal, MOVE_SLOTS,
 } from '../game/logic.js';
 import { S } from '../game/state';
+import { saveRun } from '../game/save';
 import { W, C, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
 import { CardView, shortName, cardTip } from '../ui/Card';
 import { tip, hideTip, wasLongPress } from '../ui/Tooltip';
@@ -37,6 +38,7 @@ export class MercatoScene extends Phaser.Scene {
 
   render() {
     const G = S.G, s = stageOf(G), R = this.root;
+    saveRun(G, 'mercato');
     R.removeAll(true); this.cards = []; hideTip(this);
     const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { R.add(o); return o; };
     // ----- barre latérale
@@ -69,7 +71,7 @@ export class MercatoScene extends Phaser.Scene {
     })).setEnabled(G.budget >= rc);
     add(new Button(this, SB_X + SB_W / 2, 594, SB_W - 20, 46, 'Ton effectif', C.sky, () => this.squad()));
     const next = add(new Button(this, SB_X + SB_W / 2, 664, SB_W - 20, 56, 'Prochain match', C.gold, () => {
-      this.cameras.main.fadeOut(250, 13, 15, 24); this.time.delayedCall(260, () => this.scene.start('match'));
+      saveRun(G, 'match'); this.cameras.main.fadeOut(250, 13, 15, 24); this.time.delayedCall(260, () => this.scene.start('match'));
     }, 20));
     next.setEnabled(G.budget >= 0);
     if (G.budget < 0) add(txt(this, SB_X + SB_W / 2, 698, 'Budget négatif : vends un joueur', 12, C.red).setOrigin(0.5, 0));

@@ -2,6 +2,7 @@
 import Phaser from 'phaser';
 import { newGame, booster, addMove, makeOffer, drawStarters, CAMPAIGNS, RULES, PLAYERS, STAFF, MOVES } from '../game/logic.js';
 import { loadProfile } from '../game/profile';
+import { loadRun, saveRun, clearRun } from '../game/save';
 import { drawField, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
 import { W, C, big, txt, Button, backdrop, crt, modal, panel, onUpdate } from '../ui/theme';
@@ -27,8 +28,24 @@ export class TitleScene extends Phaser.Scene {
     let t = 0;
     onUpdate(this, () => { t++; drawField(tex.getContext(), '#c8102e', null, { x: 120 + Math.sin(t / 30) * 40, y: 68 + Math.cos(t / 23) * 20 }, t); tex.refresh(); });
     const prof = loadProfile();
-    new Button(this, W / 2 - 160, 570, 300, 60, 'Nouvelle partie', C.gold, () => this.openCampaigns(), 22);
-    new Button(this, W / 2 + 160, 570, 300, 60, `Collection (${prof.unlocked.length})`, C.sky, () => this.openCollection(), 22);
+    const run = loadRun();
+    if (run) {
+      const camp = (CAMPAIGNS as any[]).find(c => c.id === run.G.campaign)!;
+      new Button(this, W / 2 - 330, 570, 300, 60, 'Continuer', C.green, () => {
+        S.G = run.G; this.cameras.main.fadeOut(250, 13, 15, 24);
+        this.time.delayedCall(260, () => this.scene.start(run.where));
+      }, 22);
+      txt(this, W / 2 - 330, 608, `${camp.name} · match ${run.G.stage + 1}/${camp.stages.length}`, 13, C.cream2).setOrigin(0.5, 0);
+    }
+    const x0 = run ? 0 : -160, x1 = run ? 330 : 160;
+    new Button(this, W / 2 + x0, 570, 300, 60, 'Nouvelle partie', C.gold, () => {
+      if (!run) { this.openCampaigns(); return; }
+      const { layer, close } = modal(this, 560, 240);
+      layer.add(txt(this, W / 2, 300, 'Commencer une nouvelle partie efface la partie en cours.\nTa collection et tes entraîneurs sont gardés.', 17, C.cream, { align: 'center' }).setOrigin(0.5));
+      layer.add(new Button(this, W / 2 - 120, 380, 210, 46, 'Nouvelle partie', C.red, () => { close(); clearRun(); this.time.delayedCall(140, () => this.openCampaigns()); }, 16));
+      layer.add(new Button(this, W / 2 + 120, 380, 210, 46, 'Annuler', C.gold, () => close(), 16));
+    }, 22);
+    new Button(this, W / 2 + x1, 570, 300, 60, `Collection (${prof.unlocked.length})`, C.sky, () => this.openCollection(), 22);
     txt(this, W / 2, 640, 'Bats le mur du gardien avec tes mouvements. Combine club, nationalité, génération et styles.', 15, C.muted).setOrigin(0.5);
     crt(this);
   }
@@ -161,7 +178,7 @@ export class TitleScene extends Phaser.Scene {
     }, 18);
     const go = new Button(this, W / 2 + 190, 600, 330, 52, 'Commencer la saison', C.gold, () => {
       if (!go.enabled) return; go.setEnabled(false); again.setEnabled(false);
-      makeOffer(S.G);
+      makeOffer(S.G); saveRun(S.G, 'match');
       hideTip(this); close();
       this.cameras.main.fadeOut(250, 13, 15, 24);
       this.time.delayedCall(260, () => this.scene.start('match'));

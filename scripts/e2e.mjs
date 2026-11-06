@@ -73,6 +73,18 @@ async function run(vw, vh, tag) {
   await pg.screenshot({ path: `${out}/${tag}-6b-tip-chip.png` });
   await click(156, 594, 800);
   await pg.screenshot({ path: `${out}/${tag}-7-squad.png` });
+  // sauvegarde : après rechargement, Continuer ramène au mercato
+  await pg.reload(); await pg.waitForTimeout(1500);
+  await pg.screenshot({ path: `${out}/${tag}-8-continuer.png` });
+  await click(310, 570, 1500);
+  await pg.screenshot({ path: `${out}/${tag}-8b-repris.png` });
+  const where = await pg.evaluate(() => game.scene.getScenes(true).map(x => x.sys.settings.key).join(','));
+  if (where !== 'mercato') errs.push(tag + ': reprise sur ' + where);
+  // une sauvegarde d'une ancienne version est ignorée sans casser le jeu
+  await pg.evaluate(() => localStorage.setItem('mercato-partie', JSON.stringify({ v: 0, where: 'match', G: { squad: ['inconnu'] } })));
+  await pg.reload(); await pg.waitForTimeout(1500);
+  const left = await pg.evaluate(() => localStorage.getItem('mercato-partie'));
+  if (left) errs.push(tag + ': ancienne sauvegarde non effacée');
   await pg.close();
 }
 await run(1280, 720, 'pc');

@@ -2,11 +2,12 @@
 import Phaser from 'phaser';
 import {
   STAFF_SLOTS, stageOf, seasonLength, campaignOf, campaignUnlocks, coachUnlocks, itemsAllowed, RULES, STAFF, ITEMS, MOVES, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
-  settle, fatigueLimit, wallNow, cardForce,
+  settle, makeOffer, fatigueLimit, wallNow, cardForce,
 } from '../game/logic.js';
 import { drawField, actorsFor, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
 import { loadProfile, saveProfile } from '../game/profile';
+import { saveRun, clearRun } from '../game/save';
 import { W, H, C, hex, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
 import { CardView, shortName, cardTip } from '../ui/Card';
 import { tip, wasLongPress } from '../ui/Tooltip';
@@ -446,6 +447,7 @@ export class MatchScene extends Phaser.Scene {
     }
     const coaches: string[] = coachUnlocks(G, M, prof, won && last);
     saveProfile(prof);
+    if (won && !last) { G.stage++; G.rerolls = 0; makeOffer(G); saveRun(G, 'mercato'); G.stage--; } else clearRun();
     layer.add(big(this, W / 2, 180, title, 24, won ? C.gold : C.red).setOrigin(0.5));
     layer.add(txt(this, W / 2, 220, `Olympique ${M.goals} - ${M.oppGoals} ${M.opp}`, 20).setOrigin(0.5));
     const rows: [string, string][] = won && !last
@@ -456,7 +458,7 @@ export class MatchScene extends Phaser.Scene {
       layer.add(txt(this, W / 2 + 230, 260 + i * 28, b, 16, i === rows.length - 1 ? C.gold : C.cream).setOrigin(1, 0));
     });
     if (won && !last) layer.add(new Button(this, W / 2, 570, 280, 52, 'Aller au mercato', C.gold, () => {
-      close(); G.stage++; G.rerolls = 0; (S as any).makeOffer = true; this.cameras.main.fadeOut(250, 13, 15, 24); this.time.delayedCall(260, () => this.scene.start('mercato'));
+      close(); G.stage++; G.rerolls = 0; this.cameras.main.fadeOut(250, 13, 15, 24); this.time.delayedCall(260, () => this.scene.start('mercato'));
     }, 20));
     else layer.add(new Button(this, W / 2, 570, 280, 52, 'Nouvelle saison', C.gold, () => { close(); this.scene.start('title'); }, 20));
     if (unlocked.length) {
