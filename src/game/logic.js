@@ -28,6 +28,9 @@ const NATIONS = {
   'Mexique': { t: 'v', c: ['#1d7a3a', '#f4f4f4', '#c8102e'] },
   'Nigéria': { t: 'v', c: ['#1d8a43', '#f4f4f4', '#1d8a43'] },
   'Mali': { t: 'v', c: ['#1d8a43', '#f2d22e', '#c8102e'] },
+  'Ukraine': { t: 'h', c: ['#2b6cb0', '#f2d22e'] },
+  'Hongrie': { t: 'h', c: ['#c8102e', '#f4f4f4', '#1d7a3a'] },
+  'Irlande du Nord': { t: 'x', c: ['#f4f4f4', '#c8102e'] },
   'Uruguay': { t: 'h', c: ['#f4f4f4', '#5aa0dc', '#f4f4f4', '#5aa0dc'] },
 };
 
@@ -48,7 +51,7 @@ const CLUBS = {
   'Nantes': ['#f2d22e', '#1d8a43'], 'Lyon': ['#f4f4f4', '#1b4f9c'], 'Bordeaux': ['#1b2a4a', '#f4f4f4'],
   'Lille': ['#c8102e', '#1b2a4a'], 'Auxerre': ['#f4f4f4', '#2b6cb0'], 'Sochaux': ['#f2c14e', '#1b4f9c'],
   'Porto': ['#1b4f9c', '#f4f4f4'], 'Ajaccio': ['#c8102e', '#f4f4f4'], 'Atlético Nacional': ['#1d8a43', '#f4f4f4'],
-  'Pumas': ['#1b2a4a', '#d4af37'],
+  'Pumas': ['#1b2a4a', '#d4af37'], 'Benfica': ['#c8102e', '#f4f4f4'],
 };
 
 // look : [peau 0-4, cheveux 0-6, coupe, pilosité]
@@ -119,6 +122,20 @@ const STARS = [
   ['Mohamed Salah', 'ATT', 89, 'Liverpool', 'Égypte', 2020, ['Vitesse'], 0, L(2, 0, 'afro', 'barbe')],
   ['Antoine Griezmann', 'ATT', 88, 'Atlético Madrid', 'France', 2010, ['Technique', 'Pressing'], 0, L(0, 3, 'court')],
   ['Achraf Hakimi', 'DEF', 86, 'PSG', 'Maroc', 2020, ['Vitesse'], 0, L(2, 0, 'court')],
+  ['Kaká', 'MIL', 91, 'AC Milan', 'Brésil', 2000, ['Vitesse', 'Technique'], 1, L(1, 1, 'court')],
+  ['Andriy Shevchenko', 'ATT', 91, 'AC Milan', 'Ukraine', 2000, ['Vitesse', 'Physique'], 1, L(0, 2, 'court')],
+  ['Luís Figo', 'MIL', 90, 'Real Madrid', 'Portugal', 2000, ['Technique', 'Vitesse'], 1, L(1, 1, 'long')],
+  ['Rivaldo', 'ATT', 91, 'FC Barcelone', 'Brésil', 1990, ['Technique', 'Spécialiste'], 1, L(3, 0, 'court')],
+  ['Romário', 'ATT', 91, 'FC Barcelone', 'Brésil', 1990, ['Vitesse'], 1, L(3, 0, 'court')],
+  ['Eusébio', 'ATT', 92, 'Benfica', 'Portugal', 1960, ['Vitesse', 'Physique'], 1, L(4, 0, 'court')],
+  ['Gerd Müller', 'ATT', 92, 'Bayern Munich', 'Allemagne', 1970, ['Spécialiste'], 1, L(0, 1, 'court')],
+  ['George Best', 'ATT', 90, 'Manchester United', 'Irlande du Nord', 1960, ['Vitesse', 'Technique'], 1, L(0, 0, 'long', 'barbe')],
+  ['Raúl', 'ATT', 89, 'Real Madrid', 'Espagne', 2000, ['Leader', 'Technique'], 1, L(1, 0, 'court')],
+  ['Francesco Totti', 'ATT', 91, 'AS Roma', 'Italie', 2000, ['Technique', 'Leader'], 1, L(0, 3, 'court')],
+  ['Alessandro Del Piero', 'ATT', 90, 'Juventus', 'Italie', 2000, ['Technique', 'Spécialiste'], 1, L(1, 0, 'court')],
+  ['Ferenc Puskás', 'ATT', 93, 'Real Madrid', 'Hongrie', 1960, ['Spécialiste', 'Technique'], 1, L(1, 0, 'court')],
+  ['Alfredo Di Stéfano', 'ATT', 94, 'Real Madrid', 'Argentine', 1960, ['Leader', 'Technique'], 1, L(1, 0, 'degarni')],
+  ['Neymar', 'ATT', 90, 'PSG', 'Brésil', 2020, ['Technique', 'Vitesse'], 1, L(1, 0, 'crete')],
 ].filter(p => p[2] > 0);
 
 // Effectif de départ : jeunes du centre de formation (noms fictifs)
@@ -200,14 +217,94 @@ const MIDS = [
 // Indice de force : courbe qui accélère avec la note FIFA (62 → 10, 72 → 20, 85 → 47, 96 → 100).
 function force(r) { return Math.max(5, Math.round(10 * Math.pow(10, (r - 62) / 34))); }
 
-function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-'); }
+// ===== Pouvoirs de stars : un effet unique par star (symbole étoile sur la carte) =====
+// c : { p, ps, n, line, style, m, G, fx } ; fx regroupe les effets (base, préc., multiplicateurs, mur...)
+const mulF = (c, q, k) => { c.fx.force[q.id] = (c.fx.force[q.id] || 1) * k; };
+const POWERS = {
+  'Pelé': ['Le Roi', '+1 précision par but déjà marqué dans le match (max +3)', c => { c.fx.prec += Math.min(3, c.m.goals); }],
+  'Diego Maradona': ['Main de Dieu', '1re action du match : mur -40 %', c => { if (c.m.played === 0) c.fx.wall *= 0.6; }],
+  'Lionel Messi': ['La Pulga', 'Précision x1,5 avec au moins 2 coéquipiers', c => { if (c.n >= 3) c.fx.mult *= 1.5; }],
+  'Cristiano Ronaldo': ['Siuuu', 'Précision x2 s\'il est le seul ATT de l\'action', c => { if (c.line.ATT === 1) c.fx.mult *= 2; }],
+  'Zinédine Zidane': ['Roulette', '+1,5 précision s\'il est le seul MIL de l\'action', c => { if (c.line.MIL === 1) c.fx.prec += 1.5; }],
+  'Johan Cruyff': ['Football total', '+0,5 précision par poste différent dans l\'action', c => { c.fx.prec += 0.5 * Object.values(c.line).filter(Boolean).length; }],
+  'Ronaldo': ['Phénomène', 'Sa force est doublée', c => mulF(c, c.p, 2)],
+  'Franz Beckenbauer': ['Kaiser', 'Les DEF de l\'action ont force x2', c => c.ps.filter(q => q.pos === 'DEF').forEach(q => mulF(c, q, 2))],
+  'Michel Platini': ['Coup franc', '+2,5 précision s\'il joue seul', c => { if (c.n === 1) c.fx.prec += 2.5; }],
+  'Ronaldinho': ['Sourire', 'Ne se fatigue jamais', c => c.fx.fresh.add(c.p.id)],
+  'Kylian Mbappé': ['Turbo', '1re action du match : +3 précision', c => { if (c.m.played === 0) c.fx.prec += 3; }],
+  'Eric Cantona': ['Kung-fu', '+2 précision, mais 1 chance sur 8 d\'être exclu', c => { c.fx.prec += 2; c.fx.red.push(c.p.id); }],
+  'Zlatan Ibrahimović': ['Ibracadabra', 'Précision x2,5 s\'il joue seul', c => { if (c.n === 1) c.fx.mult *= 2.5; }],
+  'Paolo Maldini': ['Il Capitano', 'Les joueurs de son club dans l\'action ne se fatiguent pas', c => c.ps.filter(q => q.club === c.p.club).forEach(q => c.fx.fresh.add(q.id))],
+  'Thierry Henry': ['Va-va-voom', '+40 base par joueur Vitesse dans l\'action', c => { c.fx.base += 40 * (c.style.Vitesse || 0); }],
+  'Andrea Pirlo': ['Maestro', '+1 précision par MIL dans l\'action', c => { c.fx.prec += c.line.MIL; }],
+  'Lev Yachine': ['Araignée noire', 'Mur -25 %', c => { c.fx.wall *= 0.75; }],
+  'Gianluigi Buffon': ['Gigi', '+60 base si un ATT est aussi dans l\'action', c => { if (c.line.ATT) c.fx.base += 60; }],
+  'Manuel Neuer': ['Libéro', 'Compte aussi comme DEF et MIL pour les mouvements', c => { c.fx.lines.push('DEF', 'MIL'); }],
+  'Steven Gerrard': ['Istanbul', 'Précision x2 si tu es mené de 2 buts ou plus', c => { if (c.m.oppGoals - c.m.goals >= 2) c.fx.mult *= 2; }],
+  'Xavi': ['Métronome', '+0,5 précision par joueur Technique dans l\'action', c => { c.fx.prec += 0.5 * (c.style.Technique || 0); }],
+  'Andrés Iniesta': ['Iniestazo', '+1 changement après chaque action où il joue', c => { c.fx.changes += 1; }],
+  'Luka Modrić': ['Trivela', '+30 base par joueur dans l\'action', c => { c.fx.base += 30 * c.n; }],
+  'Roberto Baggio': ['Divin codino', 'Dernière possession : sa force x4', c => { if (c.m.poss === 1) mulF(c, c.p, 4); }],
+  'Erling Haaland': ['Cyborg', '+3 force par but qu\'il a marqué cette saison', c => { c.fx.addF[c.p.id] = (c.fx.addF[c.p.id] || 0) + 3 * (c.G.goals[c.p.id] || 0); }],
+  'Gerd Müller': ['Der Bomber', '+1 force par but de ton équipe cette saison', c => { c.fx.addF[c.p.id] = (c.fx.addF[c.p.id] || 0) + Object.values(c.G.goals).reduce((a, b) => a + b, 0); }],
+  'Karim Benzema': ['Nueve', '+1,5 précision s\'il y a exactement 2 ATT', c => { if (c.line.ATT === 2) c.fx.prec += 1.5; }],
+  "N'Golo Kanté": ['Partout', 'Compte comme DEF, MIL et ATT pour les mouvements', c => { c.fx.lines.push('DEF', 'ATT'); }],
+  'Virgil van Dijk': ['Tour de contrôle', 'Mur -20 %', c => { c.fx.wall *= 0.8; }],
+  'Kevin De Bruyne': ['Caviar', '+2 précision si un ATT est dans l\'action', c => { if (c.line.ATT) c.fx.prec += 2; }],
+  'Mohamed Salah': ['Pharaon', '+3 M€ par but marqué avec lui', c => { c.fx.money += 3; }],
+  'Robert Lewandowski': ['Lewy', 'Les ATT de l\'action ont force x1,5', c => c.ps.filter(q => q.pos === 'ATT').forEach(q => mulF(c, q, 1.5))],
+  'Lothar Matthäus': ['Panzer', 'Les Allemands de l\'action ont force x1,5', c => c.ps.filter(q => q.nat === 'Allemagne').forEach(q => mulF(c, q, 1.5))],
+  'Marco van Basten': ['Volée de 88', '+80 base avec un autre Néerlandais', c => { if (c.ps.filter(q => q.nat === 'Pays-Bas').length >= 2) c.fx.base += 80; }],
+  'Kaká': ['Contre éclair', '+1,5 précision avec un autre joueur Vitesse', c => { if ((c.style.Vitesse || 0) >= 2) c.fx.prec += 1.5; }],
+  'Andriy Shevchenko': ['Sheva', '+1 précision par joueur de l\'AC Milan dans l\'action', c => { c.fx.prec += c.ps.filter(q => q.club === 'AC Milan').length; }],
+  'Luís Figo': ['Transfert du siècle', '+0,1 précision par M€ en banque (max +3)', c => { c.fx.prec += Math.min(3, Math.max(0, Math.floor(c.G.budget)) / 10); }],
+  'Rivaldo': ['Ciseau', 'Frappe isolée : précision x3', c => { c.fx.moveMult.frappe = (c.fx.moveMult.frappe || 1) * 3; }],
+  'Romário': ['Baixinho', 'Force x2 si l\'action a 2 joueurs ou moins', c => { if (c.n <= 2) mulF(c, c.p, 2); }],
+  'Eusébio': ['Panthère noire', '+50 base par joueur des années 60 ou 70', c => { c.fx.base += 50 * c.ps.filter(q => q.dec <= 1970).length; }],
+  'George Best': ['Cinquième Beatle', '+3 précision, mais épuisé après 1 action', c => { c.fx.prec += 3; c.fx.tired.add(c.p.id); }],
+  'Raúl': ['Ange de Madrid', '+40 base par joueur du Real Madrid dans l\'action', c => { c.fx.base += 40 * c.ps.filter(q => q.club === 'Real Madrid').length; }],
+  'Francesco Totti': ['Il Pupone', 'Précision x2 si l\'action ne compte que des Italiens', c => { if (c.ps.every(q => q.nat === 'Italie')) c.fx.mult *= 2; }],
+  'Alessandro Del Piero': ['Zona Del Piero', '+2 précision si l\'action a exactement 2 joueurs', c => { if (c.n === 2) c.fx.prec += 2; }],
+  'Ferenc Puskás': ['Major galopant', '+1 précision par Spécialiste dans l\'action', c => { c.fx.prec += c.style.Spécialiste || 0; }],
+  'Alfredo Di Stéfano': ['Flèche blonde', '+0,3 précision par victoire de la saison', c => { c.fx.prec += 0.3 * c.G.history.filter(h => h.won).length; }],
+  'Iker Casillas': ['San Iker', 'Les tirs arrêtés avec lui usent le mur 1,5 fois plus', c => { c.fx.wear *= 1.5; }],
+  'Fabien Barthez': ['Bisou sur le crâne', '+1 précision par Français dans l\'action', c => { c.fx.prec += c.ps.filter(q => q.nat === 'France').length; }],
+  'Peter Schmeichel': ['Étoile de mer', 'Mur -15 % si un DEF est dans l\'action', c => { if (c.line.DEF) c.fx.wall *= 0.85; }],
+  'Franco Baresi': ['Libero', '+1 précision par DEF dans l\'action', c => { c.fx.prec += c.line.DEF; }],
+  'Cafu': ['Pendolino', '+60 base si un DEF et un ATT jouent ensemble', c => { if (c.line.DEF && c.line.ATT) c.fx.base += 60; }],
+  'Roberto Carlos': ['Coup franc impossible', 'Coup de pied arrêté : précision x2', c => { c.fx.moveMult.cpa = (c.fx.moveMult.cpa || 1) * 2; }],
+  'Sergio Ramos': ['Minute 93', 'Dernière possession : +3 précision', c => { if (c.m.poss === 1) c.fx.prec += 3; }],
+  'Lilian Thuram': ['Doublé de 98', 'Compte aussi comme ATT pour les mouvements', c => { c.fx.lines.push('ATT'); }],
+  'Marcel Desailly': ['Le Roc', 'Les DEF de l\'action ne se fatiguent pas', c => c.ps.filter(q => q.pos === 'DEF').forEach(q => c.fx.fresh.add(q.id))],
+  'Carles Puyol': ['Capitaine', '+0,7 précision par joueur du FC Barcelone dans l\'action', c => { c.fx.prec += 0.7 * c.ps.filter(q => q.club === 'FC Barcelone').length; }],
+  'Alessandro Nesta': ['Tacle parfait', 'Mur -15 %', c => { c.fx.wall *= 0.85; }],
+  'Philipp Lahm': ['Polyvalent', 'Compte aussi comme MIL pour les mouvements', c => { c.fx.lines.push('MIL'); }],
+  'Kalidou Koulibaly': ['Mur de Naples', '+40 base par DEF dans l\'action', c => { c.fx.base += 40 * c.line.DEF; }],
+  'Frank Lampard': ['Super Frank', '+1,5 précision si un MIL et un ATT jouent ensemble', c => { if (c.line.MIL && c.line.ATT) c.fx.prec += 1.5; }],
+  'Patrick Vieira': ['Invincibles', 'Les joueurs d\'Arsenal de l\'action ont force x1,5', c => c.ps.filter(q => q.club === 'Arsenal').forEach(q => mulF(c, q, 1.5))],
+  'Carlos Valderrama': ['El Pibe', 'Précision x1,5 si l\'action a 4 joueurs ou plus', c => { if (c.n >= 4) c.fx.mult *= 1.5; }],
+  'Gennaro Gattuso': ['Ringhio', '+25 base par joueur Pressing, ne se fatigue jamais', c => { c.fx.base += 25 * (c.style.Pressing || 0); c.fx.fresh.add(c.p.id); }],
+  'Clarence Seedorf': ['Quatre étoiles', '+0,5 précision par club différent dans l\'action', c => { c.fx.prec += 0.5 * new Set(c.ps.map(q => q.club)).size; }],
+  'Jean-Pierre Papin': ['Papinade', 'Centre-tête : précision x2', c => { c.fx.moveMult.centre = (c.fx.moveMult.centre || 1) * 2; }],
+  'Didier Drogba': ['Munich 2012', 'Dernière possession : sa force x3', c => { if (c.m.poss === 1) mulF(c, c.p, 3); }],
+  "Samuel Eto'o": ['Triplé', '+3 force par victoire de la saison', c => { c.fx.addF[c.p.id] = (c.fx.addF[c.p.id] || 0) + 3 * c.G.history.filter(h => h.won).length; }],
+  'George Weah': ['Mister George', '+70 base s\'il est le seul ATT de l\'action', c => { if (c.line.ATT === 1) c.fx.base += 70; }],
+  'Alan Shearer': ['Bras levé', '+1 précision par Anglais dans l\'action', c => { c.fx.prec += c.ps.filter(q => q.nat === 'Angleterre').length; }],
+  'Antoine Griezmann': ['Célébration', '+0,7 précision par Français ou joueur de l\'Atlético', c => { c.fx.prec += 0.7 * c.ps.filter(q => q.nat === 'France' || q.club === 'Atlético Madrid').length; }],
+  'Achraf Hakimi': ['Fusée', '1re action du match : sa force x3', c => { if (c.m.played === 0) mulF(c, c.p, 3); }],
+  'Neymar': ['Simulation', 'Mur -10 % et +1 changement après l\'action', c => { c.fx.wall *= 0.9; c.fx.changes += 1; }],
+};
+
+function slug(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 function price(r) { return Math.max(1, Math.round(((r - 55) ** 2) / 60 * 2) / 2); }
 function salary(r) { return Math.max(0.2, Math.round(price(r) * 0.035 * 10) / 10); }
 
-const PLAYERS = {};
+const PLAYERS = {}, POWER_FX = {};
 STARS.forEach(([name, pos, r, club, nat, dec, styles, star, look]) => {
   const id = slug(name);
-  PLAYERS[id] = { id, name, pos, r, f: force(r), club, nat, dec, styles, star: !!star, look, price: price(r), salary: salary(r) };
+  const pw = POWERS[name];
+  PLAYERS[id] = { id, name, pos, r, f: force(r), club, nat, dec, styles, star: !!pw, look, price: price(r), salary: salary(r), power: pw ? { name: pw[0], desc: pw[1] } : null };
+  if (pw) POWER_FX[id] = pw[2];
 });
 YOUTH.forEach(([name, pos, r, nat, , styles], i) => {
   const id = 'jeune-' + slug(name);
@@ -258,18 +355,31 @@ const TIER_PRICE = { commun: 5, rare: 9, epique: 14 };
 function movePrice(k, lv) { return TIER_PRICE[MOVES[k].tier] + 4 * lv; }
 
 
+// Entraîneurs (le cœur des combos, comme les jokers) : commun, rare, épique, légendaire.
 const STAFF = {
-  prepa: { name: 'Préparateur physique', desc: 'Fatigue : 3 actions par match au lieu de 2', cost: 8 },
-  adjoint: { name: 'Adjoint défensif', desc: '+0,5 précision si un DEF est dans l\'action', cost: 6 },
-  coachatt: { name: 'Coach des attaquants', desc: '+20 base par ATT dans l\'action', cost: 7 },
-  comm: { name: 'Directeur commercial', desc: '+3 M€ à chaque victoire', cost: 6 },
-  psy: { name: 'Psychologue', desc: 'Annule la règle Ego', cost: 5 },
-  gk: { name: 'Entraîneur des gardiens', desc: '+1 précision si un GAR est dans l\'action', cost: 7 },
-  kine: { name: 'Kiné', desc: '+1 changement par match', cost: 6 },
-  video: { name: 'Analyste vidéo', desc: 'Le mur adverse baisse de 10 %', cost: 10 },
-  mental: { name: 'Préparateur mental', desc: '+1 possession par match', cost: 12 },
-  scout: { name: 'Recruteur malin', desc: 'Relancer le mercato coûte 1 M€ de moins', cost: 4 },
+  prepa: { tier: 'commun', name: 'Préparateur physique', desc: 'Fatigue : 3 actions par match au lieu de 2', cost: 5 },
+  kine: { tier: 'commun', name: 'Kiné', desc: '+1 changement par match', cost: 4 },
+  comm: { tier: 'commun', name: 'Directeur commercial', desc: '+4 M€ à chaque victoire', cost: 5 },
+  adjoint: { tier: 'commun', name: 'Adjoint défensif', desc: '+1 précision si un DEF est dans l\'action', cost: 5 },
+  gk: { tier: 'commun', name: 'Entraîneur des gardiens', desc: '+1,5 précision si un GAR est dans l\'action', cost: 5 },
+  coachatt: { tier: 'commun', name: 'Coach des attaquants', desc: '+30 base par ATT dans l\'action', cost: 6 },
+  video: { tier: 'commun', name: 'Analyste vidéo', desc: 'Le mur adverse baisse de 10 %', cost: 6 },
+  psy: { tier: 'commun', name: 'Psychologue', desc: 'Annule l\'Ego des stars ; +1 précision avec 2 stars ou plus', cost: 4 },
+  scout: { tier: 'commun', name: 'Recruteur', desc: '+10 base par joueur recruté cette saison', cost: 5 },
+  mental: { tier: 'rare', name: 'Préparateur mental', desc: '+1 possession par match', cost: 8 },
+  cf: { tier: 'rare', name: 'Coach des coups francs', desc: 'Précision x1,5 si un Spécialiste est dans l\'action', cost: 8 },
+  jeunes: { tier: 'rare', name: 'Formateur', desc: 'Les joueurs du booster de départ ont force x2', cost: 7 },
+  kop: { tier: 'rare', name: 'Le Kop', desc: '+0,3 précision par victoire de la saison', cost: 8 },
+  stat: { tier: 'rare', name: 'Statisticien', desc: '+10 base par but marqué cette saison', cost: 8 },
+  tacticien: { tier: 'rare', name: 'Tacticien', desc: '+0,6 précision par poste différent dans l\'action', cost: 9 },
+  selection: { tier: 'epique', name: 'Sélectionneur', desc: 'Précision x1,5 si 2 joueurs de même nation', cost: 12 },
+  mecene: { tier: 'epique', name: 'Président mécène', desc: 'Précision x(1 + budget / 40), jusqu\'à x2', cost: 13 },
+  ultras: { tier: 'epique', name: 'Ultras', desc: 'Dernière possession : précision x2,5', cost: 11 },
+  ds: { tier: 'epique', name: 'Directeur sportif', desc: 'Précision x1,3 par star dans l\'action', cost: 13 },
+  mister: { tier: 'legende', name: 'Le Mister', desc: 'Précision x2', cost: 18 },
+  monde: { tier: 'legende', name: 'Cellule mondiale', desc: '+1 précision par nationalité différente dans l\'action', cost: 16 },
 };
+const STAFF_SLOTS = 5;
 
 const ITEMS = {
   pressing: { name: 'Pressing haut', desc: 'Mur -20 % pour la prochaine action', cost: 3 },
@@ -302,13 +412,13 @@ const OPP_CLUBS = Object.keys(CLUBS).filter(c => c !== 'Olympique');
 const SEASON = [
   { comp: 'Championnat', label: 'Journée 1', wall: 250, opp: 1, prime: 6 },
   { comp: 'Championnat', label: 'Journée 2', wall: 400, opp: 1, prime: 7 },
-  { comp: 'Championnat', label: 'Grande affiche', wall: 700, opp: 2, prime: 10, boss: true },
-  { comp: 'Coupe nationale', label: 'Huitième', wall: 950, opp: 2, prime: 10 },
-  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1300, opp: 2, prime: 12 },
-  { comp: 'Coupe nationale', label: 'Finale', wall: 2000, opp: 2, prime: 15, boss: true },
-  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 2800, opp: 2, prime: 16 },
-  { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 3200, opp: 3, prime: 18 },
-  { comp: 'Coupe d\'Europe', label: 'Finale', wall: 3600, opp: 3, prime: 25, boss: true },
+  { comp: 'Championnat', label: 'Grande affiche', wall: 550, opp: 2, prime: 10, boss: true },
+  { comp: 'Coupe nationale', label: 'Huitième', wall: 800, opp: 2, prime: 10 },
+  { comp: 'Coupe nationale', label: 'Demi-finale', wall: 1200, opp: 2, prime: 12 },
+  { comp: 'Coupe nationale', label: 'Finale', wall: 2200, opp: 2, prime: 15, boss: true },
+  { comp: 'Coupe d\'Europe', label: 'Quart de finale', wall: 3600, opp: 2, prime: 16 },
+  { comp: 'Coupe d\'Europe', label: 'Demi-finale', wall: 5000, opp: 3, prime: 18 },
+  { comp: 'Coupe d\'Europe', label: 'Finale', wall: 6500, opp: 3, prime: 25, boss: true },
 ];
 
 // Campagnes : comme les paquets de Balatro, de plus en plus dures, avec des entraîneurs cultes en boss.
@@ -339,7 +449,7 @@ function pick(a) { return a[Math.floor(rng() * a.length)]; }
 // ===== Partie =====
 function newGame(campaign = 'saison') {
   const G = {
-    campaign, budget: (CAMPAIGNS.find(c => c.id === campaign) || CAMPAIGNS[0]).budget, squad: autoStarter(),
+    campaign, signed: 0, budget: (CAMPAIGNS.find(c => c.id === campaign) || CAMPAIGNS[0]).budget, squad: autoStarter(),
     goals: {}, staff: [], items: [], levels: {}, moves: ['frappe', 'passe', 'unedeux'], stage: 0, rerolls: 0, offer: null, history: [],
   };
   Object.keys(MOVES).forEach(k => G.levels[k] = 0);
@@ -382,6 +492,8 @@ function stylesOf(p, m) {
 }
 
 /** Force d'une carte dans une action (règle Catenaccio, bonus de génération). */
+function shortName(p) { const parts = p.name.split(' '); return parts.length === 1 ? p.name : parts.slice(1).join(' '); }
+function dec1(x) { return String(Math.round(x * 10) / 10).replace('.', ','); }
 function cardForce(p, m, decCount) {
   let f = p.f;
   if (m && (m.rule === 'catenaccio' || m.rule === 'simeone') && p.pos === 'ATT') f = Math.floor(f / 2);
@@ -397,13 +509,27 @@ function evaluate(ids, m, G) {
   // notes
   const decCount = {};
   ps.forEach(p => decCount[p.dec] = (decCount[p.dec] || 0) + 1);
+  // effets des pouvoirs de stars
+  const line0 = { GAR: 0, DEF: 0, MIL: 0, ATT: 0 };
+  ps.forEach(p => line0[p.pos]++);
+  const style0 = {};
+  ps.forEach(p => stylesOf(p, m).forEach(x => style0[x] = (style0[x] || 0) + 1));
+  const fx = { base: 0, prec: 0, mult: 1, wall: 1, force: {}, addF: {}, lines: [], fresh: new Set(), tired: new Set(), red: [], changes: 0, money: 0, moveMult: {}, wear: 1 };
+  const powers = [];
+  ps.forEach(p => { if (POWER_FX[p.id]) { POWER_FX[p.id]({ p, ps, n: ps.length, line: line0, style: style0, m, G, fx }); powers.push(p.id); } });
+  const forces = {};
   let sum = 0;
-  ps.forEach(p => { sum += cardForce(p, m, decCount); });
+  ps.forEach(p => {
+    let f = cardForce(p, m, decCount);
+    if (p.mid && hasStaff(G, 'jeunes')) f *= 2;
+    f = Math.round(f * (fx.force[p.id] || 1)) + (fx.addF[p.id] || 0);
+    forces[p.id] = f; sum += f;
+  });
   const gen = Object.entries(decCount).filter(([d, c]) => c >= 2 && ps.some(p => p.dec == d && !p.youth));
   gen.forEach(([d, c]) => syn.push(`Génération ${d}s : force +30 % x${c}`));
 
-  const line = { GAR: 0, DEF: 0, MIL: 0, ATT: 0 };
-  ps.forEach(p => line[p.pos]++);
+  const line = { ...line0 };
+  fx.lines.forEach(l => { if (!line[l]) line[l] = 1; });
   const st = p => stylesOf(p, m);
   const styleCount = {};
   ps.forEach(p => st(p).forEach(s => styleCount[s] = (styleCount[s] || 0) + 1));
@@ -434,14 +560,33 @@ function evaluate(ids, m, G) {
   if ((styleCount.Technique || 0) >= 3 && !m.techUsed) { techBonus = true; syn.push('Trio Technique : +1 changement'); }
   const stars = ps.filter(p => p.star).length;
   const leader = ps.some(p => st(p).includes('Leader'));
-  if (stars >= 2) {
-    if (leader || hasStaff(G, 'psy')) syn.push('Ego calmé par un Leader');
-    else { multPrec *= 0.7; syn.push('Ego : 2 stars sans Leader, préc. x0,7'); }
+  if (stars >= 3) {
+    if (leader || hasStaff(G, 'psy')) syn.push('Ego calmé');
+    else { multPrec *= 0.7; syn.push('Ego : 3 stars sans Leader, préc. x0,7'); }
   }
+  powers.forEach(id => syn.push(`★ ${PLAYERS[id].power.name} (${shortName(PLAYERS[id])})`));
+  addBase += fx.base; addPrec += fx.prec; multPrec *= fx.mult; wallMult *= fx.wall;
+  fx.fresh.forEach(id => fatigueFree.add(id));
   // staff
-  if (hasStaff(G, 'adjoint') && line.DEF) { addPrec += 0.5; syn.push('Adjoint défensif : +0,5 préc.'); }
-  if (hasStaff(G, 'coachatt') && line.ATT) { addBase += 20 * line.ATT; syn.push(`Coach des attaquants : +${20 * line.ATT} base`); }
-  if (hasStaff(G, 'gk') && line.GAR) { addPrec += 1; syn.push('Entraîneur des gardiens : +1 préc.'); }
+  const S1 = (k, cond, f, label) => { if (hasStaff(G, k) && cond) { f(); syn.push(`${STAFF[k].name} : ${label}`); } };
+  const wins = G.history.filter(h => h.won).length, seasonGoals = Object.values(G.goals).reduce((a, b) => a + b, 0);
+  S1('adjoint', line0.DEF, () => { addPrec += 1; }, '+1 préc.');
+  S1('coachatt', line0.ATT, () => { addBase += 30 * line0.ATT; }, `+${30 * line0.ATT} base`);
+  S1('gk', line0.GAR, () => { addPrec += 1.5; }, '+1,5 préc.');
+  S1('psy', stars >= 2, () => { addPrec += 1; }, '+1 préc.');
+  S1('scout', G.signed, () => { addBase += 10 * G.signed; }, `+${10 * G.signed} base`);
+  S1('cf', style0['Spécialiste'], () => { multPrec *= 1.5; }, 'préc. x1,5');
+  S1('kop', wins, () => { addPrec += 0.3 * wins; }, `+${dec1(0.3 * wins)} préc.`);
+  S1('stat', seasonGoals, () => { addBase += 10 * seasonGoals; }, `+${10 * seasonGoals} base`);
+  const nLines = Object.values(line0).filter(Boolean).length, nNat = new Set(ps.map(p => p.nat)).size;
+  S1('tacticien', true, () => { addPrec += 0.6 * nLines; }, `+${dec1(0.6 * nLines)} préc.`);
+  S1('selection', Object.values(natCount).some(k => k >= 2), () => { multPrec *= 1.5; }, 'préc. x1,5');
+  const mec = Math.min(2, 1 + Math.max(0, G.budget) / 40);
+  S1('mecene', mec > 1, () => { multPrec *= mec; }, `préc. x${dec1(mec)}`);
+  S1('ultras', m.poss === 1, () => { multPrec *= 2.5; }, 'préc. x2,5');
+  S1('ds', stars, () => { multPrec *= Math.pow(1.3, stars); }, `préc. x${dec1(Math.pow(1.3, stars))}`);
+  S1('mister', true, () => { multPrec *= 2; }, 'préc. x2');
+  S1('monde', true, () => { addPrec += nNat; }, `+${nNat} préc.`);
   if (hasStaff(G, 'video')) wallMult *= 0.9;
   if (m.nextPrec !== 1) { multPrec *= m.nextPrec; syn.push('Remontada : préc. x2'); }
   if (m.nextWall !== 1) { wallMult *= m.nextWall; syn.push('Pressing haut : mur -20 %'); }
@@ -453,7 +598,7 @@ function evaluate(ids, m, G) {
   cands.forEach(k => {
     const mv = MOVES[k], lv = G.levels[k] || 0;
     const base = mv.base + 10 * lv + addBase;
-    const prec = Math.round((mv.prec + 0.5 * lv + addPrec) * multPrec * 100) / 100;
+    const prec = Math.round((mv.prec + 0.5 * lv + addPrec) * multPrec * (fx.moveMult[k] || 1) * 100) / 100;
     const danger = Math.round((sum + base) * prec);
     if (!best || danger > best.danger) best = { move: k, base, prec, danger, lv };
   });
@@ -461,7 +606,7 @@ function evaluate(ids, m, G) {
   // Le mur s'use : chaque tir arrêté retire son danger au prochain but ; le doublé demande en plus un mur entier.
   const need = Math.max(1, wall - (m.wear || 0));
   const goals = best.danger >= need + wall ? 2 : best.danger >= need ? 1 : 0;
-  return { ...best, sum, wall, need, goals, syn, fatigueFree, techBonus, pressingAdd, ordered: ps.map(p => p.id) };
+  return { ...best, sum, wall, need, goals, syn, fatigueFree, techBonus, pressingAdd, ordered: ps.map(p => p.id), forces, fx, powers };
 }
 
 function playable(m, G, id) {
@@ -480,19 +625,20 @@ function playAction(ids, m, G) {
     G.goals[scorer] = (G.goals[scorer] || 0) + goals;
   }
   m.goals += goals;
-  if (ev.goals > 0) m.wear = 0; else if (ev.move) m.wear = (m.wear || 0) + (m.rule === 'sacchi' ? Math.round(ev.danger / 2) : ev.danger);
+  if (ev.goals > 0) m.wear = 0; else if (ev.move) m.wear = (m.wear || 0) + Math.round(ev.danger * ev.fx.wear * (m.rule === 'sacchi' ? 0.5 : 1));
   if (ev.pressingAdd) m.pressing++;
   if (ev.techBonus) { m.changes++; m.techUsed = true; }
   m.nextWall = 1; m.nextPrec = 1;
   let sentOff = null;
-  if (m.rule === 'arbitre' && ids.length === 5) {
-    sentOff = ids.slice().sort((a, b) => PLAYERS[b].r - PLAYERS[a].r)[0];
-    res.sentOff = sentOff;
-  }
+  if (m.rule === 'arbitre' && ids.length === 5) sentOff = ids.slice().sort((a, b) => PLAYERS[b].r - PLAYERS[a].r)[0];
+  ev.fx.red.forEach(id => { if (!sentOff && rng() < 0.125) sentOff = id; });
+  res.sentOff = sentOff;
+  m.changes += ev.fx.changes;
+  if (goals > 0 && ev.fx.money) { res.money = ev.fx.money * goals; G.budget = Math.round((G.budget + res.money) * 10) / 10; }
   ids.forEach(id => {
     m.hand.splice(m.hand.indexOf(id), 1);
     if (!ev.fatigueFree.has(id)) m.fatigue[id] = (m.fatigue[id] || 0) + 1;
-    if (id === sentOff) m.fatigue[id] = 99;
+    if (id === sentOff || ev.fx.tired.has(id)) m.fatigue[id] = 99;
     if (m.fatigue[id] >= fatigueLimit(G, m)) m.out.push(id); else m.discard.push(id);
   });
   m.poss--; m.played++;
@@ -533,7 +679,7 @@ function settle(m, G) {
   const wage = Math.round(G.squad.reduce((a, id) => a + PLAYERS[id].salary, 0) * 10) / 10;
   const r = { wage, prime: 0, diff: 0, ticket: 0, comm: 0 };
   if (m.over === 'win') {
-    r.prime = m.prime; r.diff = 2 * (m.goals - m.oppGoals); r.ticket = m.poss; r.comm = hasStaff(G, 'comm') ? 3 : 0;
+    r.prime = m.prime; r.diff = 2 * (m.goals - m.oppGoals); r.ticket = m.poss; r.comm = hasStaff(G, 'comm') ? 4 : 0;
   }
   r.total = Math.round((r.prime + r.diff + r.ticket + r.comm - wage) * 10) / 10;
   G.budget = Math.round((G.budget + r.total) * 10) / 10;
@@ -548,28 +694,55 @@ function campaignUnlocks(G, unlocked = []) {
 
 function sellValue(G, id) { return Math.round((PLAYERS[id].price * 0.5 + (G.goals[id] || 0)) * 2) / 2; }
 
-function rerollCost(G) { return Math.max(0, 2 + G.rerolls - (hasStaff(G, 'scout') ? 1 : 0)); }
+function rerollCost(G) { return 2 + G.rerolls; }
 
 function booster() { return shuffle(Object.keys(MOVES).filter(k => MOVES[k].tier === 'commun')).slice(0, 4); }
 function addMove(G, k, lv) { if (G.moves.length >= MOVE_SLOTS || G.moves.includes(k)) return false; G.moves.push(k); G.levels[k] = Math.max(G.levels[k] || 0, lv || 0); return true; }
 function removeMove(G, k) { const i = G.moves.indexOf(k); if (i < 0) return false; G.moves.splice(i, 1); G.levels[k] = 0; return true; }
 
-function makeOffer(G) {
-  const cap = 84 + G.stage * 2;
-  const pool = Object.values(PLAYERS).filter(p => !p.youth && !p.mid && !G.squad.includes(p.id) && p.r <= cap);
-  const players = shuffle(pool.slice()).slice(0, 4).map(p => p.id);
-  const staff = shuffle(Object.keys(STAFF).filter(k => !G.staff.includes(k))).slice(0, 2);
-  const items = shuffle(Object.keys(ITEMS)).slice(0, 2);
-  const train = shuffle(G.moves.slice()).slice(0, 2);
+// Boutique du mercato : 2 entraîneurs et 2 mouvements (relançables), plus 3 boosters (un achat chacun).
+const STAFF_WEIGHT = { commun: 60, rare: 28, epique: 10, legende: 3 };
+function pickStaff(G, n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const pool = Object.keys(STAFF).filter(k => !G.staff.includes(k) && !out.includes(k));
+    if (!pool.length) break;
+    const w = pool.map(k => STAFF_WEIGHT[STAFF[k].tier] * (STAFF[k].tier === 'commun' ? 1 : 1 + G.stage * 0.15));
+    let r = rng() * w.reduce((a, b) => a + b, 0), j = 0;
+    while (r > w[j]) { r -= w[j]; j++; }
+    out.push(pool[j]);
+  }
+  return out;
+}
+function offerMoves(G) {
   const tiers = G.stage < 3 ? ['commun', 'commun', 'rare'] : G.stage < 6 ? ['commun', 'rare', 'rare', 'epique'] : ['rare', 'epique'];
   const pool2 = Object.keys(MOVES).filter(k => MOVES[k].tier !== 'base' && !G.moves.includes(k));
   const moves = [];
-  for (let i = 0; i < 6 && moves.length < 2; i++) {
+  for (let i = 0; i < 8 && moves.length < 2; i++) {
     const t = pick(tiers); const opts = pool2.filter(k => (MOVES[k].tier === t || i > 3) && !moves.some(m => m.k === k));
     if (opts.length) { const lv = rng() < 0.25 + G.stage * 0.05 ? 1 + Math.floor(rng() * 2) : 0; moves.push({ k: pick(opts), lv }); }
   }
-  G.offer = { players, staff, items, train, moves };
+  return moves;
 }
+function makeOffer(G, keepPacks = false) {
+  const packs = keepPacks && G.offer ? G.offer.packs : { joueurs: false, entrainement: false, consignes: false };
+  G.offer = { staff: pickStaff(G, 2), moves: offerMoves(G), packs };
+}
+const PACKS = {
+  joueurs: { name: 'Joueurs', desc: 'Choisis 1 star parmi 3', price: G => 9 + G.stage },
+  entrainement: { name: 'Entraînement', desc: 'Choisis 1 mouvement à faire monter de niveau parmi 3', price: () => 4 },
+  consignes: { name: 'Consignes', desc: 'Choisis 1 consigne à usage unique parmi 3', price: () => 3 },
+};
+function packContent(G, kind) {
+  if (kind === 'joueurs') {
+    const cap = 84 + G.stage * 2 + (rng() < 0.08 ? 10 : 0);
+    const pool = Object.values(PLAYERS).filter(p => !p.youth && !p.mid && !G.squad.includes(p.id) && p.r <= cap);
+    return shuffle(pool.slice()).slice(0, 3).map(p => p.id);
+  }
+  if (kind === 'entrainement') return shuffle(G.moves.slice()).slice(0, 3);
+  return shuffle(Object.keys(ITEMS)).slice(0, 3);
+}
+function sellStaffValue(k) { return Math.floor(STAFF[k].cost / 2); }
 
 
 function wageTotal(G) { return Math.round(G.squad.reduce((a, id) => a + PLAYERS[id].salary, 0) * 10) / 10; }
@@ -577,7 +750,7 @@ function ruleWall(m) { return m.rule === 'derby' ? 1.2 : m.rule === 'mourinho' ?
 function wallNow(m, G) { return Math.round(m.wall * ruleWall(m) * Math.pow(0.9, m.pressing) * (hasStaff(G, 'video') ? 0.9 : 1)); }
 
 export {
-  LINES, NATIONS, CLUBS, PLAYERS, force, cardForce, MOVES, STARTER, starterPack, MOVE_SLOTS, TIER_PRICE, STAFF, ITEMS, RULES, SEASON, CAMPAIGNS, campaignOf, stageOf, seasonLength, campaignUnlocks,
+  LINES, NATIONS, CLUBS, PLAYERS, force, cardForce, MOVES, STARTER, starterPack, MOVE_SLOTS, TIER_PRICE, STAFF, STAFF_SLOTS, ITEMS, RULES, SEASON, CAMPAIGNS, campaignOf, stageOf, seasonLength, campaignUnlocks,
   setRng, shuffle, newGame, newMatch, evaluate, playAction, changeCards, settle, makeOffer, playable, useItem,
-  sellValue, rerollCost, price, booster, addMove, removeMove, movePrice, hasStaff, fatigueLimit, wageTotal, wallNow,
+  sellValue, rerollCost, PACKS, packContent, sellStaffValue, price, booster, addMove, removeMove, movePrice, hasStaff, fatigueLimit, wageTotal, wallNow,
 };

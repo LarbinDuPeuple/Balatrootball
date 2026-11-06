@@ -1,7 +1,7 @@
 // Écran de match : barre latérale de calcul, staff et consignes, terrain, mouvements et main de cartes.
 import Phaser from 'phaser';
 import {
-  stageOf, seasonLength, campaignOf, campaignUnlocks, RULES, STAFF, ITEMS, MOVES, CLUBS, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
+  STAFF_SLOTS, stageOf, seasonLength, campaignOf, campaignUnlocks, RULES, STAFF, ITEMS, MOVES, CLUBS, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
   settle, fatigueLimit, wallNow, cardForce,
 } from '../game/logic.js';
 import { drawField, actorsFor, PITCH_W, PITCH_H } from '../game/art';
@@ -10,7 +10,7 @@ import { loadProfile, saveProfile } from '../game/profile';
 import { W, H, C, hex, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
 import { CardView, shortName, cardTip } from '../ui/Card';
 import { tip, wasLongPress } from '../ui/Tooltip';
-import { moveBadge, staffBadge, itemBadge, moveTip, staffTip, itemTip } from '../ui/icons';
+import { moveBadge, staffBadge, itemBadge, moveTip, staffTip, itemTip, STAFF_TIER_COLOR } from '../ui/icons';
 
 const SB_X = 16, SB_W = 280;          // barre latérale
 const RX = 312;                       // début de la zone droite
@@ -102,15 +102,16 @@ export class MatchScene extends Phaser.Scene {
 
   buildTop() {
     const G = S.G;
-    for (let i = 0; i < 4; i++) {
-      const x = RX + i * 150;
-      panel(this, x, 16, 140, 96, G.staff[i] ? C.cream : C.panel, G.staff[i] ? C.green : C.panel2);
-      if (G.staff[i]) {
-        const k = G.staff[i], st = (STAFF as any)[k];
-        this.add.image(x + 70, 46, staffBadge(this, k, 44));
-        txt(this, x + 70, 74, st.name, 14, C.ink, { align: 'center', wordWrap: { width: 130 } }).setOrigin(0.5, 0).setLineSpacing(-4);
-        tip(this.add.rectangle(x, 16, 140, 96, 0, 0).setOrigin(0), () => staffTip(k));
-      } else txt(this, x + 70, 64, 'Staff\nplace libre', 13, C.muted, { align: 'center' }).setOrigin(0.5);
+    for (let i = 0; i < STAFF_SLOTS; i++) {
+      const x = RX + i * 120, k = G.staff[i];
+      const tierC = k ? STAFF_TIER_COLOR[(STAFF as any)[k].tier] : C.panel2;
+      panel(this, x, 16, 112, 96, k ? C.cream : C.panel, tierC);
+      if (k) {
+        const st = (STAFF as any)[k];
+        this.add.image(x + 56, 44, staffBadge(this, k, 50));
+        txt(this, x + 56, 72, st.name, 12, C.ink, { align: 'center', wordWrap: { width: 106 } }).setOrigin(0.5, 0).setLineSpacing(-5);
+        tip(this.add.rectangle(x, 16, 112, 96, 0, 0).setOrigin(0), () => staffTip(k));
+      } else txt(this, x + 56, 64, 'Entraîneur\nplace libre', 12, C.muted, { align: 'center' }).setOrigin(0.5);
     }
     this.ui.items = this.add.container(0, 0);
     this.drawItems();
@@ -320,12 +321,18 @@ export class MatchScene extends Phaser.Scene {
     views.forEach((v: CardView, i: number) => {
       this.time.delayedCall(260 * i, () => {
         const p = v.p;
-        const r = cardForce(p, M, decDouble);
+        const r = ev.forces[v.id] ?? cardForce(p, M, decDouble);
         sum += r;
         u.chips.setText(String(sum));
         this.tweens.add({ targets: v, scale: 1.14, duration: 90, yoyo: true });
         this.tweens.add({ targets: u.chips, scale: 1.3, duration: 80, yoyo: true });
         floatText(this, v.x, v.y - 110, '+' + r, C.sky, 18);
+        if (ev.powers.includes(v.id)) {
+          // pouvoir de star : la carte s'illumine et annonce son effet
+          this.time.delayedCall(120, () => floatText(this, v.x, v.y - 140, '★ ' + p.power.name, C.gold, 12));
+          const halo = this.add.rectangle(v.x, v.y, 132, 192, 0xf4c34f, 0.45).setDepth(v.depth - 1).setBlendMode(Phaser.BlendModes.ADD);
+          this.tweens.add({ targets: halo, alpha: 0, scale: 1.25, duration: 500, onComplete: () => halo.destroy() });
+        }
       });
       step = 260 * (i + 1);
     });
@@ -389,8 +396,13 @@ export class MatchScene extends Phaser.Scene {
     const t = big(this, cx, cy, label, res.scored ? 44 : 26, res.scored ? C.gold : C.cream, { stroke: hex(C.red), strokeThickness: res.scored ? 8 : 0, shadow: { offsetX: 5, offsetY: 5, color: '#07080e', fill: true } }).setOrigin(0.5).setDepth(300).setScale(0.2);
     this.tweens.add({ targets: t, scale: 1, duration: 260, ease: 'Back.out' });
     this.tweens.add({ targets: t, angle: { from: -3, to: 3 }, duration: 120, yoyo: true, repeat: 3 });
-    if (res.scorer && res.scored) txt(this, cx, cy + 40, `${shortName((PLAYERS as any)[res.scorer])}`, 20, C.cream).setOrigin(0.5).setDepth(300).setData('tmp', 1);
+    if (res.scorer && res.scored) {
+      const nm = shortName((PLAYERS as any)[res.scorer]);
+      const lines = [`BUUUT de ${nm} !`, `${nm} ne tremble pas !`, `Quelle frappe de ${nm} !`, `Le gardien est battu, ${nm} exulte !`, `${nm}, ${nm}, ${nm} !`];
+      txt(this, cx, cy + 40, res.scored === 2 ? `Doublé de ${nm}, le stade explose !` : lines[Math.floor(Math.random() * lines.length)], 20, C.cream).setOrigin(0.5).setDepth(300).setData('tmp', 1);
+    }
     if (res.sentOff) floatText(this, cx, cy + 70, `${shortName((PLAYERS as any)[res.sentOff])} exclu`, C.red, 12);
+    if (res.money) floatText(this, cx, cy - 60, `+${res.money} M€`, C.green, 16);
     this.time.delayedCall(1200, () => {
       this.tweens.add({ targets: t, alpha: 0, duration: 200, onComplete: () => t.destroy() });
       this.children.list.filter(o => o.getData && o.getData('tmp')).forEach(o => o.destroy());

@@ -21,8 +21,8 @@ export function drawFlag(ctx: Ctx, nat: string) {
 
 export function drawPortrait(ctx: Ctx, p: any) {
   const lk = p.look, sk = SKIN[lk.skin], sh = SKIN_SH[lk.skin], hc = HAIR[lk.hair];
-  const [shirt, trim] = (CLUBS as any)[p.club] || ['#5a8fd0', '#fff'];
-  const bg = POS_BG[p.pos];
+  const [shirt, trim] = p.kit || (CLUBS as any)[p.club] || ['#5a8fd0', '#fff'];
+  const bg = p.bg || POS_BG[p.pos];
   px(ctx, 0, 0, 20, 20, bg);
   for (let i = 0; i < 14; i++) px(ctx, (i * 7) % 20, (i * 5) % 9, 1, 1, 'rgba(0,0,0,.08)');
   const body = p.pos === 'GAR' ? '#2f9e5a' : shirt;
@@ -119,4 +119,25 @@ export function actorsFor(ids: string[]): Actor[] {
     const p = (PLAYERS as any)[id];
     return { x: lineX[p.pos] + i * 6, y: 30 + ((i * 37 + p.r) % 76), shirt: ((CLUBS as any)[p.club] || ['#5a8fd0'])[0], hair: HAIR[p.look.hair], skin: p.look.skin, gk: p.pos === 'GAR' ? '#2f9e5a' : null };
   });
+}
+
+/** Portrait pixel d'un entraîneur (staff) : survêtement à la couleur de sa rareté, accessoire selon le rôle. */
+const TIER_BG: Record<string, string> = { commun: '#bfe3a8', rare: '#a9d4f2', epique: '#d6b8f0', legende: '#f4d77a' };
+const TIER_KIT: Record<string, string> = { commun: '#2f8f3a', rare: '#2b6cb0', epique: '#7a3fb0', legende: '#b8860b' };
+export function coachKey(scene: Phaser.Scene, k: string, tier: string) {
+  const key = 'cp_' + k;
+  if (scene.textures.exists(key)) return key;
+  let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) % 9973;
+  const cuts = ['court', 'degarni', 'chauve', 'court', 'long', 'boucle'], faces = ['rien', 'moustache', 'barbe', 'rien', 'bouc'];
+  const fake = { pos: 'MIL', bg: TIER_BG[tier], kit: [TIER_KIT[tier], '#f4f4f4'], look: { skin: h % 5, hair: (h >> 2) % 7, cut: cuts[(h >> 3) % cuts.length], face: faces[(h >> 4) % faces.length] } };
+  const t = scene.textures.createCanvas(key, 20, 20)!, ctx = t.getContext();
+  drawPortrait(ctx, fake);
+  const acc = h % 4;
+  if (acc === 0) { px(ctx, 7, 8, 2, 1, '#111'); px(ctx, 11, 8, 2, 1, '#111'); px(ctx, 9, 8, 2, 1, '#555'); } // lunettes
+  if (acc === 1) { px(ctx, 5, 2, 10, 2, TIER_KIT[tier]); px(ctx, 5, 4, 12, 1, TIER_KIT[tier]); } // casquette
+  if (acc === 2) { px(ctx, 15, 16, 2, 3, '#f4f4f4'); px(ctx, 14, 15, 4, 1, '#c9c9c9'); } // carnet
+  if (acc === 3) { px(ctx, 9, 15, 2, 3, '#d4af37'); } // sifflet
+  if (tier === 'legende') { px(ctx, 1, 1, 3, 1, '#fff7c2'); px(ctx, 2, 0, 1, 3, '#fff7c2'); }
+  t.refresh();
+  return key;
 }

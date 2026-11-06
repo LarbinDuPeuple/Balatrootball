@@ -1,13 +1,13 @@
 // Mercato entre deux matchs : joueurs, mouvements, staff, consignes, entraînement et effectif.
 import Phaser from 'phaser';
 import {
-  stageOf, RULES, STAFF, ITEMS, MOVES, PLAYERS, makeOffer, rerollCost, sellValue, addMove, removeMove, movePrice, wageTotal, MOVE_SLOTS,
+  stageOf, RULES, STAFF, STAFF_SLOTS, ITEMS, MOVES, PLAYERS, PACKS, packContent, sellStaffValue, makeOffer, rerollCost, sellValue, addMove, removeMove, movePrice, wageTotal, MOVE_SLOTS,
 } from '../game/logic.js';
 import { S } from '../game/state';
 import { W, C, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
 import { CardView, shortName, cardTip } from '../ui/Card';
-import { tip, hideTip } from '../ui/Tooltip';
-import { moveBadge, staffBadge, itemBadge, moveTip, staffTip, itemTip } from '../ui/icons';
+import { tip, hideTip, wasLongPress } from '../ui/Tooltip';
+import { moveBadge, staffBadge, itemBadge, moveTip, staffTip, itemTip, STAFF_TIER_COLOR, STAFF_TIER_NAME } from '../ui/icons';
 import { Tile, moveTile, TIER_COLOR } from '../ui/tiles';
 
 const SB_X = 16, SB_W = 280, RX = 312;
@@ -53,15 +53,19 @@ export class MercatoScene extends Phaser.Scene {
     add(txt(this, SB_X + 14, 276, `Mur ${s.wall} · l'adversaire annonce ${s.opp} but${s.opp > 1 ? 's' : ''}`, 14, C.cream2, { wordWrap: { width: SB_W - 28 } }));
     add(txt(this, SB_X + 14, 318, s.coach ? `Boss : ${(RULES as any)[s.coach].coach}` : s.boss ? 'Match spécial avec une règle surprise' : `Match ${G.stage + 1} sur 9`, 14, s.boss ? C.red : C.muted));
     add(panel(this, SB_X, 366, SB_W, 130));
-    add(txt(this, SB_X + 14, 374, 'TON STAFF (PERMANENT)', 13, C.muted));
-    if (!G.staff.length) add(txt(this, SB_X + 14, 400, 'Aucun', 14, C.muted));
-    G.staff.forEach((k: string, i: number) => add(tip(this.add.image(SB_X + 36 + i * 50, 414, staffBadge(this, k, 40)), () => staffTip(k))));
+    add(txt(this, SB_X + 14, 374, `TES ENTRAÎNEURS (${G.staff.length}/${STAFF_SLOTS})`, 13, C.muted));
+    for (let i = 0; i < STAFF_SLOTS; i++) {
+      const k = G.staff[i], x = SB_X + 36 + i * 52;
+      if (!k) { const g = add(this.add.graphics()); g.lineStyle(2, C.panel2, 1).strokeRect(x - 21, 393, 42, 42); continue; }
+      const im = add(tip(this.add.image(x, 414, staffBadge(this, k, 44)), () => ({ ...staffTip(k), lines: [...staffTip(k).lines, 'Touche : revendre'] })));
+      im.setInteractive({ useHandCursor: true }).on('pointerup', () => { if (!wasLongPress(im)) this.sellStaff(k); });
+    }
     add(txt(this, SB_X + 14, 440, 'TES CONSIGNES', 13, C.muted));
     if (!G.items.length) add(txt(this, SB_X + 120, 440, 'aucune', 14, C.muted));
     G.items.forEach((k: string, i: number) => add(tip(this.add.image(SB_X + 30 + i * 40, 474, itemBadge(this, k, 32)), () => itemTip(k))));
     const rc = rerollCost(G);
     add(new Button(this, SB_X + SB_W / 2, 534, SB_W - 20, 46, `Relancer (${fmt(rc)})`, C.green, () => {
-      if (G.budget < rc) return; G.budget = Math.round((G.budget - rc) * 10) / 10; G.rerolls++; makeOffer(G); this.render();
+      if (G.budget < rc) return; G.budget = Math.round((G.budget - rc) * 10) / 10; G.rerolls++; makeOffer(G, true); this.render();
     })).setEnabled(G.budget >= rc);
     add(new Button(this, SB_X + SB_W / 2, 594, SB_W - 20, 46, 'Ton effectif', C.sky, () => this.squad()));
     const next = add(new Button(this, SB_X + SB_W / 2, 664, SB_W - 20, 56, 'Prochain match', C.gold, () => {
@@ -70,69 +74,59 @@ export class MercatoScene extends Phaser.Scene {
     next.setEnabled(G.budget >= 0);
     if (G.budget < 0) add(txt(this, SB_X + SB_W / 2, 698, 'Budget négatif : vends un joueur', 12, C.red).setOrigin(0.5, 0));
 
-    // ----- joueurs à vendre
-    add(panel(this, RX, 16, 650, 316));
-    add(txt(this, RX + 14, 24, 'JOUEURS À VENDRE', 13, C.muted));
-    G.offer.players.forEach((id: string, i: number) => {
-      const x = RX + 85 + i * 160, p = (PLAYERS as any)[id];
-      if (G.squad.includes(id)) { add(txt(this, x, 170, 'Recruté', 18, C.green).setOrigin(0.5)); return; }
-      const tag = add(this.add.graphics()); tag.fillStyle(C.edge, 1).fillRect(x - 60, 44, 120, 26); tag.lineStyle(2, C.green, 1).strokeRect(x - 60, 44, 120, 26);
-      add(big(this, x, 58, fmt(p.price), 10, C.green).setOrigin(0.5));
-      const cv = add(new CardView(this, x, 168, id)); cv.setScale(0.78); cv.setHome(x, 168); this.cards.push(cv);
-      tip(cv, () => cardTip(id));
-      add(new Button(this, x, 300, 120, 36, 'Recruter', C.gold, () => this.buy(p.price, () => G.squad.push(id), x, 260), 15))
-        .setEnabled(G.budget >= p.price && G.squad.length < 18);
+    // ----- boutique : 2 entraîneurs + 2 mouvements
+    add(panel(this, RX, 16, 952, 330));
+    add(txt(this, RX + 14, 24, 'BOUTIQUE', 13, C.muted));
+    add(txt(this, RX + 952 - 14, 24, 'Relancer change la boutique, pas les boosters', 12, C.muted).setOrigin(1, 0));
+    const cx = (i: number) => RX + 128 + i * 232, cy = 168;
+    G.offer.staff.forEach((k: string | null, i: number) => {
+      const x = cx(i);
+      if (!k) { add(txt(this, x, cy, 'Signé', 18, C.green).setOrigin(0.5)); return; }
+      const st = (STAFF as any)[k], col = STAFF_TIER_COLOR[st.tier];
+      const card = add(new Tile(this, x, cy, 180, 236, 'Entraîneur ' + STAFF_TIER_NAME[st.tier].toLowerCase(), st.name, '', '', col));
+      add(this.add.image(x + 4, cy + 30, staffBadge(this, k, 92)));
+      tip(card, () => staffTip(k));
+      add(new Button(this, x, 312, 150, 36, fmt(st.cost), C.gold, () => this.buy(st.cost, () => { G.staff.push(k); G.offer.staff[i] = null; }, x, 280), 16))
+        .setEnabled(G.budget >= st.cost && G.staff.length < STAFF_SLOTS);
     });
-    // ----- entraînement
-    add(panel(this, 974, 16, 290, 316));
-    add(txt(this, 988, 24, 'ENTRAÎNEMENT', 13, C.muted));
-    const train = G.offer.train.filter((k: string) => k && G.moves.includes(k));
-    if (!train.length) add(txt(this, 988, 60, 'Plus de séance disponible.', 14, C.muted));
-    G.offer.train.forEach((k: string, i: number) => {
-      if (!k || !G.moves.includes(k)) return;
-      const lv = G.levels[k], cost = 4 + lv * 2, y = 112 + i * 140;
-      const mv = (MOVES as any)[k];
-      const tl = add(new Tile(this, 1119, y, 262, 122, 'Séance', mv.name, '', `niv. ${lv + 1} → ${lv + 2}`, C.gold));
-      add(this.add.image(1210, y - 18, moveBadge(this, k, 40)));
-      tip(tl, () => ({ title: 'Entraînement : ' + mv.name, lines: [`Niveau ${lv + 1} → ${lv + 2}`, `${mv.base + 10 * lv} × ${dec(mv.prec + 0.5 * lv)} devient ${mv.base + 10 * (lv + 1)} × ${dec(mv.prec + 0.5 * (lv + 1))}`, `Prix : ${fmt(cost)}`], accent: C.gold }));
-      add(new Button(this, 1206, y + 40, 90, 30, 'Acheter', C.gold, () => this.buy(cost, () => { G.levels[k]++; G.offer.train[i] = null; }, 1206, y), 13)).setEnabled(G.budget >= cost);
-    });
-
-    // ----- mouvements, staff, consignes
-    add(panel(this, RX, 344, 952, 256));
-    add(txt(this, RX + 14, 352, 'MOUVEMENTS', 13, C.muted));
-    add(txt(this, RX + 334, 352, 'STAFF PERMANENT (4 PLACES)', 13, C.muted));
-    add(txt(this, RX + 654, 352, 'CONSIGNES À USAGE UNIQUE (3 MAX)', 13, C.muted));
-    const tw = 148, th = 170, ty = 460;
-    const slot = (i: number) => RX + 14 + tw / 2 + i * 160;
     G.offer.moves.forEach((o: any, i: number) => {
-      const x = slot(i);
-      if (!o) { add(txt(this, x, ty, 'Acheté', 16, C.green).setOrigin(0.5)); return; }
+      const x = cx(2 + i);
+      if (!o) { add(txt(this, x, cy, 'Acheté', 18, C.green).setOrigin(0.5)); return; }
       const cost = movePrice(o.k, o.lv);
-      const mt = add(moveTile(this, x, ty, tw, th, o.k, o.lv, true));
-      add(this.add.image(x, ty + 6, moveBadge(this, o.k, 52)));
+      const mt = add(moveTile(this, x, cy, 180, 236, o.k, o.lv, true));
+      add(this.add.image(x, cy + 14, moveBadge(this, o.k, 64)));
       tip(mt, () => moveTip(o.k, o.lv));
-      add(new Button(this, x, 572, 130, 32, `${fmt(cost)}`, C.gold, () => this.buy(cost, () => { addMove(G, o.k, o.lv); G.offer.moves[i] = null; }, x, 520), 14))
+      add(new Button(this, x, 312, 150, 36, fmt(cost), C.gold, () => this.buy(cost, () => { addMove(G, o.k, o.lv); G.offer.moves[i] = null; }, x, 280), 16))
         .setEnabled(G.budget >= cost && G.moves.length < MOVE_SLOTS);
     });
-    G.offer.staff.forEach((k: string, i: number) => {
-      const x = slot(2 + i), st = (STAFF as any)[k];
-      if (G.staff.includes(k)) { add(txt(this, x, ty, 'Signé', 16, C.green).setOrigin(0.5)); return; }
-      const t = add(new Tile(this, x, ty, tw, th, 'Staff', st.name, '', '', C.green));
-      add(this.add.image(x, ty + 22, staffBadge(this, k, 56)));
-      tip(t, () => staffTip(k));
-      add(new Button(this, x, 572, 130, 32, fmt(st.cost), C.gold, () => this.buy(st.cost, () => G.staff.push(k), x, 520), 14)).setEnabled(G.budget >= st.cost && G.staff.length < 4);
+    if (G.staff.length >= STAFF_SLOTS) add(txt(this, cx(0) + 116, 340, '5 entraîneurs max : revends-en un (touche son portrait à gauche)', 12, C.red).setOrigin(0.5, 1));
+    if (G.moves.length >= MOVE_SLOTS) add(txt(this, cx(2) + 116, 340, '6 mouvements max : retires-en un en bas', 12, C.red).setOrigin(0.5, 1));
+
+    // ----- boosters
+    add(panel(this, RX, 358, 952, 244));
+    add(txt(this, RX + 14, 366, 'BOOSTERS', 13, C.muted));
+    const PACK_COL: Record<string, number> = { joueurs: C.red, entrainement: C.gold, consignes: C.sky };
+    Object.keys(PACKS).forEach((kind, i) => {
+      const pk = (PACKS as any)[kind], x = RX + 90 + i * 316, y = 466, price = pk.price(G);
+      const sold = G.offer.packs[kind];
+      const full = kind === 'joueurs' ? G.squad.length >= 18 : kind === 'consignes' ? G.items.length >= 3 : false;
+      const pc = add(this.add.container(x, y));
+      const g = this.add.graphics();
+      g.fillStyle(C.edge, 1).fillRect(-58, -78, 116, 156); g.fillStyle(sold ? C.panel2 : PACK_COL[kind], 1).fillRect(-55, -75, 110, 150);
+      g.fillStyle(sold ? C.panel : C.cream, 1).fillRect(-55, -16, 110, 32);
+      g.fillStyle(0xffffff, sold ? 0 : 0.25).fillRect(-55, -75, 110, 6);
+      pc.add([g, big(this, 0, 1, pk.name.toUpperCase(), 8, sold ? C.muted : C.ink).setOrigin(0.5)]);
+      if (!sold) this.tweens.add({ targets: pc, y: y - 5, duration: 900 + i * 120, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      pc.setSize(116, 156);
+      tip(pc, () => ({ title: 'Booster ' + pk.name, lines: [pk.desc, `Prix : ${fmt(price)}`, 'Un seul achat par mercato'], accent: PACK_COL[kind] }));
+      add(txt(this, x + 74, y - 60, pk.desc, 15, sold ? C.muted : C.cream2, { wordWrap: { width: 140 } }));
+      const b = add(new Button(this, x + 145, y + 50, 130, 40, sold ? 'Ouvert' : fmt(price), C.gold, () => {
+        if (G.budget < price) return;
+        G.budget = Math.round((G.budget - price) * 10) / 10; G.offer.packs[kind] = true;
+        this.render(); this.openPack(kind);
+      }, 16));
+      b.setEnabled(!sold && !full && G.budget >= price);
     });
-    G.offer.items.forEach((k: string, i: number) => {
-      const x = slot(4 + i);
-      if (!k) { add(txt(this, x, ty, 'Acheté', 16, C.green).setOrigin(0.5)); return; }
-      const it = (ITEMS as any)[k];
-      const t = add(new Tile(this, x, ty, tw, th, 'Consigne', it.name, '', '', C.sky));
-      add(this.add.image(x, ty + 22, itemBadge(this, k, 56)));
-      tip(t, () => itemTip(k));
-      add(new Button(this, x, 572, 130, 32, fmt(it.cost), C.gold, () => this.buy(it.cost, () => { G.items.push(k); G.offer.items[i] = null; }, x, 520), 14)).setEnabled(G.budget >= it.cost && G.items.length < 3);
-    });
-    if (G.moves.length >= MOVE_SLOTS) add(txt(this, RX + 14, 372, '6 mouvements max : retires-en un en bas pour en acheter', 12, C.red));
 
     // ----- mes mouvements
     add(panel(this, RX, 612, 952, 92));
@@ -150,6 +144,64 @@ export class MercatoScene extends Phaser.Scene {
         void b;
       }
     });
+  }
+
+  /** Ouverture d'un booster : le paquet tremble, les 3 cartes se retournent, on en garde une. */
+  openPack(kind: string) {
+    const G = S.G, content: string[] = packContent(G, kind), pk = (PACKS as any)[kind];
+    const { layer, close } = modal(this, 900, 520);
+    layer.add(big(this, W / 2, 140, 'Booster ' + pk.name, 20).setOrigin(0.5));
+    layer.add(txt(this, W / 2, 180, pk.desc + '. Reste appuyé pour le détail.', 17, C.cream2).setOrigin(0.5));
+    const packG = this.add.container(W / 2, 380);
+    const pg = this.add.graphics();
+    pg.fillStyle(C.edge, 1).fillRect(-83, -113, 166, 226); pg.fillStyle(kind === 'joueurs' ? C.red : kind === 'consignes' ? C.sky : C.gold, 1).fillRect(-80, -110, 160, 220);
+    pg.fillStyle(C.cream, 1).fillRect(-80, -20, 160, 40);
+    packG.add([pg, big(this, 0, 0, pk.name.toUpperCase(), 10, C.ink).setOrigin(0.5)]);
+    layer.add(packG);
+    const take = (id: string) => {
+      if (kind === 'joueurs') { G.squad.push(id); G.signed = (G.signed || 0) + 1; }
+      if (kind === 'entrainement') G.levels[id] = (G.levels[id] || 0) + 1;
+      if (kind === 'consignes') G.items.push(id);
+      hideTip(this); close(); this.time.delayedCall(140, () => this.render());
+    };
+    this.tweens.add({
+      targets: packG, angle: { from: -5, to: 5 }, duration: 60, yoyo: true, repeat: 7, onComplete: () => {
+        this.cameras.main.flash(220, 255, 240, 200); this.cameras.main.shake(120, 0.004);
+        packG.destroy();
+        content.forEach((id, i) => {
+          const x = W / 2 - (content.length - 1) * 120 + i * 240, y = 380;
+          let obj: any;
+          if (kind === 'joueurs') { obj = new CardView(this, x, y, id); obj.sway = false; tip(obj, () => cardTip(id)); }
+          else if (kind === 'entrainement') {
+            const lv = G.levels[id] || 0, mv = (MOVES as any)[id];
+            obj = new Tile(this, x, y, 180, 230, 'Séance', mv.name, '', `niv. ${lv + 1} → ${lv + 2}`, C.gold);
+            obj.add(this.add.image(0, 10, moveBadge(this, id, 64)));
+            tip(obj, () => ({ title: 'Entraînement : ' + mv.name, lines: [`${mv.base + 10 * lv} × ${dec(mv.prec + 0.5 * lv)} devient ${mv.base + 10 * (lv + 1)} × ${dec(mv.prec + 0.5 * (lv + 1))}`], accent: C.gold }));
+          } else {
+            const it = (ITEMS as any)[id];
+            obj = new Tile(this, x, y, 180, 230, 'Consigne', it.name, '', '', C.sky);
+            obj.add(this.add.image(0, 20, itemBadge(this, id, 64)));
+            tip(obj, () => itemTip(id));
+          }
+          layer.add(obj); obj.setScale(0, 1);
+          this.tweens.add({ targets: obj, scaleX: 1, duration: 240, delay: i * 160, ease: 'Back.out' });
+          obj.setInteractive({ useHandCursor: true });
+          obj.on('pointerup', () => { if (wasLongPress(obj)) return; this.tweens.add({ targets: obj, y: y - 30, scale: 1.1, duration: 150, onComplete: () => take(id) }); });
+        });
+        layer.add(new Button(this, W / 2, 600, 220, 40, 'Ne rien prendre', C.panel2, () => { hideTip(this); close(); this.time.delayedCall(140, () => this.render()); }, 15));
+      },
+    });
+  }
+
+  sellStaff(k: string) {
+    const G = S.G, st = (STAFF as any)[k], v = sellStaffValue(k);
+    const { layer, close } = modal(this, 520, 260);
+    layer.add(this.add.image(W / 2, 290, staffBadge(this, k, 72)));
+    layer.add(txt(this, W / 2, 340, `Revendre ${st.name} pour ${fmt(v)} ?`, 18).setOrigin(0.5));
+    layer.add(new Button(this, W / 2 - 110, 400, 190, 44, 'Revendre', C.red, () => {
+      G.staff.splice(G.staff.indexOf(k), 1); G.budget = Math.round((G.budget + v) * 10) / 10; close(); this.time.delayedCall(140, () => this.render());
+    }, 16));
+    layer.add(new Button(this, W / 2 + 110, 400, 190, 44, 'Garder', C.gold, () => close(), 16));
   }
 
   squad() {

@@ -8,12 +8,16 @@ const LONG_PRESS = 320;
 
 class Tooltip {
   scene: Phaser.Scene;
-  box: Phaser.GameObjects.Container;
+  box: Phaser.GameObjects.Container; key = ''; bw = 300; bh = 0;
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.box = scene.add.container(0, 0).setDepth(900).setVisible(false);
   }
-  show(c: TipContent, x: number, y: number) {
+  /** Affiche (ou déplace seulement, si c'est la même bulle : pas de clignotement). */
+  show(c: TipContent, x: number, y: number, touch = false) {
+    const key = c.title + '|' + c.lines.join('|');
+    if (this.box.visible && key === this.key) { this.place(x, y, touch); return; }
+    this.key = key;
     const s = this.scene, b = this.box;
     b.removeAll(true);
     const width = 300, pad = 12;
@@ -32,16 +36,25 @@ class Tooltip {
     g.fillStyle(0x161a28, 0.97).fillRect(0, 0, width, h);
     g.fillStyle(c.accent ?? C.gold, 1).fillRect(0, 0, width, 4);
     b.add([g, ...parts]);
-    // au-dessus du point visé si possible, toujours dans l'écran
-    let px = x - width / 2, py = y - h - 18;
-    if (py < 6) py = y + 24;
+    this.bw = width; this.bh = h;
+    this.place(x, y, touch);
+    b.setVisible(true).setAlpha(0);
+    s.tweens.killTweensOf(b);
+    s.tweens.add({ targets: b, alpha: 1, duration: 90 });
+  }
+  /** Au-dessus du point visé (bien plus haut sous un doigt), toujours dans l'écran. */
+  place(x: number, y: number, touch: boolean) {
+    const width = this.bw, h = this.bh, lift = touch ? 90 : 22;
+    let px = x - width / 2, py = y - h - lift;
+    if (py < 6) {
+      if (touch) { py = y - h / 2; px = x < W / 2 ? x + 70 : x - width - 70; } // pas de place au-dessus : à côté du doigt
+      else py = y + 28;
+    }
     px = Phaser.Math.Clamp(px, 6, W - width - 6);
     py = Phaser.Math.Clamp(py, 6, H - h - 6);
-    b.setPosition(px, py).setVisible(true).setAlpha(0).setScale(0.96);
-    s.tweens.killTweensOf(b);
-    s.tweens.add({ targets: b, alpha: 1, scale: 1, duration: 90 });
+    this.box.setPosition(px, py);
   }
-  hide() { this.box.setVisible(false); }
+  hide() { this.box.setVisible(false); this.key = ''; }
 }
 
 const tips = new WeakMap<Phaser.Scene, Tooltip>();
@@ -62,11 +75,12 @@ function tipFor(scene: Phaser.Scene) {
 export function tip(obj: Phaser.GameObjects.GameObject & { x: number; y: number }, content: () => TipContent) {
   const scene = obj.scene;
   if (!obj.input) obj.setInteractive();
-  let timer: Phaser.Time.TimerEvent | null = null;
-  const at = (p: Phaser.Input.Pointer) => tipFor(scene).show(content(), p.worldX, p.worldY);
-  obj.on('pointerover', (p: Phaser.Input.Pointer) => { if (!p.wasTouch) at(p); });
-  obj.on('pointermove', (p: Phaser.Input.Pointer) => { if (!p.wasTouch && tipFor(scene).box.visible) at(p); });
-  obj.on('pointerout', () => { tipFor(scene).hide(); timer?.remove(); });
+  let timer: Phaser.Time.TimerEvent | null = null, hiding: Phaser.Time.TimerEvent | null = null;
+  const at = (p: Phaser.Input.Pointer) => tipFor(scene).show(content(), p.worldX, p.worldY, p.wasTouch);
+  obj.on('pointerover', (p: Phaser.Input.Pointer) => { hiding?.remove(); hiding = null; if (!p.wasTouch) at(p); });
+  obj.on('pointermove', (p: Phaser.Input.Pointer) => { if (tipFor(scene).box.visible) at(p); });
+  // petit délai : une carte qui se soulève au survol ne fait plus clignoter la bulle
+  obj.on('pointerout', () => { timer?.remove(); hiding?.remove(); hiding = scene.time.delayedCall(70, () => tipFor(scene).hide()); });
   obj.on('pointerdown', (p: Phaser.Input.Pointer) => {
     obj.setData('longpress', false);
     if (!p.wasTouch) return;
@@ -74,7 +88,7 @@ export function tip(obj: Phaser.GameObjects.GameObject & { x: number; y: number 
     timer = scene.time.delayedCall(LONG_PRESS, () => { obj.setData('longpress', true); at(p); });
   });
   obj.on('pointerup', () => { timer?.remove(); });
-  obj.once('destroy', () => { timer?.remove(); });
+  obj.once('destroy', () => { timer?.remove(); hiding?.remove(); });
   return obj;
 }
 

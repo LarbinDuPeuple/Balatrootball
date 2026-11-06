@@ -59,6 +59,14 @@ async function run(vw, vh, tag) {
   await pg.screenshot({ path: `${out}/${tag}-5-end.png` });
   await click(640, 570, 3500);
   await pg.screenshot({ path: `${out}/${tag}-6-mercato.png` });
+  await pg.evaluate(() => { window.__S.G.budget = 60; game.scene.getScene('mercato').render(); });
+  await pg.waitForTimeout(300);
+  await pg.screenshot({ path: `${out}/${tag}-6a-mercato-riche.png` });
+  await click(547, 516, 3500);
+  await pg.screenshot({ path: `${out}/${tag}-6c-booster.png` });
+  await click(640, 380, 900);
+  await pg.mouse.move(box.x + 440 * s, box.y + 168 * s); await pg.waitForTimeout(400);
+  await pg.screenshot({ path: `${out}/${tag}-6d-tip-coach.png` });
   await pg.mouse.move(box.x + 360 * s, box.y + 668 * s); await pg.waitForTimeout(400);
   await pg.screenshot({ path: `${out}/${tag}-6b-tip-chip.png` });
   await click(156, 594, 800);

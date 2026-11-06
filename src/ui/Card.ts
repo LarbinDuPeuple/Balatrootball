@@ -6,6 +6,19 @@ import { C, txt, big, fmt } from './theme';
 import { styleBadge, STYLE_DESC } from './icons';
 import type { TipContent } from './Tooltip';
 
+/** Symbole du pouvoir de star : étoile dorée pixel. */
+export function starBadge(scene: Phaser.Scene) {
+  const key = 'starBadge';
+  if (scene.textures.exists(key)) return key;
+  const rows = ['.....#.....', '....#o#....', '....#o#....', '####ooo####', '#ooooooooo#', '.#ooooooo#.', '..#ooooo#..', '..#oo#oo#..', '.#oo#.#oo#.', '.###...###.'];
+  const sz = 3, t = scene.textures.createCanvas(key, rows[0].length * sz + 2, rows.length * sz + 2)!, ctx = t.getContext();
+  rows.forEach((r, y) => [...r].forEach((ch, x) => {
+    if (ch === '.') return;
+    ctx.fillStyle = ch === '#' ? '#1a1410' : '#f4c34f'; ctx.fillRect(1 + x * sz, 1 + y * sz, sz, sz);
+  }));
+  t.refresh(); return key;
+}
+
 export const CARD_W = 120, CARD_H = 180;
 
 export function rarity(r: number) { return r >= 92 ? 'legende' : r >= 88 ? 'or' : r >= 80 ? 'argent' : 'bronze'; }
@@ -41,10 +54,7 @@ export class CardView extends Phaser.GameObjects.Container {
     const badges = p.styles.map((st: string, i: number) => scene.add.image(x0 + 16 + i * 20, y0 + h - 18, styleBadge(scene, st, 18)));
     this.pips = scene.add.graphics();
     this.add([g, this.glow, head, flag, pic, note, noteT, nm, ...badges, this.pips]);
-    if (p.star) {
-      const sb = scene.add.graphics(); sb.fillStyle(C.edge, 1).fillRect(x0 + 9, y0 + 26, 38, 15); sb.fillStyle(C.red, 1).fillRect(x0 + 10, y0 + 27, 36, 13);
-      this.add([sb, big(scene, x0 + 28, y0 + 34, 'STAR', 7, C.cream).setOrigin(0.5)]);
-    }
+    if (p.star) this.add(scene.add.image(x0 + 22, y0 + 38, starBadge(scene)).setScale(1));
     if (rar === 'legende' || rar === 'or') this.shine(rar === 'legende');
     this.setSize(w, h);
     scene.add.existing(this);
@@ -87,7 +97,7 @@ export function cardTip(id: string, extra: string[] = []): TipContent {
   const lines = [
     `${p.club || 'Sans club'} · ${p.nat} · années ${p.dec}`,
     ...p.styles.map((s: string) => `${s} : ${STYLE_DESC[s]}`),
-    ...(p.star ? ['Star : 2 stars sans Leader dans une action = précision x0,7'] : []),
+    ...(p.power ? [`★ ${p.power.name} : ${p.power.desc}`] : []),
     `Salaire ${fmt(p.salary)} par match · valeur ${fmt(p.price)}`,
     ...extra,
   ];

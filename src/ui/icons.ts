@@ -2,6 +2,7 @@
 import Phaser from 'phaser';
 import { C, hex, BIG_FONT } from './theme';
 import { MOVES, STAFF, ITEMS } from '../game/logic.js';
+import { coachKey } from '../game/art';
 import { TIER_COLOR } from './tiles';
 
 export const MOVE_CODE: Record<string, string> = {
@@ -43,12 +44,27 @@ export function badgeKey(scene: Phaser.Scene, code: string, color: number, size 
 
 export const moveBadge = (scene: Phaser.Scene, k: string, size = 32) => badgeKey(scene, MOVE_CODE[k] || '?', TIER_COLOR[(MOVES as any)[k].tier], size);
 export const styleBadge = (scene: Phaser.Scene, s: string, size = 16) => badgeKey(scene, STYLE_ICON[s][0], STYLE_ICON[s][1], size);
-export const staffBadge = (scene: Phaser.Scene, k: string, size = 32) => badgeKey(scene, STAFF_CODE[k] || '?', C.green, size);
+/** Vignette d'entraîneur : portrait pixel encadré de la couleur de sa rareté. */
+export function staffBadge(scene: Phaser.Scene, k: string, size = 32) {
+  const tier = (STAFF as any)[k]?.tier || 'commun';
+  const key = `sb_${k}_${size}`;
+  if (scene.textures.exists(key)) return key;
+  const src = scene.textures.get(coachKey(scene, k, tier)).getSourceImage() as HTMLCanvasElement;
+  const t = scene.textures.createCanvas(key, size, size)!, ctx = t.getContext();
+  const u = Math.max(2, Math.round(size / 16));
+  ctx.fillStyle = hex(C.edge); ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = hex(STAFF_TIER_COLOR[tier]); ctx.fillRect(u, u, size - 2 * u, size - 2 * u);
+  ctx.imageSmoothingEnabled = false; ctx.drawImage(src, 2 * u, 2 * u, size - 4 * u, size - 4 * u);
+  t.refresh();
+  return key;
+}
+export const STAFF_TIER_COLOR: Record<string, number> = { commun: C.green, rare: C.sky, epique: C.purple, legende: C.gold };
+export const STAFF_TIER_NAME: Record<string, string> = { commun: 'Commun', rare: 'Rare', epique: 'Épique', legende: 'Légendaire' };
 export const itemBadge = (scene: Phaser.Scene, k: string, size = 32) => badgeKey(scene, ITEM_CODE[k] || '?', C.sky, size);
 
 export function moveTip(k: string, lv: number) {
   const mv = (MOVES as any)[k];
   return { title: mv.name + (lv ? ` niv.${lv + 1}` : ''), sub: { base: 'Mouvement de base', commun: 'Mouvement commun', rare: 'Mouvement rare', epique: 'Mouvement épique' }[mv.tier as string], lines: [mv.desc, `${mv.base + 10 * lv} base × ${String(mv.prec + 0.5 * lv).replace('.', ',')} précision`], accent: TIER_COLOR[mv.tier] };
 }
-export function staffTip(k: string) { const s = (STAFF as any)[k]; return { title: s.name, sub: 'Staff permanent', lines: [s.desc, `Prix : ${s.cost} M€`], accent: C.green }; }
+export function staffTip(k: string) { const s = (STAFF as any)[k]; return { title: s.name, sub: `Entraîneur ${STAFF_TIER_NAME[s.tier].toLowerCase()} · permanent`, lines: [s.desc, `Prix : ${s.cost} M€ · revente ${Math.floor(s.cost / 2)} M€`], accent: STAFF_TIER_COLOR[s.tier] }; }
 export function itemTip(k: string, inMatch = false) { const s = (ITEMS as any)[k]; return { title: s.name, sub: 'Consigne à usage unique', lines: [s.desc, inMatch ? 'Touche pour l\'utiliser maintenant' : `Prix : ${s.cost} M€`], accent: C.sky }; }
