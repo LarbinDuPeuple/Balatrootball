@@ -1,7 +1,7 @@
 // Écran de match : barre latérale de calcul, staff et consignes, terrain, mouvements et main de cartes.
 import Phaser from 'phaser';
 import {
-  STAFF_SLOTS, stageOf, seasonLength, campaignOf, campaignUnlocks, RULES, STAFF, ITEMS, MOVES, CLUBS, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
+  STAFF_SLOTS, stageOf, seasonLength, campaignOf, campaignUnlocks, coachUnlocks, itemsAllowed, RULES, STAFF, ITEMS, MOVES, PLAYERS, newMatch, evaluate, playAction, changeCards, useItem,
   settle, fatigueLimit, wallNow, cardForce,
 } from '../game/logic.js';
 import { drawField, actorsFor, PITCH_W, PITCH_H } from '../game/art';
@@ -35,7 +35,7 @@ export class MatchScene extends Phaser.Scene {
     S.M = newMatch(G);
     const M = S.M;
     this.views = []; this.sel = []; this.busy = false; this.ui = {};
-    this.oppColor = (CLUBS as any)[M.opp][0] === '#f4f4f4' ? '#e9e9e9' : (CLUBS as any)[M.opp][0];
+    this.oppColor = M.kit === '#f4f4f4' ? '#e9e9e9' : M.kit;
     backdrop(this, M.rule ? 0x40182a : 0x18402a);
     this.cameras.main.fadeIn(250, 13, 15, 24);
     this.buildSidebar();
@@ -57,7 +57,7 @@ export class MatchScene extends Phaser.Scene {
     u.opp = big(this, SB_X + 14, 50, M.opp.toUpperCase(), 14, C.cream, { wordWrap: { width: SB_W - 28 } });
     if (M.rule) {
       u.opp.setY(46);
-      txt(this, SB_X + 14, 70, ((RULES as any)[M.rule].coach ? (RULES as any)[M.rule].coach + ' · ' : 'Règle : ') + (RULES as any)[M.rule].name, 14, C.gold);
+      txt(this, SB_X + 14, 70, ((RULES as any)[M.rule].club ? 'Boss · ' : 'Règle : ') + (RULES as any)[M.rule].name, 14, C.gold);
     }
     panel(this, SB_X, 104, SB_W, 86);
     txt(this, SB_X + 14, 112, 'MUR DU GARDIEN', 13, C.muted);
@@ -277,7 +277,7 @@ export class MatchScene extends Phaser.Scene {
     const { layer, close } = modal(this, 640, M.rule ? 400 : 290);
     const top = M.rule ? 180 : 230;
     layer.add(txt(this, W / 2, top, `${s.comp} · ${s.label} · match ${G.stage + 1}/${seasonLength(G)}`.toUpperCase(), 14, C.muted).setOrigin(0.5));
-    layer.add(big(this, W / 2, top + 36, s.coach ? (RULES as any)[s.coach].coach.toUpperCase() : s.boss ? 'MATCH SPÉCIAL' : 'COUP D\'ENVOI', 22, s.coach ? C.red : C.gold).setOrigin(0.5));
+    layer.add(big(this, W / 2, top + 36, s.coach ? 'CLUB LÉGENDAIRE' : s.boss ? 'MATCH SPÉCIAL' : 'COUP D\'ENVOI', 22, s.coach ? C.red : C.gold).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 76, `Olympique contre ${M.opp}`, 20).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 108, `${M.opp} annonce ${M.oppGoals} but${M.oppGoals > 1 ? 's' : ''}. Marques-en ${M.oppGoals + 1} en ${M.poss} possessions.`, 16, C.cream2).setOrigin(0.5));
     layer.add(txt(this, W / 2, top + 134, `Mur du gardien : ${wallNow(M, G)}. Chaque tir arrêté l'use jusqu'au but.${M.ossature ? `  Ossature ${M.ossature} : +1 possession.` : ''}`, 16, C.cream2).setOrigin(0.5));
@@ -292,6 +292,7 @@ export class MatchScene extends Phaser.Scene {
 
   useItem(k: string, x: number) {
     if (this.busy) return;
+    if (!itemsAllowed(S.M)) { floatText(this, x, 120, 'Consignes interdites', C.red, 12); return; }
     if (useItem(k, S.M, S.G)) {
       floatText(this, x, 120, (ITEMS as any)[k].name, C.sky, 12);
       this.drawItems(); this.syncHand(); this.refresh();
@@ -403,6 +404,8 @@ export class MatchScene extends Phaser.Scene {
     }
     if (res.sentOff) floatText(this, cx, cy + 70, `${shortName((PLAYERS as any)[res.sentOff])} exclu`, C.red, 12);
     if (res.money) floatText(this, cx, cy - 60, `+${res.money} M€`, C.green, 16);
+    if (res.blocked) floatText(this, cx, cy + 70, res.blocked, C.red, 12);
+    if (res.extra) this.time.delayedCall(500, () => floatText(this, cx, cy - 90, res.extra, C.gold, 12));
     this.time.delayedCall(1200, () => {
       this.tweens.add({ targets: t, alpha: 0, duration: 200, onComplete: () => t.destroy() });
       this.children.list.filter(o => o.getData && o.getData('tmp')).forEach(o => o.destroy());
@@ -441,6 +444,7 @@ export class MatchScene extends Phaser.Scene {
       prof.unlocked.push(...unlocked);
       prof.won[G.campaign] = (prof.won[G.campaign] || 0) + 1;
     }
+    const coaches: string[] = coachUnlocks(G, M, prof, won && last);
     saveProfile(prof);
     layer.add(big(this, W / 2, 180, title, 24, won ? C.gold : C.red).setOrigin(0.5));
     layer.add(txt(this, W / 2, 220, `Olympique ${M.goals} - ${M.oppGoals} ${M.opp}`, 20).setOrigin(0.5));
@@ -458,6 +462,15 @@ export class MatchScene extends Phaser.Scene {
     if (unlocked.length) {
       layer.add(txt(this, W / 2, 480, 'Entrent dans ta collection (booster de départ) :', 15, C.gold).setOrigin(0.5));
       layer.add(txt(this, W / 2, 504, unlocked.map(id => (PLAYERS as any)[id].name).join(', '), 17, C.cream).setOrigin(0.5));
+    }
+    if (coaches.length) {
+      const y0 = unlocked.length ? 430 : 470;
+      layer.add(txt(this, W / 2, y0, coaches.length > 1 ? 'Entraîneurs débloqués !' : 'Entraîneur débloqué !', 15, C.gold).setOrigin(0.5));
+      coaches.forEach((k, i) => {
+        const x = W / 2 + (i - (coaches.length - 1) / 2) * 180;
+        layer.add(this.add.image(x - 60, y0 + 32, staffBadge(this, k, 40)));
+        layer.add(txt(this, x - 34, y0 + 22, (STAFF as any)[k].name, 15, C.cream, { wordWrap: { width: 130 } }));
+      });
     }
     if (won) this.burst(W / 2, 160);
   }

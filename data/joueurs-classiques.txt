@@ -1,0 +1,627 @@
+# Proposition : 590 joueurs classiques (5 nations x 30, 9 x 20, 10 x 15, 11 x 10), du meilleur au moins fort dans chaque nation.
+# Format : Nom;Poste;Club;Décennie;Force
+#France
+Robert Pirès;MIL;Arsenal;2000;89
+Raymond Kopa;ATT;Reims;1950;87
+Franck Ribéry;MIL;Bayern Munich;2010;83
+Just Fontaine;ATT;Reims;1950;81
+Bixente Lizarazu;DEF;Bayern Munich;2000;79
+Laurent Blanc;DEF;Manchester United;1990;79
+Alain Giresse;MIL;Bordeaux;1980;73
+Didier Deschamps;MIL;Juventus;1990;73
+Manuel Amoros;DEF;Monaco;1980;68
+Hugo Lloris;GAR;Tottenham;2010;67
+Raphaël Varane;DEF;Real Madrid;2010;65
+Paul Pogba;MIL;Juventus;2010;61
+Emmanuel Petit;MIL;Arsenal;1990;57
+David Trezeguet;ATT;Juventus;2000;57
+Claude Makélélé;MIL;Chelsea;2000;51
+Olivier Giroud;ATT;Chelsea;2010;49
+Youri Djorkaeff;MIL;Inter Milan;1990;47
+Jean Tigana;MIL;Bordeaux;1980;43
+William Gallas;DEF;Chelsea;2000;41
+Nicolas Anelka;ATT;Chelsea;2000;40
+Florent Malouda;MIL;Chelsea;2010;37
+Ludovic Giuly;MIL;Monaco;2000;32
+Djibril Cissé;ATT;Liverpool;2000;30
+Yoann Gourcuff;MIL;Bordeaux;2010;29
+Louis Saha;ATT;Manchester United;2000;24
+Mathieu Valbuena;MIL;Marseille;2010;24
+Grégory Coupet;GAR;Lyon;2000;19
+Christophe Dugarry;ATT;Bordeaux;1990;18
+Christian Karembeu;MIL;Real Madrid;1990;14
+Stéphane Guivarc'h;ATT;Auxerre;1990;11
+#Angleterre
+David Beckham;MIL;Manchester United;2000;89
+Wayne Rooney;ATT;Manchester United;2010;88
+Jimmy Greaves;ATT;Tottenham;1960;83
+Bobby Charlton;MIL;Manchester United;1960;81
+Kevin Keegan;ATT;Liverpool;1970;80
+Bobby Moore;DEF;West Ham;1960;78
+Bryan Robson;MIL;Manchester United;1980;74
+Gary Lineker;ATT;Tottenham;1980;72
+Paul Scholes;MIL;Manchester United;2000;69
+Jude Bellingham;MIL;Real Madrid;2020;68
+Harry Kane;ATT;Tottenham;2020;64
+Rio Ferdinand;DEF;Manchester United;2000;61
+Peter Shilton;GAR;Nottingham Forest;1980;59
+John Terry;DEF;Chelsea;2000;56
+Glenn Hoddle;MIL;Tottenham;1980;52
+Gordon Banks;GAR;Stoke City;1960;51
+Paul Gascoigne;MIL;Tottenham;1990;46
+Ashley Cole;DEF;Arsenal;2000;45
+Tony Adams;DEF;Arsenal;1990;42
+Michael Owen;ATT;Liverpool;2000;37
+Sol Campbell;DEF;Arsenal;2000;34
+Gary Neville;DEF;Manchester United;2000;34
+David Seaman;GAR;Arsenal;1990;33
+Jamie Carragher;DEF;Liverpool;2000;29
+Stuart Pearce;DEF;Nottingham Forest;1990;25
+Peter Crouch;ATT;Liverpool;2000;23
+Joey Barton;MIL;Newcastle;2010;18
+Teddy Sheringham;ATT;Manchester United;1990;18
+Emile Heskey;ATT;Liverpool;2000;14
+Titus Bramble;DEF;Newcastle;2000;14
+#Espagne
+Sergio Busquets;MIL;FC Barcelone;2010;90
+Xabi Alonso;MIL;Real Madrid;2010;87
+Francisco Gento;MIL;Real Madrid;1960;86
+David Villa;ATT;Valence;2010;80
+Fernando Torres;ATT;Liverpool;2010;78
+Pedri;MIL;FC Barcelone;2020;77
+David Silva;MIL;Manchester City;2010;74
+Lamine Yamal;ATT;FC Barcelone;2020;70
+Gerard Piqué;DEF;FC Barcelone;2010;70
+Fernando Hierro;DEF;Real Madrid;2000;65
+Luis Arconada;GAR;Real Sociedad;1980;63
+Rodri;MIL;Manchester City;2020;60
+David de Gea;GAR;Manchester United;2010;57
+Emilio Butragueño;ATT;Real Madrid;1980;56
+Cesc Fàbregas;MIL;Arsenal;2010;54
+Jordi Alba;DEF;FC Barcelone;2010;48
+Dani Carvajal;DEF;Real Madrid;2020;47
+Luis Enrique;MIL;FC Barcelone;1990;44
+Andoni Zubizarreta;GAR;FC Barcelone;1990;43
+Santillana;ATT;Real Madrid;1980;38
+Fernando Morientes;ATT;Real Madrid;2000;37
+Míchel Salgado;DEF;Real Madrid;2000;34
+Pedro;ATT;FC Barcelone;2010;30
+Santi Cazorla;MIL;Arsenal;2010;30
+Pepe Reina;GAR;Liverpool;2010;23
+Juan Mata;MIL;Chelsea;2010;23
+Joaquín;MIL;Betis;2000;21
+Gaizka Mendieta;MIL;Valence;2000;18
+Marcos Senna;MIL;Villarreal;2000;16
+Joan Capdevila;DEF;Villarreal;2010;12
+#Italie
+Giuseppe Meazza;ATT;Inter Milan;1930;90
+Fabio Cannavaro;DEF;Juventus;2000;85
+Dino Zoff;GAR;Juventus;1970;85
+Gaetano Scirea;DEF;Juventus;1980;81
+Giacinto Facchetti;DEF;Inter Milan;1960;80
+Paolo Rossi;ATT;Juventus;1980;76
+Luigi Riva;ATT;Cagliari;1970;72
+Gianni Rivera;MIL;AC Milan;1960;72
+Christian Vieri;ATT;Inter Milan;2000;68
+Filippo Inzaghi;ATT;AC Milan;2000;65
+Sandro Mazzola;MIL;Inter Milan;1960;64
+Giorgio Chiellini;DEF;Juventus;2010;60
+Gianluigi Donnarumma;GAR;PSG;2020;57
+Daniele De Rossi;MIL;AS Roma;2010;53
+Alessandro Costacurta;DEF;AC Milan;1990;50
+Gianluca Vialli;ATT;Juventus;1990;49
+Gianluca Zambrotta;DEF;Juventus;2000;48
+Roberto Mancini;ATT;Sampdoria;1980;46
+Walter Zenga;GAR;Inter Milan;1990;41
+Leonardo Bonucci;DEF;Juventus;2010;38
+Marco Verratti;MIL;PSG;2010;36
+Salvatore Schillaci;ATT;Juventus;1990;34
+Mauro Tassotti;DEF;AC Milan;1990;30
+Antonio Di Natale;ATT;Udinese;2010;28
+Marco Materazzi;DEF;Inter Milan;2000;25
+Roberto Donadoni;MIL;AC Milan;1990;23
+Luca Toni;ATT;Bayern Munich;2000;22
+Ciro Immobile;ATT;Lazio;2020;15
+Fabio Grosso;DEF;Inter Milan;2000;14
+Antonio Cassano;ATT;AS Roma;2000;11
+#Allemagne
+Oliver Kahn;GAR;Bayern Munich;2000;88
+Karl-Heinz Rummenigge;ATT;Bayern Munich;1980;85
+Miroslav Klose;ATT;Lazio;2010;84
+Michael Ballack;MIL;Chelsea;2000;80
+Toni Kroos;MIL;Real Madrid;2010;76
+Bastian Schweinsteiger;MIL;Bayern Munich;2010;72
+Jürgen Klinsmann;ATT;Tottenham;1990;64
+Thomas Müller;ATT;Bayern Munich;2010;62
+Rudi Völler;ATT;AS Roma;1990;60
+Sepp Maier;GAR;Bayern Munich;1970;55
+Paul Breitner;DEF;Bayern Munich;1970;52
+Andreas Brehme;DEF;Inter Milan;1990;46
+Mesut Özil;MIL;Arsenal;2010;41
+Mats Hummels;DEF;Dortmund;2010;36
+Bernd Schuster;MIL;Real Madrid;1980;32
+Uwe Seeler;ATT;Hambourg;1960;32
+Marco Reus;ATT;Dortmund;2010;27
+Mario Götze;MIL;Dortmund;2010;23
+Jens Lehmann;GAR;Arsenal;2000;20
+Dietmar Hamann;MIL;Liverpool;2000;12
+#Pays-Bas
+Ruud Gullit;MIL;AC Milan;1980;88
+Frank Rijkaard;MIL;AC Milan;1980;86
+Dennis Bergkamp;ATT;Arsenal;1990;81
+Johan Neeskens;MIL;Ajax;1970;76
+Arjen Robben;ATT;Bayern Munich;2010;72
+Edwin van der Sar;GAR;Manchester United;2000;68
+Ruud van Nistelrooy;ATT;Manchester United;2000;68
+Robin van Persie;ATT;Arsenal;2010;63
+Edgar Davids;MIL;Juventus;1990;58
+Ronald Koeman;DEF;FC Barcelone;1990;54
+Patrick Kluivert;ATT;FC Barcelone;1990;50
+Wesley Sneijder;MIL;Inter Milan;2010;47
+Jaap Stam;DEF;Manchester United;1990;40
+Frenkie de Jong;MIL;FC Barcelone;2020;40
+Marc Overmars;MIL;Arsenal;1990;33
+Frank de Boer;DEF;Ajax;1990;28
+Rob Rensenbrink;ATT;Anderlecht;1970;28
+Giovanni van Bronckhorst;DEF;FC Barcelone;2000;22
+Mark van Bommel;MIL;Bayern Munich;2010;18
+Dirk Kuyt;ATT;Liverpool;2010;12
+#Portugal
+Rui Costa;MIL;AC Milan;2000;90
+Deco;MIL;FC Barcelone;2000;88
+Bernardo Silva;MIL;Manchester City;2020;82
+Bruno Fernandes;MIL;Manchester United;2020;77
+Pepe;DEF;Real Madrid;2010;76
+Rúben Dias;DEF;Manchester City;2020;69
+Ricardo Carvalho;DEF;Chelsea;2000;66
+Paulo Futre;ATT;Atlético Madrid;1980;61
+Nuno Gomes;ATT;Benfica;2000;56
+João Moutinho;MIL;Porto;2010;54
+Simão;MIL;Benfica;2000;48
+Fernando Couto;DEF;Lazio;1990;48
+Pauleta;ATT;PSG;2000;44
+Rui Patrício;GAR;Sporting;2010;36
+Vítor Baía;GAR;Porto;2000;33
+Nani;MIL;Manchester United;2010;28
+Ricardo Quaresma;MIL;Porto;2000;27
+Maniche;MIL;Porto;2000;22
+Bruno Alves;DEF;Porto;2010;16
+Hélder Postiga;ATT;Porto;2000;14
+#Belgique
+Eden Hazard;MIL;Chelsea;2010;82
+Thibaut Courtois;GAR;Real Madrid;2010;80
+Jean-Marie Pfaff;GAR;Bayern Munich;1980;78
+Vincent Kompany;DEF;Manchester City;2010;72
+Romelu Lukaku;ATT;Inter Milan;2020;69
+Enzo Scifo;MIL;Anderlecht;1990;63
+Paul Van Himst;ATT;Anderlecht;1960;61
+Jan Ceulemans;MIL;Club Bruges;1980;58
+Jan Vertonghen;DEF;Tottenham;2010;52
+Dries Mertens;ATT;Naples;2010;50
+Toby Alderweireld;DEF;Tottenham;2010;44
+Axel Witsel;MIL;Dortmund;2010;41
+Eric Gerets;DEF;PSV;1980;36
+Marc Wilmots;MIL;Schalke;1990;35
+Michel Preud'homme;GAR;Benfica;1990;29
+Radja Nainggolan;MIL;AS Roma;2010;26
+Youri Tielemans;MIL;Leicester;2020;21
+Marouane Fellaini;MIL;Manchester United;2010;20
+Daniel Van Buyten;DEF;Bayern Munich;2010;13
+Émile Mpenza;ATT;Standard de Liège;2000;11
+#Croatie
+Davor Šuker;ATT;Real Madrid;1990;82
+Ivan Rakitić;MIL;FC Barcelone;2010;81
+Zvonimir Boban;MIL;AC Milan;1990;74
+Robert Prosinečki;MIL;Real Madrid;1990;72
+Joško Gvardiol;DEF;Manchester City;2020;67
+Mario Mandžukić;ATT;Juventus;2010;64
+Ivan Perišić;MIL;Inter Milan;2010;63
+Marcelo Brozović;MIL;Inter Milan;2020;56
+Mateo Kovačić;MIL;Chelsea;2020;54
+Darijo Srna;DEF;Shakhtar Donetsk;2010;47
+Alen Bokšić;ATT;Lazio;1990;46
+Dejan Lovren;DEF;Liverpool;2010;44
+Slaven Bilić;DEF;West Ham;1990;39
+Ivica Olić;ATT;Bayern Munich;2010;36
+Robert Kovač;DEF;Bayern Munich;2000;28
+Niko Kovač;MIL;Bayern Munich;2000;24
+Danijel Subašić;GAR;Monaco;2010;22
+Igor Štimac;DEF;Derby County;1990;19
+Dado Pršo;ATT;Rangers;2000;13
+Stipe Pletikosa;GAR;Hajduk Split;2000;13
+#Serbie
+Dragan Stojković;MIL;Marseille;1990;74
+Dejan Savićević;MIL;AC Milan;1990;70
+Siniša Mihajlović;DEF;Lazio;1990;62
+Nemanja Vidić;DEF;Manchester United;2010;53
+Predrag Mijatović;ATT;Real Madrid;1990;46
+Dejan Stanković;MIL;Inter Milan;2000;39
+Dragan Džajić;MIL;Étoile rouge;1960;30
+Branislav Ivanović;DEF;Chelsea;2010;24
+Sergej Milinković-Savić;MIL;Lazio;2020;18
+Dušan Vlahović;ATT;Juventus;2020;10
+#Pologne
+Zbigniew Boniek;ATT;Juventus;1980;85
+Grzegorz Lato;ATT;Stal Mielec;1970;80
+Kazimierz Deyna;MIL;Legia Varsovie;1970;74
+Jerzy Dudek;GAR;Liverpool;2000;72
+Wojciech Szczęsny;GAR;Juventus;2020;70
+Jakub Błaszczykowski;MIL;Dortmund;2010;65
+Łukasz Piszczek;DEF;Dortmund;2010;60
+Piotr Zieliński;MIL;Naples;2020;58
+Włodzimierz Lubański;ATT;Górnik Zabrze;1960;54
+Kamil Glik;DEF;Monaco;2010;50
+Jan Tomaszewski;GAR;ŁKS Łódź;1970;44
+Andrzej Szarmach;ATT;Auxerre;1970;44
+Arkadiusz Milik;ATT;Naples;2010;39
+Grzegorz Krychowiak;MIL;Séville;2010;35
+Artur Boruc;GAR;Celtic;2000;28
+Ebi Smolarek;ATT;Feyenoord;2000;25
+Jacek Krzynówek;MIL;Leverkusen;2000;23
+Tomasz Hajto;DEF;Schalke;2000;17
+Maciej Żurawski;ATT;Celtic;2000;17
+Emmanuel Olisadebe;ATT;Panathinaïkos;2000;11
+#Suède
+Henrik Larsson;ATT;Celtic;2000;78
+Gunnar Nordahl;ATT;AC Milan;1950;76
+Nils Liedholm;MIL;AC Milan;1950;70
+Freddie Ljungberg;MIL;Arsenal;2000;63
+Tomas Brolin;ATT;Parme;1990;61
+Alexander Isak;ATT;Newcastle;2020;56
+Thomas Ravelli;GAR;IFK Göteborg;1990;49
+Dejan Kulusevski;MIL;Tottenham;2020;47
+Olof Mellberg;DEF;Aston Villa;2000;39
+Patrik Andersson;DEF;Bayern Munich;1990;33
+Kennet Andersson;ATT;Bologne;1990;31
+Victor Lindelöf;DEF;Manchester United;2020;23
+Glenn Strömberg;MIL;Atalanta;1980;18
+Martin Dahlin;ATT;Mönchengladbach;1990;13
+Emil Forsberg;MIL;RB Leipzig;2020;10
+#Danemark
+Michael Laudrup;MIL;FC Barcelone;1990;81
+Brian Laudrup;MIL;Rangers;1990;77
+Allan Simonsen;ATT;Mönchengladbach;1970;71
+Preben Elkjær;ATT;Vérone;1980;63
+Christian Eriksen;MIL;Tottenham;2010;60
+Jon Dahl Tomasson;ATT;AC Milan;2000;53
+Kasper Schmeichel;GAR;Leicester;2010;48
+Morten Olsen;DEF;Anderlecht;1980;44
+Simon Kjær;DEF;AC Milan;2020;42
+Rasmus Højlund;ATT;Manchester United;2020;37
+Daniel Agger;DEF;Liverpool;2010;28
+Pierre-Emile Højbjerg;MIL;Tottenham;2020;24
+Thomas Helveg;DEF;AC Milan;2000;18
+Martin Jørgensen;MIL;Udinese;2000;15
+Ebbe Sand;ATT;Schalke;2000;11
+#Écosse
+Kenny Dalglish;ATT;Liverpool;1980;76
+Denis Law;ATT;Manchester United;1960;67
+Graeme Souness;MIL;Liverpool;1980;62
+Billy Bremner;MIL;Leeds;1970;55
+Jimmy Johnstone;MIL;Celtic;1960;47
+Alan Hansen;DEF;Liverpool;1980;40
+Andy Robertson;DEF;Liverpool;2020;33
+Scott McTominay;MIL;Naples;2020;25
+Ally McCoist;ATT;Rangers;1990;15
+Gordon Strachan;MIL;Manchester United;1980;11
+#Irlande
+Roy Keane;MIL;Manchester United;1990;75
+Paul McGrath;DEF;Aston Villa;1990;68
+Liam Brady;MIL;Juventus;1980;59
+Robbie Keane;ATT;Tottenham;2000;55
+Denis Irwin;DEF;Manchester United;1990;49
+John Giles;MIL;Leeds;1970;41
+Damien Duff;MIL;Chelsea;2000;33
+Shay Given;GAR;Newcastle;2000;27
+Steve Staunton;DEF;Liverpool;1990;15
+Ray Houghton;MIL;Liverpool;1980;10
+#Turquie
+Hakan Şükür;ATT;Galatasaray;2000;79
+Rüştü Reçber;GAR;Fenerbahçe;2000;73
+Hakan Çalhanoğlu;MIL;Inter Milan;2020;71
+Arda Güler;MIL;Real Madrid;2020;67
+Arda Turan;MIL;Atlético Madrid;2010;58
+Emre Belözoğlu;MIL;Inter Milan;2000;57
+Metin Oktay;ATT;Galatasaray;1960;50
+Nihat Kahveci;ATT;Villarreal;2000;47
+Lefter Küçükandonyadis;ATT;Fenerbahçe;1950;42
+Tugay Kerimoğlu;MIL;Blackburn;2000;35
+Kenan Yıldız;ATT;Juventus;2020;28
+Bülent Korkmaz;DEF;Galatasaray;2000;23
+Hamit Altıntop;MIL;Bayern Munich;2010;22
+Merih Demiral;DEF;Juventus;2020;13
+Alpay Özalan;DEF;Aston Villa;2000;10
+#URSS / Russie
+Oleg Blokhine;ATT;Dynamo Kiev;1970;85
+Rinat Dasaev;GAR;Spartak Moscou;1980;82
+Igor Belanov;ATT;Dynamo Kiev;1980;75
+Igor Netto;MIL;Spartak Moscou;1960;72
+Eduard Streltsov;ATT;Torpedo Moscou;1960;67
+Andreï Archavine;MIL;Arsenal;2000;65
+Alexandre Mostovoï;MIL;Celta Vigo;1990;60
+Oleg Protasov;ATT;Dynamo Kiev;1980;57
+Igor Akinfeev;GAR;CSKA Moscou;2010;54
+Valeri Karpine;MIL;Celta Vigo;1990;47
+Andreï Kanchelskis;MIL;Manchester United;1990;45
+Albert Chesternev;DEF;CSKA Moscou;1960;41
+Aleksandr Golovine;MIL;Monaco;2020;38
+Viktor Onopko;DEF;Real Oviedo;1990;33
+Alexandre Kerjakov;ATT;Zenit;2010;30
+Dmitri Alenitchev;MIL;Porto;2000;26
+Sergueï Ignachevitch;DEF;CSKA Moscou;2010;21
+Youri Jirkov;DEF;Chelsea;2010;21
+Roman Pavlioutchenko;ATT;Tottenham;2000;17
+Vladimir Bechastnykh;ATT;Spartak Moscou;1990;10
+#Tchéquie
+Pavel Nedvěd;MIL;Juventus;2000;80
+Petr Čech;GAR;Chelsea;2000;75
+Josef Masopust;MIL;Dukla Prague;1960;71
+Tomáš Rosický;MIL;Arsenal;2000;63
+Antonín Panenka;MIL;Bohemians Prague;1970;60
+Jan Koller;ATT;Dortmund;2000;54
+Karel Poborský;MIL;Manchester United;1990;51
+Milan Baroš;ATT;Liverpool;2000;45
+Patrik Berger;MIL;Liverpool;1990;38
+Ivo Viktor;GAR;Dukla Prague;1970;36
+Vladimír Šmicer;MIL;Liverpool;2000;29
+Marek Jankulovski;DEF;AC Milan;2000;27
+Tomáš Souček;MIL;West Ham;2020;19
+Patrik Schick;ATT;Leverkusen;2020;16
+Zdeněk Nehoda;ATT;Dukla Prague;1970;12
+#Suisse
+Stéphane Chapuisat;ATT;Dortmund;1990;75
+Granit Xhaka;MIL;Arsenal;2020;71
+Xherdan Shaqiri;MIL;Bayern Munich;2010;63
+Yann Sommer;GAR;Mönchengladbach;2020;52
+Manuel Akanji;DEF;Manchester City;2020;49
+Alexander Frei;ATT;Dortmund;2000;38
+Stephan Lichtsteiner;DEF;Juventus;2010;31
+Ciriaco Sforza;MIL;Bayern Munich;1990;23
+Köbi Kuhn;MIL;FC Zurich;1960;17
+Kubilay Türkyilmaz;ATT;Bologne;1990;12
+#Brésil
+Zico;MIL;Flamengo;1980;88
+Garrincha;ATT;Botafogo;1960;87
+Didi;MIL;Botafogo;1950;86
+Sócrates;MIL;Corinthians;1980;81
+Tostão;ATT;Cruzeiro;1970;81
+Rivelino;MIL;Corinthians;1970;78
+Falcão;MIL;AS Roma;1980;74
+Jairzinho;ATT;Botafogo;1970;73
+Carlos Alberto;DEF;Santos;1970;67
+Nílton Santos;DEF;Botafogo;1950;64
+Vinícius Júnior;ATT;Real Madrid;2020;62
+Bebeto;ATT;La Corogne;1990;61
+Careca;ATT;Naples;1980;56
+Thiago Silva;DEF;PSG;2010;53
+Marcelo;DEF;Real Madrid;2010;51
+Marquinhos;DEF;PSG;2020;51
+Dani Alves;DEF;FC Barcelone;2010;46
+Alisson;GAR;Liverpool;2020;42
+Leonardo;MIL;AC Milan;1990;42
+Casemiro;MIL;Real Madrid;2020;41
+Juninho Pernambucano;MIL;Lyon;2000;35
+Ederson;GAR;Manchester City;2020;33
+Lúcio;DEF;Bayern Munich;2000;30
+Adriano;ATT;Inter Milan;2000;29
+Gilberto Silva;MIL;Arsenal;2000;26
+Dunga;MIL;Stuttgart;1990;21
+Taffarel;GAR;Galatasaray;1990;20
+Robinho;ATT;Real Madrid;2000;19
+Denílson;MIL;Betis;1990;16
+Lucas Leiva;MIL;Liverpool;2010;14
+#Argentine
+Gabriel Batistuta;ATT;Fiorentina;1990;90
+Mario Kempes;ATT;Valence;1970;85
+Javier Zanetti;DEF;Inter Milan;2000;83
+Daniel Passarella;DEF;River Plate;1970;79
+Juan Román Riquelme;MIL;Boca Juniors;2000;75
+Sergio Agüero;ATT;Manchester City;2010;71
+Ángel Di María;MIL;Real Madrid;2010;64
+Hernán Crespo;ATT;Lazio;2000;64
+Javier Mascherano;MIL;FC Barcelone;2010;56
+Juan Sebastián Verón;MIL;Lazio;2000;52
+Carlos Tévez;ATT;Juventus;2010;50
+Lautaro Martínez;ATT;Inter Milan;2020;44
+Emiliano Martínez;GAR;Aston Villa;2020;43
+Gonzalo Higuaín;ATT;Naples;2010;39
+Julián Álvarez;ATT;Manchester City;2020;34
+Claudio Caniggia;ATT;AS Roma;1990;32
+Pablo Aimar;MIL;Valence;2000;26
+Ubaldo Fillol;GAR;River Plate;1970;20
+Javier Saviola;ATT;FC Barcelone;2000;19
+Gabriel Heinze;DEF;Manchester United;2000;16
+#Uruguay
+Luis Suárez;ATT;FC Barcelone;2010;85
+Enzo Francescoli;ATT;River Plate;1980;79
+Juan Alberto Schiaffino;ATT;AC Milan;1950;78
+Obdulio Varela;MIL;Peñarol;1950;70
+Edinson Cavani;ATT;PSG;2010;69
+Diego Forlán;ATT;Atlético Madrid;2010;64
+Diego Godín;DEF;Atlético Madrid;2010;62
+Federico Valverde;MIL;Real Madrid;2020;58
+Ronald Araújo;DEF;FC Barcelone;2020;53
+Álvaro Recoba;MIL;Inter Milan;2000;49
+Paolo Montero;DEF;Juventus;1990;46
+Ladislao Mazurkiewicz;GAR;Peñarol;1970;40
+Darwin Núñez;ATT;Liverpool;2020;36
+Fernando Muslera;GAR;Galatasaray;2010;34
+Rubén Sosa;ATT;Inter Milan;1990;28
+Rodrigo Bentancur;MIL;Tottenham;2020;25
+Diego Lugano;DEF;Fenerbahçe;2000;23
+Daniel Fonseca;ATT;AS Roma;1990;20
+Martín Cáceres;DEF;Juventus;2010;13
+Sebastián Abreu;ATT;Botafogo;2010;10
+#Colombie
+James Rodríguez;MIL;Real Madrid;2010;81
+Radamel Falcao;ATT;Atlético Madrid;2010;73
+Luis Díaz;ATT;Liverpool;2020;69
+Faustino Asprilla;ATT;Parme;1990;64
+Freddy Rincón;MIL;Real Madrid;1990;60
+René Higuita;GAR;Atlético Nacional;1990;53
+Juan Cuadrado;MIL;Juventus;2010;49
+Iván Córdoba;DEF;Inter Milan;2000;44
+Mario Yepes;DEF;PSG;2000;38
+Andrés Escobar;DEF;Atlético Nacional;1990;36
+Leonel Álvarez;MIL;Atlético Nacional;1990;29
+Óscar Córdoba;GAR;Boca Juniors;2000;25
+Jackson Martínez;ATT;Porto;2010;20
+David Ospina;GAR;Arsenal;2010;13
+Davinson Sánchez;DEF;Tottenham;2020;10
+#Mexique
+Hugo Sánchez;ATT;Real Madrid;1980;81
+Rafael Márquez;DEF;FC Barcelone;2000;73
+Javier Hernández;ATT;Manchester United;2010;69
+Cuauhtémoc Blanco;ATT;Club América;1990;64
+Hirving Lozano;ATT;Naples;2020;60
+Guillermo Ochoa;GAR;Ajaccio;2010;57
+Andrés Guardado;MIL;Betis;2010;49
+Carlos Vela;ATT;Real Sociedad;2010;46
+Jorge Campos;GAR;Pumas;1990;39
+Raúl Jiménez;ATT;Wolverhampton;2020;35
+Antonio Carbajal;GAR;León;1950;29
+Luis García;ATT;Atlético Madrid;1990;24
+Héctor Herrera;MIL;Porto;2010;20
+Edson Álvarez;MIL;Ajax;2020;16
+Jared Borgetti;ATT;Pachuca;2000;10
+#États-Unis
+Christian Pulisic;MIL;AC Milan;2020;77
+Landon Donovan;MIL;LA Galaxy;2000;71
+Clint Dempsey;ATT;Fulham;2010;63
+Tim Howard;GAR;Everton;2010;54
+Brad Friedel;GAR;Aston Villa;2000;47
+Claudio Reyna;MIL;Rangers;2000;40
+Weston McKennie;MIL;Juventus;2020;32
+Tyler Adams;MIL;RB Leipzig;2020;27
+Michael Bradley;MIL;AS Roma;2010;19
+Kasey Keller;GAR;Tottenham;2000;11
+#Sénégal
+Sadio Mané;ATT;Liverpool;2020;79
+Édouard Mendy;GAR;Chelsea;2020;74
+El Hadji Diouf;ATT;Liverpool;2000;69
+Idrissa Gueye;MIL;Everton;2020;67
+Papa Bouba Diop;MIL;Fulham;2000;62
+Khalilou Fadiga;MIL;Auxerre;2000;53
+Nicolas Jackson;ATT;Chelsea;2020;50
+Ismaïla Sarr;ATT;Watford;2020;46
+Henri Camara;ATT;Wigan;2000;42
+Demba Ba;ATT;Chelsea;2010;34
+Jules Bocandé;ATT;Metz;1980;30
+Aliou Cissé;MIL;PSG;2000;24
+Pape Matar Sarr;MIL;Tottenham;2020;18
+Mamadou Niang;ATT;Marseille;2010;14
+Papiss Cissé;ATT;Newcastle;2010;10
+#Cameroun
+Roger Milla;ATT;Montpellier;1990;80
+Thomas N'Kono;GAR;Espanyol;1980;74
+André Onana;GAR;Inter Milan;2020;71
+Patrick Mboma;ATT;Parme;2000;66
+Rigobert Song;DEF;Liverpool;1990;59
+Geremi;MIL;Chelsea;2000;54
+Marc-Vivien Foé;MIL;Lyon;2000;52
+Bryan Mbeumo;ATT;Brentford;2020;46
+Lauren;DEF;Arsenal;2000;38
+Alex Song;MIL;Arsenal;2010;35
+Joseph-Antoine Bell;GAR;Marseille;1980;28
+Vincent Aboubakar;ATT;Porto;2010;26
+Eric Maxim Choupo-Moting;ATT;Bayern Munich;2020;19
+François Omam-Biyik;ATT;Laval;1990;17
+Stéphane Mbia;MIL;Marseille;2010;10
+#Côte d'Ivoire
+Yaya Touré;MIL;Manchester City;2010;81
+Kolo Touré;DEF;Arsenal;2000;76
+Franck Kessié;MIL;AC Milan;2020;69
+Salomon Kalou;ATT;Chelsea;2010;67
+Laurent Pokou;ATT;Rennes;1970;58
+Gervinho;ATT;Arsenal;2010;56
+Didier Zokora;MIL;Tottenham;2000;49
+Sébastien Haller;ATT;Dortmund;2020;47
+Wilfried Zaha;MIL;Crystal Palace;2020;38
+Wilfried Bony;ATT;Swansea;2010;33
+Emmanuel Eboué;DEF;Arsenal;2000;29
+Serge Aurier;DEF;PSG;2010;26
+Simon Adingra;MIL;Brighton;2020;18
+Abdoulaye Traoré;ATT;ASEC Mimosas;1990;13
+Cheick Tioté;MIL;Newcastle;2010;11
+#Nigéria
+Jay-Jay Okocha;MIL;PSG;1990;80
+Nwankwo Kanu;ATT;Arsenal;1990;75
+Victor Osimhen;ATT;Naples;2020;72
+Rashidi Yekini;ATT;Vitória Setúbal;1990;66
+Sunday Oliseh;MIL;Ajax;1990;61
+Daniel Amokachi;ATT;Everton;1990;55
+Finidi George;MIL;Ajax;1990;51
+John Obi Mikel;MIL;Chelsea;2010;43
+Ademola Lookman;ATT;Atalanta;2020;39
+Vincent Enyeama;GAR;Lille;2010;35
+Taribo West;DEF;Inter Milan;1990;29
+Emmanuel Amunike;MIL;FC Barcelone;1990;27
+Wilfred Ndidi;MIL;Leicester;2020;19
+Obafemi Martins;ATT;Inter Milan;2000;13
+Joseph Yobo;DEF;Everton;2000;10
+#Ghana
+Abédi Pelé;MIL;Marseille;1990;78
+Michael Essien;MIL;Chelsea;2000;69
+Tony Yeboah;ATT;Leeds;1990;61
+Samuel Kuffour;DEF;Bayern Munich;2000;53
+Asamoah Gyan;ATT;Sunderland;2010;46
+Thomas Partey;MIL;Arsenal;2020;38
+Mohammed Kudus;MIL;West Ham;2020;34
+Sulley Muntari;MIL;Inter Milan;2010;23
+Stephen Appiah;MIL;Fenerbahçe;2000;16
+Kevin-Prince Boateng;MIL;AC Milan;2010;10
+#Maroc
+Hakim Ziyech;MIL;Chelsea;2020;78
+Yassine Bounou;GAR;Séville;2020;67
+Noureddine Naybet;DEF;La Corogne;2000;62
+Mustapha Hadji;MIL;Coventry;1990;54
+Sofyan Amrabat;MIL;Fiorentina;2020;47
+Youssef En-Nesyri;ATT;Séville;2020;41
+Mehdi Benatia;DEF;Juventus;2010;34
+Badou Zaki;GAR;Majorque;1980;26
+Mohamed Timoumi;MIL;FAR Rabat;1980;19
+Brahim Díaz;MIL;Real Madrid;2020;10
+#Algérie
+Rabah Madjer;ATT;Porto;1980;75
+Riyad Mahrez;MIL;Manchester City;2020;67
+Lakhdar Belloumi;MIL;GC Mascara;1980;60
+Rachid Mekhloufi;ATT;Saint-Étienne;1960;55
+Ismaël Bennacer;MIL;AC Milan;2020;49
+Salah Assad;ATT;Mulhouse;1980;38
+Islam Slimani;ATT;Sporting;2010;34
+Mustapha Dahleb;MIL;PSG;1970;23
+Yacine Brahimi;MIL;Porto;2010;18
+Sofiane Feghouli;MIL;Valence;2010;10
+#Égypte
+Mohamed Aboutrika;MIL;Al Ahly;2000;76
+Mahmoud El Khatib;ATT;Al Ahly;1980;69
+Hossam Hassan;ATT;Al Ahly;1990;61
+Omar Marmoush;ATT;Manchester City;2020;53
+Ahmed Hassan;MIL;Anderlecht;2000;46
+Essam El-Hadary;GAR;Al Ahly;2000;41
+Mohamed Zidan;ATT;Dortmund;2000;30
+Hany Ramzy;DEF;Kaiserslautern;1990;26
+Wael Gomaa;DEF;Al Ahly;2000;16
+Mahmoud Trezeguet;MIL;Aston Villa;2020;10
+#Japon
+Hidetoshi Nakata;MIL;AS Roma;2000;78
+Kaoru Mitoma;MIL;Brighton;2020;71
+Shunsuke Nakamura;MIL;Celtic;2000;60
+Takefusa Kubo;MIL;Real Sociedad;2020;52
+Keisuke Honda;MIL;AC Milan;2010;47
+Shinji Kagawa;MIL;Dortmund;2010;41
+Wataru Endo;MIL;Liverpool;2020;33
+Takehiro Tomiyasu;DEF;Arsenal;2020;27
+Yasuhito Endo;MIL;Gamba Osaka;2000;16
+Makoto Hasebe;MIL;Wolfsburg;2010;11
+#Corée du Sud
+Son Heung-min;ATT;Tottenham;2020;75
+Park Ji-sung;MIL;Manchester United;2000;67
+Cha Bum-kun;ATT;Francfort;1980;63
+Kim Min-jae;DEF;Bayern Munich;2020;54
+Lee Kang-in;MIL;PSG;2020;48
+Hwang Hee-chan;ATT;Wolverhampton;2020;41
+Hong Myung-bo;DEF;Pohang;1990;33
+Ki Sung-yueng;MIL;Swansea;2010;27
+Ahn Jung-hwan;ATT;Pérouse;2000;17
+Lee Young-pyo;DEF;Tottenham;2000;12

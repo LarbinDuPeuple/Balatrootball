@@ -124,19 +124,44 @@ export function actorsFor(ids: string[]): Actor[] {
 /** Portrait pixel d'un entraîneur (staff) : survêtement à la couleur de sa rareté, accessoire selon le rôle. */
 const TIER_BG: Record<string, string> = { commun: '#bfe3a8', rare: '#a9d4f2', epique: '#d6b8f0', legende: '#f4d77a' };
 const TIER_KIT: Record<string, string> = { commun: '#2f8f3a', rare: '#2b6cb0', epique: '#7a3fb0', legende: '#b8860b' };
+// Traits signature des entraîneurs célèbres : [peau, cheveux, coupe, visage, accessoire, costume].
+// Accessoires : lunettes, casquette, carnet, sifflet, cigare, echarpe, doudoune.
+const SIGN: Record<string, [number, number, string, string, string, string?]> = {
+  prepa: [0, 5, 'court', 'rien', 'sifflet'], kine: [1, 5, 'court', 'rien', 'lunettes'], comm: [0, 5, 'court', 'rien', 'casquette', '#1c3f8a'],
+  adjoint: [1, 0, 'court', 'rien', 'rien', '#111111'], gk: [0, 5, 'degarni', 'rien', 'lunettes', '#2a2a2a'], coachatt: [0, 5, 'court', 'rien', 'cigare'],
+  video: [0, 5, 'degarni', 'rien', 'lunettes', '#3a3a3a'], psy: [0, 1, 'court', 'rien', 'echarpe', '#c8102e'], scout: [0, 5, 'degarni', 'rien', 'carnet'],
+  domenech: [0, 5, 'court', 'moustache', 'carnet', '#1c3f8a'], houllier: [0, 5, 'chauve', 'rien', 'lunettes', '#c8102e'], rehhagel: [0, 3, 'court', 'rien', 'rien', '#1d5fbf'],
+  hodgson: [0, 5, 'degarni', 'rien', 'carnet'], aragones: [0, 5, 'degarni', 'rien', 'lunettes', '#c8102e'], bora: [1, 0, 'boucle', 'rien', 'rien'],
+  eriksson: [0, 6, 'degarni', 'rien', 'lunettes', '#1c2a5a'], deschamps: [1, 5, 'court', 'rien', 'doudoune', '#1c3f8a'], herrera: [1, 0, 'court', 'rien', 'rien', '#0a1f5c'],
+  mental: [0, 5, 'court', 'rien', 'rien', '#f4f4f4'], cf: [0, 3, 'court', 'rien', 'rien', '#a50044'], jeunes: [0, 5, 'degarni', 'rien', 'carnet', '#c8102e'],
+  kop: [0, 3, 'court', 'barbe', 'lunettes', '#c8102e'], stat: [0, 3, 'court', 'rien', 'rien', '#111111'], tacticien: [0, 5, 'chauve', 'rien', 'rien', '#fb090b'],
+  hitzfeld: [0, 5, 'court', 'rien', 'rien', '#dc052d'], lippi: [0, 5, 'boucle', 'rien', 'cigare', '#111111'], benitez: [0, 1, 'degarni', 'bouc', 'carnet', '#c8102e'],
+  heynckes: [0, 5, 'court', 'rien', 'rien', '#dc052d'], conte: [1, 0, 'court', 'rien', 'rien', '#034694'], luisenrique: [1, 5, 'chauve', 'barbe', 'rien', '#a50044'],
+  emery: [1, 0, 'court', 'rien', 'rien', '#f4f4f4'], selection: [0, 5, 'degarni', 'rien', 'lunettes', '#1c3f8a'], mecene: [1, 5, 'court', 'rien', 'doudoune', '#111111'],
+  ultras: [0, 5, 'degarni', 'rien', 'carnet', '#111111'], ds: [0, 5, 'chauve', 'moustache', 'rien', '#f4f4f4'], michels: [0, 0, 'court', 'rien', 'rien', '#d2122e'],
+  trapattoni: [0, 5, 'degarni', 'rien', 'sifflet', '#111111'], paisley: [0, 5, 'degarni', 'rien', 'casquette', '#c8102e'], happel: [0, 5, 'court', 'rien', 'cigare', '#2a2a2a'],
+  mister: [1, 5, 'chauve', 'barbe', 'echarpe', '#6cabdd'], monde: [0, 5, 'court', 'rien', 'doudoune', '#ef0107'], lobanovski: [0, 5, 'court', 'rien', 'carnet', '#f4f4f4'],
+};
 export function coachKey(scene: Phaser.Scene, k: string, tier: string) {
   const key = 'cp_' + k;
   if (scene.textures.exists(key)) return key;
   let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) % 9973;
   const cuts = ['court', 'degarni', 'chauve', 'court', 'long', 'boucle'], faces = ['rien', 'moustache', 'barbe', 'rien', 'bouc'];
-  const fake = { pos: 'MIL', bg: TIER_BG[tier], kit: [TIER_KIT[tier], '#f4f4f4'], look: { skin: h % 5, hair: (h >> 2) % 7, cut: cuts[(h >> 3) % cuts.length], face: faces[(h >> 4) % faces.length] } };
+  const accs = ['lunettes', 'casquette', 'carnet', 'sifflet'];
+  const sg = SIGN[k];
+  const look = sg ? { skin: sg[0], hair: sg[1], cut: sg[2], face: sg[3] } : { skin: h % 5, hair: (h >> 2) % 7, cut: cuts[(h >> 3) % cuts.length], face: faces[(h >> 4) % faces.length] };
+  const suit = sg?.[5] || TIER_KIT[tier];
+  const fake = { pos: 'MIL', bg: TIER_BG[tier], kit: [suit, '#f4f4f4'], look };
   const t = scene.textures.createCanvas(key, 20, 20)!, ctx = t.getContext();
   drawPortrait(ctx, fake);
-  const acc = h % 4;
-  if (acc === 0) { px(ctx, 7, 8, 2, 1, '#111'); px(ctx, 11, 8, 2, 1, '#111'); px(ctx, 9, 8, 2, 1, '#555'); } // lunettes
-  if (acc === 1) { px(ctx, 5, 2, 10, 2, TIER_KIT[tier]); px(ctx, 5, 4, 12, 1, TIER_KIT[tier]); } // casquette
-  if (acc === 2) { px(ctx, 15, 16, 2, 3, '#f4f4f4'); px(ctx, 14, 15, 4, 1, '#c9c9c9'); } // carnet
-  if (acc === 3) { px(ctx, 9, 15, 2, 3, '#d4af37'); } // sifflet
+  const acc = sg ? sg[4] : accs[h % 4];
+  if (acc === 'lunettes') { px(ctx, 7, 8, 2, 1, '#111'); px(ctx, 11, 8, 2, 1, '#111'); px(ctx, 9, 8, 2, 1, '#555'); }
+  if (acc === 'casquette') { px(ctx, 5, 2, 10, 2, suit); px(ctx, 5, 4, 12, 1, suit); }
+  if (acc === 'carnet') { px(ctx, 15, 16, 2, 3, '#f4f4f4'); px(ctx, 14, 15, 4, 1, '#c9c9c9'); }
+  if (acc === 'sifflet') { px(ctx, 9, 15, 2, 3, '#d4af37'); }
+  if (acc === 'cigare') { px(ctx, 11, 12, 3, 1, '#7a4a22'); px(ctx, 14, 12, 1, 1, '#ff7a2a'); px(ctx, 15, 10, 1, 1, '#cfcfcf'); }
+  if (acc === 'echarpe') { px(ctx, 6, 14, 8, 2, '#e8e8e8'); px(ctx, 7, 16, 2, 3, '#e8e8e8'); }
+  if (acc === 'doudoune') { px(ctx, 3, 15, 14, 1, '#111'); px(ctx, 3, 17, 14, 1, '#111'); }
   if (tier === 'legende') { px(ctx, 1, 1, 3, 1, '#fff7c2'); px(ctx, 2, 0, 1, 3, '#fff7c2'); }
   t.refresh();
   return key;

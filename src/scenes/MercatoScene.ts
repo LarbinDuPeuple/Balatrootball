@@ -1,7 +1,7 @@
 // Mercato entre deux matchs : joueurs, mouvements, staff, consignes, entraînement et effectif.
 import Phaser from 'phaser';
 import {
-  stageOf, RULES, STAFF, STAFF_SLOTS, ITEMS, MOVES, PLAYERS, PACKS, packContent, sellStaffValue, makeOffer, rerollCost, sellValue, addMove, removeMove, movePrice, wageTotal, MOVE_SLOTS,
+  stageOf, RULES, STAFF, STAFF_SLOTS, ITEMS, MOVES, PLAYERS, PACKS, packContent, sellStaffValue, staffCost, hasStaff, makeOffer, rerollCost, sellValue, addMove, removeMove, movePrice, wageTotal, MOVE_SLOTS,
 } from '../game/logic.js';
 import { S } from '../game/state';
 import { W, C, txt, big, panel, Button, backdrop, crt, modal, floatText, fmt, dec } from '../ui/theme';
@@ -51,7 +51,7 @@ export class MercatoScene extends Phaser.Scene {
     add(txt(this, SB_X + 14, 230, 'PROCHAIN MATCH', 13, C.muted));
     add(txt(this, SB_X + 14, 250, `${s.comp} · ${s.label}`, 16, C.cream, { wordWrap: { width: SB_W - 28 } }));
     add(txt(this, SB_X + 14, 276, `Mur ${s.wall} · l'adversaire annonce ${s.opp} but${s.opp > 1 ? 's' : ''}`, 14, C.cream2, { wordWrap: { width: SB_W - 28 } }));
-    add(txt(this, SB_X + 14, 318, s.coach ? `Boss : ${(RULES as any)[s.coach].coach}` : s.boss ? 'Match spécial avec une règle surprise' : `Match ${G.stage + 1} sur 9`, 14, s.boss ? C.red : C.muted));
+    add(txt(this, SB_X + 14, 318, s.coach ? `Boss : ${(RULES as any)[s.coach].club}` : s.boss ? 'Match spécial avec une règle surprise' : `Match ${G.stage + 1} sur 9`, 14, s.boss ? C.red : C.muted));
     add(panel(this, SB_X, 366, SB_W, 130));
     add(txt(this, SB_X + 14, 374, `TES ENTRAÎNEURS (${G.staff.length}/${STAFF_SLOTS})`, 13, C.muted));
     for (let i = 0; i < STAFF_SLOTS; i++) {
@@ -82,12 +82,12 @@ export class MercatoScene extends Phaser.Scene {
     G.offer.staff.forEach((k: string | null, i: number) => {
       const x = cx(i);
       if (!k) { add(txt(this, x, cy, 'Signé', 18, C.green).setOrigin(0.5)); return; }
-      const st = (STAFF as any)[k], col = STAFF_TIER_COLOR[st.tier];
-      const card = add(new Tile(this, x, cy, 180, 236, 'Entraîneur ' + STAFF_TIER_NAME[st.tier].toLowerCase(), st.name, '', '', col));
+      const st = (STAFF as any)[k], col = STAFF_TIER_COLOR[st.tier], cost = staffCost(G, k);
+      const card = add(new Tile(this, x, cy, 180, 236, st.role + ' · ' + STAFF_TIER_NAME[st.tier].toLowerCase(), st.name, '', '', col));
       add(this.add.image(x + 4, cy + 30, staffBadge(this, k, 92)));
-      tip(card, () => staffTip(k));
-      add(new Button(this, x, 312, 150, 36, fmt(st.cost), C.gold, () => this.buy(st.cost, () => { G.staff.push(k); G.offer.staff[i] = null; }, x, 280), 16))
-        .setEnabled(G.budget >= st.cost && G.staff.length < STAFF_SLOTS);
+      tip(card, () => staffTip(k, false, cost));
+      add(new Button(this, x, 312, 150, 36, fmt(cost), C.gold, () => this.buy(cost, () => { G.staff.push(k); G.offer.staff[i] = null; }, x, 280), 16))
+        .setEnabled(G.budget >= cost && G.staff.length < STAFF_SLOTS);
     });
     G.offer.moves.forEach((o: any, i: number) => {
       const x = cx(2 + i);
@@ -158,11 +158,14 @@ export class MercatoScene extends Phaser.Scene {
     pg.fillStyle(C.cream, 1).fillRect(-80, -20, 160, 40);
     packG.add([pg, big(this, 0, 0, pk.name.toUpperCase(), 10, C.ink).setOrigin(0.5)]);
     layer.add(packG);
-    let taken = false; // un seul choix par booster, même avec un double appui
+    // un seul choix par booster (deux consignes avec Eriksson), même avec un double appui
+    let left = kind === 'consignes' && hasStaff(G, 'eriksson') && G.items.length <= 1 ? 2 : 1;
+    const picked: string[] = [];
     const take = (id: string) => {
       if (kind === 'joueurs' && !G.squad.includes(id)) { G.squad.push(id); G.signed = (G.signed || 0) + 1; }
-      if (kind === 'entrainement') G.levels[id] = (G.levels[id] || 0) + 1;
+      if (kind === 'entrainement') G.levels[id] = (G.levels[id] || 0) + (hasStaff(G, 'hitzfeld') ? 2 : 1);
       if (kind === 'consignes') G.items.push(id);
+      if (left > 0) return;
       hideTip(this); close(); this.time.delayedCall(140, () => this.render());
     };
     this.tweens.add({
@@ -175,7 +178,8 @@ export class MercatoScene extends Phaser.Scene {
           if (kind === 'joueurs') { obj = new CardView(this, x, y, id); obj.sway = false; tip(obj, () => cardTip(id)); }
           else if (kind === 'entrainement') {
             const lv = G.levels[id] || 0, mv = (MOVES as any)[id];
-            obj = new Tile(this, x, y, 180, 230, 'Séance', mv.name, '', `niv. ${lv + 1} → ${lv + 2}`, C.gold);
+            const up = hasStaff(G, 'hitzfeld') ? 2 : 1;
+            obj = new Tile(this, x, y, 180, 230, 'Séance', mv.name, '', `niv. ${lv + 1} → ${lv + 1 + up}`, C.gold);
             obj.add(this.add.image(0, 10, moveBadge(this, id, 64)));
             tip(obj, () => ({ title: 'Entraînement : ' + mv.name, lines: [`${mv.base + 10 * lv} × ${dec(mv.prec + 0.5 * lv)} devient ${mv.base + 10 * (lv + 1)} × ${dec(mv.prec + 0.5 * (lv + 1))}`], accent: C.gold }));
           } else {
@@ -187,9 +191,9 @@ export class MercatoScene extends Phaser.Scene {
           layer.add(obj); obj.setScale(0, 1);
           this.tweens.add({ targets: obj, scaleX: 1, duration: 240, delay: i * 160, ease: 'Back.out' });
           obj.setInteractive({ useHandCursor: true });
-          obj.on('pointerup', () => { if (wasLongPress(obj) || taken) return; taken = true; this.tweens.add({ targets: obj, y: y - 30, scale: 1.1, duration: 150, onComplete: () => take(id) }); });
+          obj.on('pointerup', () => { if (wasLongPress(obj) || left <= 0 || picked.includes(id)) return; left--; picked.push(id); this.tweens.add({ targets: obj, y: y - 30, scale: 1.1, duration: 150, onComplete: () => take(id) }); });
         });
-        layer.add(new Button(this, W / 2, 600, 220, 40, 'Ne rien prendre', C.panel2, () => { hideTip(this); close(); this.time.delayedCall(140, () => this.render()); }, 15));
+        layer.add(new Button(this, W / 2, 600, 220, 40, left === 2 ? 'Terminer' : 'Ne rien prendre', C.panel2, () => { hideTip(this); close(); this.time.delayedCall(140, () => this.render()); }, 15));
       },
     });
   }

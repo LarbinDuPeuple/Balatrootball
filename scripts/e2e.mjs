@@ -23,21 +23,23 @@ async function run(vw, vh, tag) {
   await pg.reload(); await pg.waitForTimeout(1500);
   await click(800, 570, 800);
   await pg.screenshot({ path: `${out}/${tag}-1c-collection.png` });
-  await click(1180, 96, 600);
+  await click(790, 112, 800);
+  await pg.screenshot({ path: `${out}/${tag}-1e-coachs.png` });
+  await pg.mouse.move(box.x + 1032 * s, box.y + 228 * s); await pg.waitForTimeout(400);
+  await pg.screenshot({ path: `${out}/${tag}-1f-coach-tip.png` });
+  await click(1180, 66, 600);
   await click(480, 570, 800);
   await pg.screenshot({ path: `${out}/${tag}-1d-campagnes.png` });
-  await click(260, 510, 3000);
-  // booster de départ : 4 paquets (GAR 4→2, puis 6→4)
-  for (const [n, keep] of [[4, 2], [6, 4], [6, 4], [6, 4]]) {
-    const x0 = 640 - (n - 1) * 84;
-    for (let i = 0; i < keep; i++) await click(x0 + i * 168, 400, 150);
-    await pg.screenshot({ path: `${out}/${tag}-1b-draft-${n}.png` });
-    await click(640, 610, 2800);
-  }
-  await pg.waitForTimeout(800);
-  await click(340, 360, 200); await click(540, 360, 200);
-  await pg.screenshot({ path: `${out}/${tag}-2-booster.png` });
-  await click(640, 570, 3500);
+  await click(363, 242, 1200);
+  // choix du mouvement puis tirage de l'effectif
+  await click(360, 370, 300);
+  await pg.screenshot({ path: `${out}/${tag}-2-move.png` });
+  await click(640, 590, 1200);
+  await pg.screenshot({ path: `${out}/${tag}-2b-draw-anim.png` });
+  await pg.waitForTimeout(1600);
+  await pg.screenshot({ path: `${out}/${tag}-2c-draw.png` });
+  await click(450, 600, 2600); // nouveau tirage
+  await click(830, 600, 3500);
   await click(640, 402, 500); await click(640, 442, 600); // bouton Jouer de l'intro (avec ou sans règle)
   await pg.screenshot({ path: `${out}/${tag}-3-match.png` });
   await pg.mouse.move(box.x + 552 * s, box.y + 560 * s); await pg.waitForTimeout(400);

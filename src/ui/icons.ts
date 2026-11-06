@@ -1,13 +1,16 @@
 // Petits logos pixel : un badge coloré avec un sigle, pour les mouvements, styles, staff et consignes.
 import Phaser from 'phaser';
 import { C, hex, BIG_FONT } from './theme';
-import { MOVES, STAFF, ITEMS } from '../game/logic.js';
+import { MOVES, STAFF, ITEMS, unlockText } from '../game/logic.js';
 import { coachKey } from '../game/art';
 import { TIER_COLOR } from './tiles';
 
 export const MOVE_CODE: Record<string, string> = {
   frappe: 'FR', passe: 'PC', unedeux: '12', cpa: 'CF', centre: 'CT', triangle: 'TR', relance: 'RP',
   recup: 'RH', long: 'JL', contre: 'CE', solo: 'EX', tiki: 'TK', montee: 'MC', totale: 'AT',
+  tete: 'TP', loin: 'FL', duo: 'DA', charniere: 'CC', relais: 'RM', degagement: 'DG', debord: 'DB', compat: 'CP', coequip: 'CQ', libero: 'GL',
+  panenka: 'PK', chevauchee: 'CH', indirect: 'CI', quatuor: 'Q4', generation: 'GD', selnat: 'SN', blocclub: 'BC', brassard: 'BR', duel: 'DP', contrepress: 'CX',
+  carre: 'C4', vieille: 'VG', vague: 'NV', dream: 'DT', melting: 'MP', beton: 'BA', clubleg: 'CL', onzenat: 'ON',
 };
 export const STYLE_ICON: Record<string, [string, number]> = {
   Vitesse: ['V', C.sky], Technique: ['T', C.purple], Physique: ['P', C.red],
@@ -21,8 +24,11 @@ export const STYLE_DESC: Record<string, string> = {
   Pressing: '3 dans l\'action : mur -10 % jusqu\'à la fin du match',
   'Spécialiste': 'Permet le Coup de pied arrêté (joueur seul)',
 };
-export const STAFF_CODE: Record<string, string> = { prepa: 'PP', adjoint: 'AD', coachatt: 'CA', comm: '€', psy: 'PS', gk: 'EG', kine: 'K', video: 'AV', mental: 'PM', scout: 'RM' };
-export const ITEM_CODE: Record<string, string> = { pressing: 'PH', blocbas: 'BB', coaching: 'CG', tactique: 'CH', remontada: 'R!', recup: 'RC' };
+export const ITEM_CODE: Record<string, string> = {
+  pressing: 'PH', blocbas: 'BB', coaching: 'CG', tactique: 'CH', remontada: 'R!', recup: 'RC', ballonlong: 'BL', profondeur: 'AP', defhaute: 'DH',
+  losange: 'ML', volant: 'GV', rotation: 'RO', derby: 'JD', hymne: 'HN', prime: '€', videoadv: 'VA', tab: 'TB', presstout: 'PT', double: 'x2',
+  sangfroid: 'SF', douzieme: '12', capitaine: 'CA', chapeau: 'CP', causerie: 'CM', vestiaire: 'VS', pluie: 'PL', additionnel: '+T', horsjeu: 'HJ', faute: 'FT', express: 'EX',
+};
 
 /** Texture de badge carré (taille en pixels écran), mise en cache par sigle, couleur et taille. */
 export function badgeKey(scene: Phaser.Scene, code: string, color: number, size = 32) {
@@ -64,7 +70,10 @@ export const itemBadge = (scene: Phaser.Scene, k: string, size = 32) => badgeKey
 
 export function moveTip(k: string, lv: number) {
   const mv = (MOVES as any)[k];
-  return { title: mv.name + (lv ? ` niv.${lv + 1}` : ''), sub: { base: 'Mouvement de base', commun: 'Mouvement commun', rare: 'Mouvement rare', epique: 'Mouvement épique' }[mv.tier as string], lines: [mv.desc, `${mv.base + 10 * lv} base × ${String(mv.prec + 0.5 * lv).replace('.', ',')} précision`], accent: TIER_COLOR[mv.tier] };
+  return { title: mv.name + (lv ? ` niv.${lv + 1}` : ''), sub: { base: 'Mouvement de base', commun: 'Mouvement commun', rare: 'Mouvement rare', epique: 'Mouvement épique' }[mv.tier as string], lines: [mv.desc, ...(mv.ex ? [mv.ex] : []), `${mv.base + 10 * lv} base × ${String(mv.prec + 0.5 * lv).replace('.', ',')} précision`], accent: TIER_COLOR[mv.tier] };
 }
-export function staffTip(k: string) { const s = (STAFF as any)[k]; return { title: s.name, sub: `Entraîneur ${STAFF_TIER_NAME[s.tier].toLowerCase()} · permanent`, lines: [s.desc, `Prix : ${s.cost} M€ · revente ${Math.floor(s.cost / 2)} M€`], accent: STAFF_TIER_COLOR[s.tier] }; }
+export function staffTip(k: string, locked = false, cost?: number) {
+  const s = (STAFF as any)[k], c = cost ?? s.cost;
+  return { title: s.name, sub: `${s.role} · ${STAFF_TIER_NAME[s.tier].toLowerCase()}`, lines: [s.desc, locked ? `Verrouillé : ${unlockText(k)}` : `Prix : ${c} M€ · revente ${Math.floor(c / 2)} M€`], accent: STAFF_TIER_COLOR[s.tier] };
+}
 export function itemTip(k: string, inMatch = false) { const s = (ITEMS as any)[k]; return { title: s.name, sub: 'Consigne à usage unique', lines: [s.desc, inMatch ? 'Touche pour l\'utiliser maintenant' : `Prix : ${s.cost} M€`], accent: C.sky }; }

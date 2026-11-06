@@ -1,13 +1,14 @@
 // Écran titre et booster de départ.
 import Phaser from 'phaser';
-import { newGame, booster, addMove, makeOffer, STARTER, starterPack, CAMPAIGNS, RULES, PLAYERS } from '../game/logic.js';
+import { newGame, booster, addMove, makeOffer, drawStarters, CAMPAIGNS, RULES, PLAYERS, STAFF, MOVES } from '../game/logic.js';
 import { loadProfile } from '../game/profile';
 import { drawField, PITCH_W, PITCH_H } from '../game/art';
 import { S } from '../game/state';
 import { W, C, big, txt, Button, backdrop, crt, modal, panel, onUpdate } from '../ui/theme';
-import { moveTile, Tile } from '../ui/tiles';
+import { moveTile } from '../ui/tiles';
 import { CardView, CARD_W, CARD_H, cardTip } from '../ui/Card';
 import { tip, wasLongPress, hideTip } from '../ui/Tooltip';
+import { staffBadge, staffTip, STAFF_TIER_COLOR } from '../ui/icons';
 
 export class TitleScene extends Phaser.Scene {
   constructor() { super('title'); }
@@ -32,149 +33,141 @@ export class TitleScene extends Phaser.Scene {
     crt(this);
   }
 
-  /** Nouvelle saison : un booster de joueurs par ligne, puis le booster de mouvements. */
+  /** Nouvelle saison : choix d'un mouvement, puis tirage au sort de l'effectif. */
   startSeason(campaign: string) {
-    S.G = newGame(campaign);
-    S.G.squad = [];
-    this.openDraft(0);
+    const prof = loadProfile();
+    S.G = newGame(campaign, { coaches: prof.coaches, unlocked: prof.unlocked });
+    this.openMovePick();
   }
 
-  /** Choix de la campagne : chacune se débloque en gagnant la précédente. */
+  /** Choix de la campagne : 9 campagnes, chacune se débloque en gagnant la précédente. */
   openCampaigns() {
     const prof = loadProfile();
-    const { layer, close } = modal(this, 1160, 560);
-    layer.add(big(this, W / 2, 110, 'Choisis ta campagne', 22).setOrigin(0.5));
+    const { layer, close } = modal(this, 1220, 660);
+    layer.add(big(this, W / 2, 52, 'Choisis ta campagne', 20).setOrigin(0.5));
+    const cw = 390, ch = 192;
     CAMPAIGNS.forEach((c: any, i: number) => {
-      const x = W / 2 - 380 + i * 380, open = !c.req || prof.won[c.req];
-      const won = prof.won[c.id] || 0;
-      layer.add(panel(this, x - 175, 150, 350, 400, open ? C.panel2 : C.panel, open ? C.gold : C.edge));
-      layer.add(big(this, x, 180, `${i + 1}`, 18, open ? C.gold : C.muted).setOrigin(0.5));
-      layer.add(txt(this, x, 214, c.name.toUpperCase(), 19, open ? C.cream : C.muted, { align: 'center', wordWrap: { width: 320 } }).setOrigin(0.5, 0));
-      layer.add(txt(this, x, 262, c.desc, 16, open ? C.cream2 : C.muted, { align: 'center', wordWrap: { width: 310 } }).setOrigin(0.5, 0));
-      const coaches = c.stages.filter((s: any) => s.coach).map((s: any) => (RULES as any)[s.coach].coach);
-      if (coaches.length) layer.add(txt(this, x, 370, 'Boss : ' + coaches.join(', '), 15, open ? C.red : C.muted, { align: 'center', wordWrap: { width: 310 } }).setOrigin(0.5, 0));
-      layer.add(txt(this, x, 440, open ? (won ? `Gagnée ${won} fois` : 'Pas encore gagnée') : `Verrouillée : gagne « ${CAMPAIGNS.find((o: any) => o.id === c.req)!.name} »`, 15, open ? (won ? C.green : C.muted) : C.muted, { align: 'center', wordWrap: { width: 310 } }).setOrigin(0.5, 0));
-      const b = new Button(this, x, 510, 220, 48, open ? 'Jouer' : 'Verrouillée', open ? C.gold : C.panel2, () => { close(); this.time.delayedCall(140, () => this.startSeason(c.id)); }, 19);
+      const x = W / 2 + ((i % 3) - 1) * (cw + 8), y = 80 + Math.floor(i / 3) * (ch + 8);
+      const open = !c.req || prof.won[c.req], won = prof.won[c.id] || 0;
+      layer.add(panel(this, x - cw / 2, y, cw, ch, open ? C.panel2 : C.panel, open ? C.gold : C.edge));
+      layer.add(big(this, x - cw / 2 + 16, y + 14, `${i + 1}`, 14, open ? C.gold : C.muted));
+      layer.add(txt(this, x - cw / 2 + 46, y + 12, c.name.toUpperCase(), 16, open ? C.cream : C.muted, { wordWrap: { width: cw - 60 } }));
+      const bosses = c.stages.filter((s: any) => s.coach).map((s: any) => (RULES as any)[s.coach].club);
+      layer.add(txt(this, x - cw / 2 + 16, y + 44, bosses.length ? 'Boss : ' + bosses.join(', ') : c.desc, 14, open ? (bosses.length ? C.red : C.cream2) : C.muted, { wordWrap: { width: cw - 32 } }));
+      const rewards = c.stages.filter((s: any) => s.coach).map((s: any) => (STAFF as any)[(RULES as any)[s.coach].unlock]?.name).filter(Boolean);
+      if (rewards.length) layer.add(txt(this, x - cw / 2 + 16, y + 96, 'À débloquer : ' + rewards.join(', '), 13, open ? C.sky : C.muted, { wordWrap: { width: cw - 32 } }));
+      layer.add(txt(this, x - cw / 2 + 16, y + ch - 34, open ? (won ? `Gagnée ${won} fois` : 'Pas encore gagnée') : `Gagne « ${CAMPAIGNS.find((o: any) => o.id === c.req)!.name} »`, 13, open ? (won ? C.green : C.muted) : C.muted, { wordWrap: { width: 210 } }));
+      const b = new Button(this, x + cw / 2 - 74, y + ch - 30, 124, 40, open ? 'Jouer' : 'Fermée', open ? C.gold : C.panel2, () => { close(); this.time.delayedCall(140, () => this.startSeason(c.id)); }, 17);
       b.setEnabled(!!open); layer.add(b);
     });
-    layer.add(new Button(this, W / 2 + 540, 110, 50, 44, '✕', C.red, () => close(), 20));
+    layer.add(new Button(this, W / 2 + 570, 52, 50, 44, '✕', C.red, () => close(), 20));
   }
 
-  /** Collection : les joueurs débloqués, qui peuvent sortir du booster de départ. */
-  openCollection() {
+  /** Collection : joueurs débloqués et entraîneurs célèbres. */
+  openCollection(tab: 'joueurs' | 'coachs' = 'joueurs') {
     const prof = loadProfile();
-    const { layer, close } = modal(this, 1160, 600);
-    layer.add(big(this, W / 2, 96, 'Ta collection', 22).setOrigin(0.5));
-    layer.add(txt(this, W / 2, 136, 'Gagne une campagne : tes meilleurs buteurs entrent ici et peuvent sortir du booster de départ.', 17, C.cream2).setOrigin(0.5));
-    const ids = prof.unlocked.filter(id => (PLAYERS as any)[id]);
-    if (!ids.length) layer.add(txt(this, W / 2, 340, 'Aucun joueur pour l\'instant.', 20, C.muted).setOrigin(0.5));
-    const per = 9, sc = 0.78, gx = 118, gy = 160;
-    ids.slice(0, 27).forEach((id, i) => {
-      const inRow = Math.min(per, Math.min(ids.length, 27) - Math.floor(i / per) * per);
-      const v = new CardView(this, W / 2 - (inRow - 1) * gx / 2 + (i % per) * gx, 260 + Math.floor(i / per) * gy, id);
-      v.sway = false; v.setScale(sc); layer.add(v);
-      tip(v, () => cardTip(id));
-    });
-    if (ids.length > 27) layer.add(txt(this, W / 2, 640, `et ${ids.length - 27} autres`, 15, C.muted).setOrigin(0.5));
-    layer.add(new Button(this, W / 2 + 540, 96, 50, 44, '✕', C.red, () => { hideTip(this); close(); }, 20));
+    const { layer, close } = modal(this, 1160, 640);
+    const famous = Object.keys(STAFF).filter(k => !(STAFF as any)[k].group);
+    const mine = famous.filter(k => !(STAFF as any)[k].unlock || prof.coaches.includes(k));
+    layer.add(big(this, W / 2, 66, 'Ta collection', 20).setOrigin(0.5));
+    const swap = (t: 'joueurs' | 'coachs') => { hideTip(this); layer.destroy(); this.children.list.filter((o: any) => o.depth === 499).forEach(o => o.destroy()); this.openCollection(t); };
+    layer.add(new Button(this, W / 2 - 150, 112, 270, 42, `Joueurs (${prof.unlocked.length})`, tab === 'joueurs' ? C.gold : C.panel2, () => tab !== 'joueurs' && swap('joueurs'), 16));
+    layer.add(new Button(this, W / 2 + 150, 112, 270, 42, `Entraîneurs (${mine.length}/${famous.length})`, tab === 'coachs' ? C.gold : C.panel2, () => tab !== 'coachs' && swap('coachs'), 16));
+    if (tab === 'joueurs') {
+      layer.add(txt(this, W / 2, 152, 'Gagne une campagne : tes meilleurs buteurs entrent ici et peuvent sortir au tirage de départ.', 16, C.cream2).setOrigin(0.5));
+      const ids = prof.unlocked.filter(id => (PLAYERS as any)[id]);
+      if (!ids.length) layer.add(txt(this, W / 2, 360, 'Aucun joueur pour l\'instant.', 20, C.muted).setOrigin(0.5));
+      const per = 9, sc = 0.72, gx = 118, gy = 146;
+      ids.slice(0, 27).forEach((id, i) => {
+        const inRow = Math.min(per, Math.min(ids.length, 27) - Math.floor(i / per) * per);
+        const v = new CardView(this, W / 2 - (inRow - 1) * gx / 2 + (i % per) * gx, 252 + Math.floor(i / per) * gy, id);
+        v.sway = false; v.setScale(sc); layer.add(v);
+        tip(v, () => cardTip(id));
+      });
+      if (ids.length > 27) layer.add(txt(this, W / 2, 660, `et ${ids.length - 27} autres`, 15, C.muted).setOrigin(0.5));
+    } else {
+      layer.add(txt(this, W / 2, 152, 'Bats les clubs légendaires ou réussis un exploit pour débloquer leur entraîneur. Reste appuyé pour le détail.', 16, C.cream2).setOrigin(0.5));
+      const per = 11, gx = 98, gy = 112;
+      famous.forEach((k, i) => {
+        const st = (STAFF as any)[k], got = mine.includes(k);
+        const x = W / 2 - (per - 1) * gx / 2 + (i % per) * gx, y = 228 + Math.floor(i / per) * gy;
+        const img = this.add.image(x, y, staffBadge(this, k, 64)).setInteractive();
+        if (!got) img.setTint(0x333333);
+        const name = txt(this, x, y + 38, got ? st.name.split(' ').slice(-1)[0] : '???', 12, got ? C.cream : C.muted).setOrigin(0.5, 0);
+        const ring = this.add.graphics(); ring.lineStyle(2, got ? STAFF_TIER_COLOR[st.tier] : C.edge, 1).strokeRect(x - 34, y - 34, 68, 68);
+        layer.add([ring, img, name]);
+        tip(img, () => staffTip(k, !got));
+      });
+    }
+    layer.add(new Button(this, W / 2 + 540, 66, 50, 44, '✕', C.red, () => { hideTip(this); close(); }, 20));
   }
 
-  openDraft(step: number) {
-    const lines = Object.keys(STARTER) as string[];
-    if (step >= lines.length) { this.openBooster(); return; }
-    const pos = lines[step], [n, keep] = (STARTER as any)[pos];
-    const label: Record<string, string> = { GAR: 'Gardiens', DEF: 'Défenseurs', MIL: 'Milieux', ATT: 'Attaquants' };
-    const pack: string[] = starterPack(pos, loadProfile().unlocked);
-    const chosen: string[] = [];
-    const { layer, close } = modal(this, 1160, 600);
-    layer.add(txt(this, W / 2, 84, `BOOSTER DE DÉPART · ${step + 1}/${lines.length}`, 16, C.muted).setOrigin(0.5));
-    layer.add(big(this, W / 2, 120, label[pos], 22).setOrigin(0.5));
-    const hint = txt(this, W / 2, 162, `Garde ${keep} joueurs sur ${n}. Reste appuyé sur une carte pour son détail.`, 18, C.cream2).setOrigin(0.5);
-    layer.add(hint);
-    const packG = this.add.container(W / 2, 360);
-    const pg = this.add.graphics();
-    pg.fillStyle(C.edge, 1).fillRect(-83, -113, 166, 226); pg.fillStyle(C.sky, 1).fillRect(-80, -110, 160, 220);
-    pg.fillStyle(C.gold, 1).fillRect(-80, -20, 160, 40);
-    packG.add([pg, big(this, 0, 0, label[pos].toUpperCase(), 10, C.ink).setOrigin(0.5)]);
-    layer.add(packG);
-    const go = new Button(this, W / 2, 610, 340, 52, '', C.gold, () => {
-      if (!go.enabled) return; go.setEnabled(false); // pas de double validation
-      S.G.squad.push(...chosen.filter(id => !S.G.squad.includes(id)));
-      hideTip(this); close();
-      this.time.delayedCall(160, () => this.openDraft(step + 1));
+  /** Avant les joueurs : choisis 1 mouvement parmi 3 communs, avec un exemple pour comprendre. */
+  openMovePick() {
+    const pack: string[] = booster(3);
+    let chosen: string | null = null;
+    const { layer, close } = modal(this, 900, 560);
+    layer.add(txt(this, W / 2, 106, 'NOUVELLE SAISON · 1/2', 16, C.muted).setOrigin(0.5));
+    layer.add(big(this, W / 2, 140, 'Choisis ton mouvement', 22).setOrigin(0.5));
+    layer.add(txt(this, W / 2, 182, 'Tu as déjà Frappe isolée, Passe courte et Une-deux. Ajoutes-en un.\nTon effectif sera tiré au sort pour pouvoir le jouer.', 17, C.cream2, { align: 'center' }).setOrigin(0.5, 0));
+    const tiles = pack.map((k, i) => {
+      const x = W / 2 - 280 + i * 280;
+      const tile = moveTile(this, x, 370, 240, 200, k, 0);
+      tile.setScale(0, 1); layer.add(tile);
+      layer.add(txt(this, x, 484, (MOVES as any)[k].ex || '', 14, C.sky, { align: 'center', wordWrap: { width: 230 } }).setOrigin(0.5, 0));
+      this.tweens.add({ targets: tile, scaleX: 1, duration: 220, delay: i * 140, ease: 'Back.out' });
+      tile.setInteractive({ useHandCursor: true }).on('pointerup', () => {
+        chosen = k;
+        tiles.forEach((tl, ii) => { const on = pack[ii] === k; tl.setOn(on); this.tweens.add({ targets: tl, y: on ? 354 : 370, duration: 120 }); });
+        go.setEnabled(true).setLabel('Tirer mon effectif');
+      });
+      return tile;
     });
-    const sync = () => go.setEnabled(chosen.length === keep).setLabel(chosen.length === keep ? (step === lines.length - 1 ? 'Valider l\'effectif' : 'Suivant') : `Choisis ${keep} joueurs (${chosen.length}/${keep})`);
-    sync(); go.setVisible(false); layer.add(go);
-    const gap = 168, x0 = W / 2 - (n - 1) * gap / 2, cy = 380;
-    this.tweens.add({
-      targets: packG, angle: { from: -4, to: 4 }, duration: 70, yoyo: true, repeat: 6, onComplete: () => {
-        this.cameras.main.flash(200, 255, 240, 200);
-        packG.destroy();
-        pack.forEach((id, i) => {
-          const ring = this.add.graphics();
-          const v = new CardView(this, x0 + i * gap, cy, id);
-          v.sway = false; v.setScale(0, 1.12);
-          layer.add([ring, v]);
-          this.tweens.add({ targets: v, scaleX: 1.12, duration: 220, delay: i * 120, ease: 'Back.out' });
-          v.setInteractive({ useHandCursor: true });
-          tip(v, () => cardTip(id));
-          v.on('pointerup', () => {
-            if (wasLongPress(v)) return;
-            const j = chosen.indexOf(id);
-            if (j >= 0) chosen.splice(j, 1); else if (chosen.length < keep) chosen.push(id); else return;
-            const on = chosen.includes(id);
-            this.tweens.add({ targets: v, y: on ? cy - 22 : cy, duration: 120 });
-            ring.clear();
-            if (on) ring.fillStyle(C.gold, 1).fillRect(v.x - CARD_W * 0.56 - 6, cy - 22 - CARD_H * 0.56 - 6, CARD_W * 1.12 + 12, CARD_H * 1.12 + 12);
-            sync();
-          });
-        });
-        go.setVisible(true);
-      },
-    });
-  }
-
-  openBooster() {
-    const pack = booster();
-    const chosen: string[] = [];
-    const { layer, close } = modal(this, 860, 520);
-    layer.add(big(this, W / 2, 140, 'Booster de départ', 22).setOrigin(0.5));
-    layer.add(txt(this, W / 2, 182, 'Tu as Frappe isolée, Passe courte et Une-deux. Choisis 2 mouvements de plus.', 17).setOrigin(0.5));
-    // le paquet tremble puis s'ouvre
-    const packG = this.add.container(W / 2, 360);
-    const pg = this.add.graphics();
-    pg.fillStyle(C.edge, 1).fillRect(-83, -113, 166, 226); pg.fillStyle(C.red, 1).fillRect(-80, -110, 160, 220);
-    pg.fillStyle(C.gold, 1).fillRect(-80, -20, 160, 40);
-    packG.add([pg, big(this, 0, 0, 'MOUVEMENTS', 10, C.ink).setOrigin(0.5)]);
-    layer.add(packG);
-    const tiles: Tile[] = [];
-    const go = new Button(this, W / 2, 570, 320, 52, 'Choisis 2 mouvements', C.gold, () => {
-      if (!go.enabled) return; go.setEnabled(false);
-      chosen.forEach(k => addMove(S.G, k, 0));
-      makeOffer(S.G);
+    const go = new Button(this, W / 2, 590, 340, 52, 'Choisis un mouvement', C.gold, () => {
+      if (!go.enabled || !chosen) return; go.setEnabled(false);
+      addMove(S.G, chosen, 0);
       close();
+      this.time.delayedCall(160, () => this.openDraw(chosen!, 1));
+    });
+    go.setEnabled(false); layer.add(go);
+  }
+
+  /** Tirage au sort de l'effectif (14 joueurs classiques), avec un nouveau tirage gratuit. */
+  openDraw(move: string, redraws: number) {
+    const ids: string[] = drawStarters(move, loadProfile().unlocked) || S.G.squad;
+    S.G.squad = ids.slice(); S.G.starters = ids.slice();
+    const { layer, close } = modal(this, 1220, 660);
+    layer.add(txt(this, W / 2, 62, 'NOUVELLE SAISON · 2/2', 16, C.muted).setOrigin(0.5));
+    layer.add(big(this, W / 2, 94, 'Tirage de ton effectif', 22).setOrigin(0.5));
+    layer.add(txt(this, W / 2, 128, `2 gardiens, 4 défenseurs, 4 milieux, 4 attaquants. Tu pourras jouer ${(MOVES as any)[move].name}.`, 16, C.cream2).setOrigin(0.5));
+    const order = ['GAR', 'DEF', 'MIL', 'ATT'];
+    const sorted = ids.slice().sort((a, b) => order.indexOf((PLAYERS as any)[a].pos) - order.indexOf((PLAYERS as any)[b].pos));
+    const per = 7, gx = 150, sc = 0.78;
+    const views = sorted.map((id, i) => {
+      const v = new CardView(this, W / 2 - (per - 1) * gx / 2 + (i % per) * gx, 252 + Math.floor(i / per) * 160, id);
+      v.sway = false; v.setScale(0, sc); v.setAlpha(0); layer.add(v);
+      tip(v, () => cardTip(id));
+      this.time.delayedCall(250 + i * 80, () => {
+        this.cameras.main.shake(50, 0.002);
+        this.tweens.add({ targets: v, scaleX: sc, alpha: 1, duration: 200, ease: 'Back.out' });
+      });
+      return v;
+    });
+    const done = 250 + sorted.length * 80 + 200;
+    const again = new Button(this, W / 2 - 190, 600, 330, 52, redraws ? `Nouveau tirage (${redraws})` : 'Plus de nouveau tirage', C.sky, () => {
+      if (!again.enabled) return; again.setEnabled(false); go.setEnabled(false);
+      hideTip(this); close();
+      this.time.delayedCall(160, () => this.openDraw(move, redraws - 1));
+    }, 18);
+    const go = new Button(this, W / 2 + 190, 600, 330, 52, 'Commencer la saison', C.gold, () => {
+      if (!go.enabled) return; go.setEnabled(false); again.setEnabled(false);
+      makeOffer(S.G);
+      hideTip(this); close();
       this.cameras.main.fadeOut(250, 13, 15, 24);
       this.time.delayedCall(260, () => this.scene.start('match'));
-    });
-    go.setEnabled(false); go.setVisible(false);
-    layer.add(go);
-    this.tweens.add({
-      targets: packG, angle: { from: -4, to: 4 }, duration: 70, yoyo: true, repeat: 6, onComplete: () => {
-        this.cameras.main.flash(200, 255, 240, 200);
-        packG.destroy();
-        pack.forEach((k: string, i: number) => {
-          const tile = moveTile(this, W / 2 - 300 + i * 200, 360, 180, 210, k, 0);
-          tile.setScale(0, 1); layer.add(tile); tiles.push(tile);
-          this.tweens.add({ targets: tile, scaleX: 1, duration: 220, delay: i * 140, ease: 'Back.out' });
-          tile.setInteractive({ useHandCursor: true }).on('pointerup', () => {
-            const j = chosen.indexOf(k);
-            if (j >= 0) chosen.splice(j, 1); else if (chosen.length < 2) chosen.push(k);
-            tiles.forEach((tl, ii) => { const on = chosen.includes(pack[ii]); tl.setOn(on); this.tweens.add({ targets: tl, y: on ? 344 : 360, duration: 120 }); });
-            go.setEnabled(chosen.length === 2).setLabel(chosen.length === 2 ? 'Commencer la saison' : `Choisis 2 mouvements (${chosen.length}/2)`);
-          });
-        });
-        go.setVisible(true);
-      },
-    });
+    }, 18);
+    again.setEnabled(false); go.setEnabled(false); layer.add([again, go]);
+    this.time.delayedCall(done, () => { again.setEnabled(redraws > 0); go.setEnabled(true); });
+    void views;
   }
 }
